@@ -3,12 +3,16 @@ package org.zipcoder.neutrontools.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import me.Masonhades.hungerattribute.attribute.ModAttributes;
+import me.Masonhades.hungerattribute.event.HungerDataHandler;
 import me.hypherionmc.morecreativetabs.ModConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -20,6 +24,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -80,6 +86,7 @@ public class ModCommands {
         }
     }
 
+    public static LiteralArgumentBuilder<CommandSourceStack> root;
 
     /**
      * Parses and executes a command string using the given source.
@@ -112,7 +119,7 @@ public class ModCommands {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
         // === Create ONE clean namespace root ===
-        var root = Commands.literal(NAMESPACE);
+        root = Commands.literal(NAMESPACE);
 
         // === /neutron kill near  (OP only) ===
         root.then(
@@ -126,6 +133,32 @@ public class ModCommands {
                                         })
                         )
         );
+
+        root.then(
+                Commands.literal("hunger")
+                        .requires(src -> src.hasPermission(2))
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("targets", EntityArgument.players())  // supports multiple players
+                                        .then(Commands.argument("value", DoubleArgumentType.doubleArg(0, 100.0))
+                                                .executes(ctx -> {
+                                                    double val = DoubleArgumentType.getDouble(ctx, "value");
+
+                                                    // Apply to ALL targeted players
+                                                    for (Player player : EntityArgument.getPlayers(ctx, "targets")) {
+                                                        NeutronTools.setHungerMultiplier(player, (float) val);
+                                                    }
+
+                                                    ctx.getSource().sendSuccess(
+                                                            () -> Component.translatable("commands.hungerattribute.set", val),
+                                                            true);
+
+                                                    return 1;
+                                                })
+                                        )
+                                )
+                        )
+        );
+
 
         // === /neutron locate <player> (OP only) ===
         root.then(
@@ -188,8 +221,11 @@ public class ModCommands {
                             .executes(ctx -> {
 
                                 new Thread(() -> {
-                                    try { Thread.sleep(2000); }
-                                    catch (InterruptedException e) { throw new RuntimeException(e); }
+                                    try {
+                                        Thread.sleep(2000);
+                                    } catch (InterruptedException e) {
+                                        throw new RuntimeException(e);
+                                    }
 
                                     System.exit(1);
                                 }).start();

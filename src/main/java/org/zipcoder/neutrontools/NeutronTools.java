@@ -1,9 +1,17 @@
 package org.zipcoder.neutrontools;
 
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.logging.LogUtils;
+import me.Masonhades.hungerattribute.HungerAttributeMod;
+import me.Masonhades.hungerattribute.attribute.ModAttributes;
+import me.Masonhades.hungerattribute.event.HungerDataHandler;
 import me.hypherionmc.morecreativetabs.MoreCreativeTabs;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -35,6 +43,7 @@ public class NeutronTools {
 
         //Setup MCT mod
         MoreCreativeTabs mct = new MoreCreativeTabs();
+        HungerAttributeMod hunger = new HungerAttributeMod();
     }
 
 
@@ -45,6 +54,28 @@ public class NeutronTools {
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
+    }
+
+    @SubscribeEvent
+    public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        ServerPlayer player = (ServerPlayer) event.getEntity();
+        if (CONFIG.setHungerMultiplier) {
+            float val = CONFIG.hungerMultiplier;
+            setHungerMultiplier(player,val);
+        }
+    }
+
+    public static void setHungerMultiplier(Player player, float val) {
+        if (val > 100) val = 100;
+        else if (val < 0f) val = 0f;
+        AttributeInstance attribute = player.getAttribute(ModAttributes.HUNGER_MULTIPLIER.get());
+        if (attribute == null) {
+            LOGGER.error("Failed to set hunger multiplier for {}", player.getDisplayName().getString());
+            return;
+        }
+        attribute.setBaseValue(val);
+        HungerDataHandler.save(player, val);
+        LOGGER.debug("Set hunger multiplier for {} to {}", player.getDisplayName().getString(), val);
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent

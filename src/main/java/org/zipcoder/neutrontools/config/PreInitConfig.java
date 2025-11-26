@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 
 public class PreInitConfig {
+
+
     public PreInitConfig() {
         try {
             Path path = FMLPaths.CONFIGDIR.get();
@@ -34,6 +36,8 @@ public class PreInitConfig {
     //--------------------------------------------------------------------
     public int portalWaitTime = 80;
     public boolean crashCommands = false;
+    public boolean setHungerMultiplier = false;
+    public int hungerMultiplier = 1;
     //--------------------------------------------------------------------
 
     /**
@@ -43,6 +47,8 @@ public class PreInitConfig {
         //--------------------------------------------------------------------
         config.set("common.crash_commands", crashCommands);
         config.set("common.portal_wait_time", portalWaitTime);
+        config.set("common.set_default_hunger_multiplier",setHungerMultiplier);
+        config.set("common.hunger_multiplier",hungerMultiplier);
         //--------------------------------------------------------------------
         config.save();
     }
@@ -54,8 +60,10 @@ public class PreInitConfig {
     private void loadConfig(FileConfig config) {
         config.load();
         //--------------------------------------------------------------------
-        crashCommands = config.getOrElse("common.crash_commands", false);
-        portalWaitTime = config.getOrElse("common.portal_wait_time", 40);
+        crashCommands = config.getOrElse("common.crash_commands", crashCommands);
+        portalWaitTime = config.getOrElse("common.portal_wait_time", portalWaitTime);
+        setHungerMultiplier = config.getOrElse("common.set_default_hunger_multiplier", setHungerMultiplier);
+        hungerMultiplier = config.getOrElse("common.hunger_multiplier", hungerMultiplier);
         //--------------------------------------------------------------------
     }
 }

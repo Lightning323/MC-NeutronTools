@@ -1,0 +1,4 @@
+{
+  "attribute.name.hungerattribute.hunger_multiplier" : "Hunger Exhaustion Multiplier",
+  "commands.hungerattribute.set": "Hunger multiplier set to %.2fx"
+}

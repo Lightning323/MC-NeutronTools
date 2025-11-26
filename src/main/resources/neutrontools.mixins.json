@@ -20,7 +20,8 @@
     "moreCreativeTabs.accessor.ForceCreativeTabAccessor",
     "ItemGroupMixin",
     "ItemDisplayBuilderMixin",
-    "FastPortalsForgeMixin"
+    "FastPortalsForgeMixin",
+    "hungerAttribute.PlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
