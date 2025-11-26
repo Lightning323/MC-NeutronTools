@@ -11,8 +11,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import me.Masonhades.hungerattribute.attribute.ModAttributes;
-import me.Masonhades.hungerattribute.event.HungerDataHandler;
 import me.hypherionmc.morecreativetabs.ModConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -134,30 +132,6 @@ public class ModCommands {
                         )
         );
 
-        root.then(
-                Commands.literal("hunger")
-                        .requires(src -> src.hasPermission(2))
-                        .then(Commands.literal("set")
-                                .then(Commands.argument("targets", EntityArgument.players())  // supports multiple players
-                                        .then(Commands.argument("value", DoubleArgumentType.doubleArg(0, 100.0))
-                                                .executes(ctx -> {
-                                                    double val = DoubleArgumentType.getDouble(ctx, "value");
-
-                                                    // Apply to ALL targeted players
-                                                    for (Player player : EntityArgument.getPlayers(ctx, "targets")) {
-                                                        NeutronTools.setHungerMultiplier(player, (float) val);
-                                                    }
-
-                                                    ctx.getSource().sendSuccess(
-                                                            () -> Component.translatable("commands.hungerattribute.set", val),
-                                                            true);
-
-                                                    return 1;
-                                                })
-                                        )
-                                )
-                        )
-        );
 
 
         // === /neutron locate <player> (OP only) ===

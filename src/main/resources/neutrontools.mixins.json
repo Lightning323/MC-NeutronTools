@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "neutrontools.refmap.json",
   "mixins": [
-
+    "PlayerMixin"
   ],
   "client": [
     "moreCreativeTabs.accessor.CreativeModeTabAccessor",
@@ -19,9 +19,7 @@
     "moreCreativeTabs.ForgeReloadableResourceManagerMixin",
     "moreCreativeTabs.accessor.ForceCreativeTabAccessor",
     "ItemGroupMixin",
-    "ItemDisplayBuilderMixin",
-    "FastPortalsForgeMixin",
-    "hungerAttribute.PlayerMixin"
+    "ItemDisplayBuilderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

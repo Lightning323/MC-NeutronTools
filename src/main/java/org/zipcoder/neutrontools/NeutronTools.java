@@ -1,14 +1,8 @@
 package org.zipcoder.neutrontools;
 
-import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.logging.LogUtils;
-import me.Masonhades.hungerattribute.HungerAttributeMod;
-import me.Masonhades.hungerattribute.attribute.ModAttributes;
-import me.Masonhades.hungerattribute.event.HungerDataHandler;
 import me.hypherionmc.morecreativetabs.MoreCreativeTabs;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -19,8 +13,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.PacketDistributor;
 import org.slf4j.Logger;
 import org.zipcoder.neutrontools.config.PreInitConfig;
+import org.zipcoder.neutrontools.network.ModNetwork;
+import org.zipcoder.neutrontools.network.SyncConfigPacket;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(NeutronTools.MODID)
@@ -28,6 +25,18 @@ public class NeutronTools {
     public static final String MODID = "neutrontools";
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final PreInitConfig CONFIG = new PreInitConfig();
+
+    public static float clamp(float value, float min, float max) {
+        if (value > max) return max;
+        else if (value < min) return min;
+        return value;
+    }
+
+    public static double clamp(double value, double min, double max) {
+        if (value > max) return max;
+        else if (value < min) return min;
+        return value;
+    }
 
     public NeutronTools() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -37,13 +46,8 @@ public class NeutronTools {
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
-
-        //Register creative tabs
-//        TEST_CREATIVE_TABS.register(modEventBus);
-
-        //Setup MCT mod
+        ModNetwork.register();
         MoreCreativeTabs mct = new MoreCreativeTabs();
-        HungerAttributeMod hunger = new HungerAttributeMod();
     }
 
 
@@ -58,24 +62,10 @@ public class NeutronTools {
 
     @SubscribeEvent
     public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        ServerPlayer player = (ServerPlayer) event.getEntity();
-        if (CONFIG.setHungerMultiplier) {
-            float val = CONFIG.hungerMultiplier;
-            setHungerMultiplier(player,val);
+        if (event.getEntity() instanceof ServerPlayer player) {
+            LOGGER.info("Syncing config with client...");
+            ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SyncConfigPacket(CONFIG));
         }
-    }
-
-    public static void setHungerMultiplier(Player player, float val) {
-        if (val > 100) val = 100;
-        else if (val < 0f) val = 0f;
-        AttributeInstance attribute = player.getAttribute(ModAttributes.HUNGER_MULTIPLIER.get());
-        if (attribute == null) {
-            LOGGER.error("Failed to set hunger multiplier for {}", player.getDisplayName().getString());
-            return;
-        }
-        attribute.setBaseValue(val);
-        HungerDataHandler.save(player, val);
-        LOGGER.debug("Set hunger multiplier for {} to {}", player.getDisplayName().getString(), val);
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent

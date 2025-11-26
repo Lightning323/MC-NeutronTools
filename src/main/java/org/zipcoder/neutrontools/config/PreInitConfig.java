@@ -8,6 +8,7 @@ import java.io.File;
 import java.nio.file.Path;
 
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
+import static org.zipcoder.neutrontools.NeutronTools.clamp;
 
 public class PreInitConfig {
 
@@ -34,10 +35,9 @@ public class PreInitConfig {
      * NO FLOATS ALLOWED!
      */
     //--------------------------------------------------------------------
-    public int portalWaitTime = 80;
+    public int portalWaitTime = 80;//80 is minecraft default
     public boolean crashCommands = false;
-    public boolean setHungerMultiplier = false;
-    public int hungerMultiplier = 1;
+    public float hungerMultiplier = 1.0f;//Casting from double to float
     //--------------------------------------------------------------------
 
     /**
@@ -47,8 +47,7 @@ public class PreInitConfig {
         //--------------------------------------------------------------------
         config.set("common.crash_commands", crashCommands);
         config.set("common.portal_wait_time", portalWaitTime);
-        config.set("common.set_default_hunger_multiplier",setHungerMultiplier);
-        config.set("common.hunger_multiplier",hungerMultiplier);
+        config.set("common.hunger_multiplier", (double) hungerMultiplier);
         //--------------------------------------------------------------------
         config.save();
     }
@@ -61,9 +60,10 @@ public class PreInitConfig {
         config.load();
         //--------------------------------------------------------------------
         crashCommands = config.getOrElse("common.crash_commands", crashCommands);
-        portalWaitTime = config.getOrElse("common.portal_wait_time", portalWaitTime);
-        setHungerMultiplier = config.getOrElse("common.set_default_hunger_multiplier", setHungerMultiplier);
-        hungerMultiplier = config.getOrElse("common.hunger_multiplier", hungerMultiplier);
+        portalWaitTime = (int) clamp(config.getOrElse("common.portal_wait_time", portalWaitTime), 0, 160);
+
+        double hungerMultiplier_double = config.getOrElse("common.hunger_multiplier", (double) hungerMultiplier);
+        hungerMultiplier = clamp((float) hungerMultiplier_double, 0, 1000);
         //--------------------------------------------------------------------
     }
 }
