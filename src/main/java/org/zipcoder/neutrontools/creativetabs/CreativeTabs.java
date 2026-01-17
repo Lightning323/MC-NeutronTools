@@ -1,7 +1,7 @@
-package org.zipcoder.creativetabs;
+package org.zipcoder.neutrontools.creativetabs;
 
-import org.zipcoder.creativetabs.client.impl.CreativeModeTabMixin_I;
-import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
+import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -27,27 +27,18 @@ public class CreativeTabs {
 
     public CreativeTabs() {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "", (a, b) -> true));
-//        CustomCreativeTabRegistry.INSTANCE.setForge(true);
     }
 
     /**
      * This is a client side method
-     */
-    public static void reloadResources() {
-        if (!hasRun) {
-            CreativeTabCustomizationData.INSTANCE.setVanillaTabs(new ArrayList<>(BuiltInRegistries.CREATIVE_MODE_TAB.stream().toList()));
-            reloadTabs();
-            hasRun = true;
-        } else {
-            reloadTabs();
-        }
-    }
-
-    /**
      * Called to reload all creative tabs
      */
-    private static void reloadTabs() {
-        NeutronTools.TAB_LOGGER.info("Checking for custom creative tabs");
+    public static void reloadTabs() {
+        if (!hasRun) { //If this is our first time
+            CreativeTabCustomizationData.INSTANCE.setVanillaTabs(new ArrayList<>(BuiltInRegistries.CREATIVE_MODE_TAB.stream().toList()));
+            hasRun = true;
+        }
+        NeutronTools.LOGGER.info("Reloading creative tabs");
         CreativeTabCustomizationData.INSTANCE.clearTabs();
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             ResourceManager manager = Minecraft.getInstance().getResourceManager();
@@ -78,6 +69,17 @@ public class CreativeTabs {
                 CreativeModeTabMixin_I mixinTab = (CreativeModeTabMixin_I) tab;
                 mixinTab.rebuildCache();
             }
+
+            //Log the final result
+            StringBuilder sb = new StringBuilder();
+            sb.append("Creative tabs have been reloaded:\n")
+                    .append(CreativeTabCustomizationData.INSTANCE.getNewTabs().size()).append(" New tabs\n")
+                    .append(CreativeTabCustomizationData.INSTANCE.disabledTabs.size()).append(" Disabled tabs\n")
+                    .append(CreativeTabCustomizationData.INSTANCE.disabledItems.size()).append(" Disabled items\n")
+                    .append(CreativeTabCustomizationData.INSTANCE.itemsToAdd.size()).append(" Tab additions\n")
+                    .append(CreativeTabCustomizationData.INSTANCE.itemsToDelete.size()).append(" Tab subtractions\n");
+            NeutronTools.LOGGER.info(sb.toString());
+
         });
     }
 }

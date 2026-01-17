@@ -1,6 +1,6 @@
 package org.zipcoder.neutrontools.mixin;
 
-import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static org.zipcoder.creativetabs.utils.CreativeTabUtils.getTabKey;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTabKey;
 
 @Mixin(value = CreativeModeTab.class, priority = 10000)
 public abstract class ItemGroupMixin {

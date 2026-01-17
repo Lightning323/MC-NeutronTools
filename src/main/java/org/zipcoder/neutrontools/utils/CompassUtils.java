@@ -1,4 +1,4 @@
-package org.zipcoder.neutrontools;
+package org.zipcoder.neutrontools.utils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

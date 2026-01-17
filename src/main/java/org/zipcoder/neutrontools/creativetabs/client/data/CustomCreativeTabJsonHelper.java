@@ -1,4 +1,4 @@
-package org.zipcoder.creativetabs.client.data;
+package org.zipcoder.neutrontools.creativetabs.client.data;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -12,21 +12,21 @@ public class CustomCreativeTabJsonHelper {
     @SerializedName("tab_enabled")
     private boolean tabEnabled;
 
-    public boolean isTabEnabled(){
-        return  tabEnabled;
+    public boolean isTabEnabled() {
+        return tabEnabled;
     }
 
     @SerializedName("tab_name")
     private String tabName;
 
-    public String getTabName(){
+    public String getTabName() {
         return tabName;
     }
 
     @SerializedName("tab_stack")
     private TabIcon tabIcon;
 
-    public boolean isKeepExisting(){
+    public boolean isKeepExisting() {
         return keepExisting;
     }
 
@@ -34,12 +34,13 @@ public class CustomCreativeTabJsonHelper {
     @SerializedName("tab_background")
     private String tabBackground;
 
-    public String getTabBackground(){
+    public String getTabBackground() {
         return tabBackground;
     }
 
     private boolean replace;
-    public boolean isReplace(){
+
+    public boolean isReplace() {
         return replace;
     }
 
@@ -47,14 +48,14 @@ public class CustomCreativeTabJsonHelper {
     //    @Setter
     private boolean keepExisting;
 
-    public void setKeepExisting(boolean b){
+    public void setKeepExisting(boolean b) {
         keepExisting = b;
     }
 
     @SerializedName("tab_items")
     private ArrayList<TabItem> tabItems;
 
-    public ArrayList<TabItem> getTabItems(){
+    public ArrayList<TabItem> getTabItems() {
         return tabItems;
     }
 
@@ -69,15 +70,15 @@ public class CustomCreativeTabJsonHelper {
 
         private String nbt;
 
-        public String getName(){
+        public String getName() {
             return name;
         }
 
-        public String getNbt(){
+        public String getNbt() {
             return nbt;
         }
 
-        public boolean isHideOldTab(){
+        public boolean isHideOldTab() {
             return hideOldTab;
         }
     }
@@ -94,7 +95,7 @@ public class CustomCreativeTabJsonHelper {
         }
 
         public String getNbt() {
-            return name;
+            return nbt;
         }
     }
 

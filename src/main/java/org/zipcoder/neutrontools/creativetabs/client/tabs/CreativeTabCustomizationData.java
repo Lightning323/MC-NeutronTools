@@ -1,14 +1,10 @@
-package org.zipcoder.creativetabs.client.tabs;
+package org.zipcoder.neutrontools.creativetabs.client.tabs;
 
 import com.google.gson.Gson;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-//import lombok.AccessLevel;
-//import lombok.Getter;
-//import lombok.NoArgsConstructor;
-//import lombok.Setter;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.zipcoder.creativetabs.client.data.*;
 import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.creativetabs.client.data.*;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 import net.minecraft.client.Minecraft;
@@ -29,7 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static org.zipcoder.creativetabs.utils.CreativeTabUtils.*;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.*;
 
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)
 //@Getter
@@ -40,7 +36,7 @@ public class CreativeTabCustomizationData {
 
     private final List<CreativeModeTab> vanillaTabs = new ArrayList<>();
     private final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
-    private final Set<String> disabledTabs = new HashSet<>();
+    public final Set<String> disabledTabs = new HashSet<>();
     public final Set<String> disabledItems = new HashSet<>();
     private final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
     private final LinkedList<CreativeModeTab> currentTabs = new LinkedList<>();
@@ -53,7 +49,7 @@ public class CreativeTabCustomizationData {
      * Clear all cached data for reloading
      */
     public void clearTabs() {
-        NeutronTools.TAB_LOGGER.debug("Clearing tab Data");
+        NeutronTools.LOGGER.debug("Clearing tab Data");
         wasReloaded = true;
 
         newTabs.clear();
@@ -80,7 +76,7 @@ public class CreativeTabCustomizationData {
                 if (tag.contains("customName"))
                     stack.setHoverName(Component.literal(tag.getString("customName")));
             } catch (CommandSyntaxException e) {
-                NeutronTools.TAB_LOGGER.error("Failed to Process NBT for Item {}", item.getName(), e);
+                NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.getName(), e);
             }
         }
         return stack;
@@ -92,7 +88,7 @@ public class CreativeTabCustomizationData {
                 ResourceLocation location = entry.getKey();
                 Resource resource = entry.getValue();
 
-                NeutronTools.TAB_LOGGER.info("Processing tab data {}", location.toString());
+                NeutronTools.LOGGER.info("Processing tab data {}", location.toString());
 
                 //Iterate over each resource (JSON file)
                 try (InputStream stream = resource.open()) {
@@ -124,7 +120,7 @@ public class CreativeTabCustomizationData {
                     });
 
                 } catch (Exception e) {
-                    NeutronTools.TAB_LOGGER.error("Failed to process items in creative tab", e);
+                    NeutronTools.LOGGER.error("Failed to process items in creative tab", e);
                 }
             }
         }
@@ -184,7 +180,7 @@ public class CreativeTabCustomizationData {
             ResourceLocation location = entry.getKey();
             Resource resource = entry.getValue();
 
-            NeutronTools.TAB_LOGGER.info("Processing tab data {}", location.toString());
+            NeutronTools.LOGGER.info("Processing tab data {}", location.toString());
 
             try (InputStream stream = resource.open()) {
                 CustomCreativeTabJsonHelper json = GSON.fromJson(new InputStreamReader(stream), CustomCreativeTabJsonHelper.class);
@@ -212,7 +208,7 @@ public class CreativeTabCustomizationData {
                             if (tag.contains("customName"))
                                 stack.setHoverName(Component.literal(tag.getString("customName")));
                         } catch (CommandSyntaxException e) {
-                            NeutronTools.TAB_LOGGER.error("Failed to Process NBT for Item {}", item.getName(), e);
+                            NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.getName(), e);
                         }
                     }
 
@@ -234,7 +230,7 @@ public class CreativeTabCustomizationData {
                     tabItems.put(tab, stacks);
                 }
             } catch (Exception e) {
-                NeutronTools.TAB_LOGGER.error("Failed to process creative tab", e);
+                NeutronTools.LOGGER.error("Failed to process creative tab", e);
             }
         }
     }
@@ -243,12 +239,12 @@ public class CreativeTabCustomizationData {
     public void loadDisabledTabs(Map<ResourceLocation, Resource> disabledTabsJson) {
         if (!disabledTabsJson.isEmpty()) {
             disabledTabsJson.forEach((location, resource) -> {
-                NeutronTools.TAB_LOGGER.info("Processing tab data {}", location.toString());
+                NeutronTools.LOGGER.info("Processing tab data {}", location.toString());
                 try (InputStream stream = resource.open()) {//Process each resource
                     DisabledTabsJsonHelper json = new Gson().fromJson(new InputStreamReader(stream), DisabledTabsJsonHelper.class);
                     disabledTabs.addAll(json.getDisabledTabs());
                 } catch (Exception e) {
-                    NeutronTools.TAB_LOGGER.error("Failed to process disabled tabs for {}", location, e);
+                    NeutronTools.LOGGER.error("Failed to process disabled tabs for {}", location, e);
                 }
             });
         }
@@ -258,12 +254,12 @@ public class CreativeTabCustomizationData {
         //Check in resource pack
         if (!jsonEntries.isEmpty()) {
             jsonEntries.forEach((location, resource) -> {
-                NeutronTools.TAB_LOGGER.info("Processing tab data {}", location.toString());
+                NeutronTools.LOGGER.info("Processing tab data {}", location.toString());
                 try (InputStream stream = resource.open()) {//Process each resource
                     DisabledItemsJsonHelper json = new Gson().fromJson(new InputStreamReader(stream), DisabledItemsJsonHelper.class);
                     disabledItems.addAll(json.getDisabledItems());
                 } catch (Exception e) {
-                    NeutronTools.TAB_LOGGER.error("Failed to process disabled items for {}", location, e);
+                    NeutronTools.LOGGER.error("Failed to process disabled items for {}", location, e);
                 }
             });
         }
@@ -279,7 +275,7 @@ public class CreativeTabCustomizationData {
                         }
                     });
                 } catch (IOException e) {
-                    NeutronTools.TAB_LOGGER.error("Failed to process JEI blacklisted items {}", e);
+                    NeutronTools.LOGGER.error("Failed to process JEI blacklisted items {}", e);
                 }
             }
         }
@@ -288,12 +284,12 @@ public class CreativeTabCustomizationData {
     public void loadOrderedTabs(Map<ResourceLocation, Resource> resourceMap) {
         if (!resourceMap.isEmpty()) {
             resourceMap.forEach((location, resource) -> {
-                NeutronTools.TAB_LOGGER.info("Processing tab data {}", location.toString());
+                NeutronTools.LOGGER.info("Processing tab data {}", location.toString());
                 try (InputStream stream = resource.open()) {
                     OrderedTabsJsonHelper tabs = new Gson().fromJson(new InputStreamReader(stream), OrderedTabsJsonHelper.class);
                     tabOrder.addAll(tabs.getTabs());
                 } catch (Exception e) {
-                    NeutronTools.TAB_LOGGER.error("Failed to process ordered tabs for {}", location, e);
+                    NeutronTools.LOGGER.error("Failed to process ordered tabs for {}", location, e);
                 }
             });
         }
@@ -358,7 +354,7 @@ public class CreativeTabCustomizationData {
 
     private void processTab(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
         String tabName = getTabKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
-        NeutronTools.TAB_LOGGER.debug("Processing tab: {}", tabName);
+        NeutronTools.LOGGER.debug("Processing tab: {}", tabName);
         if (!disabledTabs.contains(tabName)) {
             filteredTabs.add(tab);
         }

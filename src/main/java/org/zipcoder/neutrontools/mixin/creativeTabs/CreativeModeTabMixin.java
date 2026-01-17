@@ -1,9 +1,9 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import org.zipcoder.creativetabs.client.data.CustomCreativeTabJsonHelper;
-import org.zipcoder.creativetabs.client.impl.CreativeModeTabMixin_I;
-import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
-import org.zipcoder.creativetabs.utils.CreativeTabUtils;
+import org.zipcoder.neutrontools.creativetabs.client.data.CustomCreativeTabJsonHelper;
+import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
+import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 
-import static org.zipcoder.creativetabs.utils.CreativeTabUtils.getTabKey;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTabKey;
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 
 @Mixin(CreativeModeTab.class)

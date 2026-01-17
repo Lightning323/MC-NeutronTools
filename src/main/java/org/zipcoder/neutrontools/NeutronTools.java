@@ -1,8 +1,7 @@
 package org.zipcoder.neutrontools;
 
 import com.mojang.logging.LogUtils;
-import org.apache.logging.log4j.LogManager;
-import org.zipcoder.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -23,25 +22,12 @@ import org.zipcoder.neutrontools.network.SyncConfigPacket;
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(NeutronTools.MODID)
 public class NeutronTools {
+
     public static final String MODID = "neutrontools";
     public static final PreInitConfig CONFIG = new PreInitConfig();
-
     public static final Logger LOGGER = LogUtils.getLogger();
-    public static final org.apache.logging.log4j.Logger TAB_LOGGER = LogManager.getLogger("Neutron Tools Creative Tabs");
-    
     public static final String RESOURCE_ID = "neutron";
 
-    public static float clamp(float value, float min, float max) {
-        if (value > max) return max;
-        else if (value < min) return min;
-        return value;
-    }
-
-    public static double clamp(double value, double min, double max) {
-        if (value > max) return max;
-        else if (value < min) return min;
-        return value;
-    }
 
     public NeutronTools() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -78,7 +64,6 @@ public class NeutronTools {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-
         }
     }
 }

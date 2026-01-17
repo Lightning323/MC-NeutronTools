@@ -1,7 +1,7 @@
-package org.zipcoder.creativetabs.utils;
+package org.zipcoder.neutrontools.utils;
 
-import org.zipcoder.creativetabs.client.data.CustomCreativeTabJsonHelper;
-import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.client.data.CustomCreativeTabJsonHelper;
+import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -47,7 +47,8 @@ public class CreativeTabUtils {
                     CompoundTag tag = TagParser.parseTag(finalTabIcon.getNbt());
                     stack.setTag(tag);
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to Process NBT for Item Tag {};\t Tab Name {}", finalTabIcon.getName(), json.getTabName(), e);
+                    NeutronTools.LOGGER.error("Failed to Process NBT for Item Tag: \"{}\";\t Tab Name: \"{}\";\t NBT data: \"{}\"",
+                            finalTabIcon.getName(), json.getTabName(), finalTabIcon.getNbt(), e);
                 }
             }
             icon.set(stack);

@@ -1,4 +1,4 @@
-package org.zipcoder.creativetabs.client.data;
+package org.zipcoder.neutrontools.creativetabs.client.data;
 
 import java.util.List;
 

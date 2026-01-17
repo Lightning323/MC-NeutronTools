@@ -3,12 +3,11 @@ package org.zipcoder.neutrontools.config;
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import net.minecraftforge.fml.loading.FMLPaths;
+import org.zipcoder.neutrontools.utils.MathUtils;
 
 import java.io.File;
 import java.nio.file.Path;
-
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
-import static org.zipcoder.neutrontools.NeutronTools.clamp;
 
 public class PreInitConfig {
 
@@ -62,10 +61,10 @@ public class PreInitConfig {
         config.load();
         //--------------------------------------------------------------------
         crashCommands = config.getOrElse("common.crash_commands", crashCommands);
-        portalWaitTime = (int) clamp(config.getOrElse("common.portal_wait_time", portalWaitTime), 0, 160);
+        portalWaitTime = (int) MathUtils.clamp(config.getOrElse("common.portal_wait_time", portalWaitTime), 0, 160);
 
         double hungerMultiplier_double = config.getOrElse("common.hunger_multiplier", (double) hungerMultiplier);
-        hungerMultiplier = clamp((float) hungerMultiplier_double, 0, 1000);
+        hungerMultiplier = MathUtils.clamp((float) hungerMultiplier_double, 0, 1000);
 
         hideCreativeTabItemsFromJEIBlacklist = config.getOrElse("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
         //--------------------------------------------------------------------

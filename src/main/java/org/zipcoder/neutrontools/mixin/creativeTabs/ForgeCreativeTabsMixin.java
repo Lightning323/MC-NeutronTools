@@ -1,7 +1,7 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import org.zipcoder.creativetabs.client.impl.ForgeTabData;
-import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.client.impl.ForgeTabData;
+import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.ForceCreativeTabAccessor;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;

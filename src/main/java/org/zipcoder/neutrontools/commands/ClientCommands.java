@@ -1,8 +1,8 @@
 package org.zipcoder.neutrontools.commands;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import org.zipcoder.creativetabs.CreativeTabs;
-import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -32,7 +32,7 @@ public class ClientCommands {
                                     context.getSource().sendSuccess(() -> enabled ? Component.literal("Showing tab registry names") : Component.literal("Showing tab names"), true);
                                     return 1;
                                 }))).then(Commands.literal("reloadTabs").executes(context -> {
-                            CreativeTabs.reloadResources();
+                            CreativeTabs.reloadTabs();
                             context.getSource().sendSuccess(() -> Component.literal("Reloaded Custom Tabs"), true);
                             return 1;
                         }))

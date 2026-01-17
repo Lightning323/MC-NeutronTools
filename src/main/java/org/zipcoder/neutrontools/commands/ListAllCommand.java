@@ -18,7 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.zipcoder.creativetabs.utils.CreativeTabUtils.getTabKey;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTabKey;
 import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
 
 public class ListAllCommand {
