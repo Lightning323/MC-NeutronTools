@@ -1,6 +1,6 @@
 package org.zipcoder.neutrontools.mixin;
 
-import me.hypherionmc.morecreativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -13,14 +13,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.mixin.moreCreativeTabs.accessor.CreativeModeTabAccessor;
-import org.zipcoder.neutrontools.mixin.moreCreativeTabs.accessor.CreativeModeTabsAccessor;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static me.hypherionmc.morecreativetabs.utils.CreativeTabUtils.getTabKey;
+import static org.zipcoder.creativetabs.utils.CreativeTabUtils.getTabKey;
 
 @Mixin(value = CreativeModeTab.class, priority = 10000)
 public abstract class ItemGroupMixin {

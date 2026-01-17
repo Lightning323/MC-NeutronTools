@@ -1,4 +1,4 @@
-package me.hypherionmc.morecreativetabs.client.tabs;
+package org.zipcoder.creativetabs.client.tabs;
 
 import com.google.gson.Gson;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -6,12 +6,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 //import lombok.Getter;
 //import lombok.NoArgsConstructor;
 //import lombok.Setter;
-import me.hypherionmc.morecreativetabs.ModConstants;
-import me.hypherionmc.morecreativetabs.client.data.CustomCreativeTabJsonHelper;
-import me.hypherionmc.morecreativetabs.client.data.DisabledTabsJsonHelper;
-import me.hypherionmc.morecreativetabs.client.data.OrderedTabsJsonHelper;
-import org.zipcoder.neutrontools.mixin.moreCreativeTabs.accessor.CreativeModeTabAccessor;
-import org.zipcoder.neutrontools.mixin.moreCreativeTabs.accessor.CreativeModeTabsAccessor;
+import org.zipcoder.creativetabs.ModConstants;
+import org.zipcoder.creativetabs.client.data.CustomCreativeTabJsonHelper;
+import org.zipcoder.creativetabs.client.data.DisabledTabsJsonHelper;
+import org.zipcoder.creativetabs.client.data.OrderedTabsJsonHelper;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static me.hypherionmc.morecreativetabs.utils.CreativeTabUtils.*;
+import static org.zipcoder.creativetabs.utils.CreativeTabUtils.*;
 
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)
 //@Getter

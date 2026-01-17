@@ -1,4 +1,4 @@
-package me.hypherionmc.morecreativetabs.client.data;
+package org.zipcoder.creativetabs.client.data;
 
 import java.util.List;
 

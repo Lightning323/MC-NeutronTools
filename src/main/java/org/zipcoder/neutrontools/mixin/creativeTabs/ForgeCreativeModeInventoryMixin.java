@@ -1,4 +1,4 @@
-package org.zipcoder.neutrontools.mixin.moreCreativeTabs;
+package org.zipcoder.neutrontools.mixin.creativeTabs;
 
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import org.spongepowered.asm.mixin.Mixin;

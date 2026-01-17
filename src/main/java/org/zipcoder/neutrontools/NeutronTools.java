@@ -1,7 +1,7 @@
 package org.zipcoder.neutrontools;
 
 import com.mojang.logging.LogUtils;
-import me.hypherionmc.morecreativetabs.MoreCreativeTabs;
+import org.zipcoder.creativetabs.CreativeTabs;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -47,7 +47,7 @@ public class NeutronTools {
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
         ModNetwork.register();
-        MoreCreativeTabs mct = new MoreCreativeTabs();
+        CreativeTabs mct = new CreativeTabs();
     }
 
 

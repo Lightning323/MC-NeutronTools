@@ -154,13 +154,6 @@ dependencies {
     // If the group id is "net.minecraft" and the artifact id is one of ["client", "server", "joined"],
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-    // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
-    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
-//     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
-
     runtimeOnly fg.deobf("curse.maven:jei-238222:6600311")
 
     // For more info:
@@ -170,17 +163,6 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
 }
-
-
-//https://github.com/unimined/unimined
-//unimined.minecraft {
-//    defaultRemapJar = false
-//    minecraftForge {
-//        loader forge_version
-//        mixinConfig("morecreativetabs.mixin.json", "morecreativetabs.forge.mixin.json")
-//    }
-//}
-
 // This block of code expands all declared replace properties in the specified resource targets.
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
 // When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.

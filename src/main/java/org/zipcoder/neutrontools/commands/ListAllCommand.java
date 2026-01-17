@@ -7,13 +7,13 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
-import org.zipcoder.neutrontools.mixin.moreCreativeTabs.accessor.CreativeModeTabAccessor;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static me.hypherionmc.morecreativetabs.utils.CreativeTabUtils.getTabKey;
+import static org.zipcoder.creativetabs.utils.CreativeTabUtils.getTabKey;
 import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
 
 public class ListAllCommand {

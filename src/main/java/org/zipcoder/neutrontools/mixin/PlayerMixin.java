@@ -27,6 +27,16 @@ public class PlayerMixin {
         return level;
     }
 
+    //TODO: Add sprint speed boost
+//    // Change this to whatever multiplier your goofy heart desires
+//    private static final float SPEED_MULTIPLIER = 2.0f; // 2x sprint speed
+//
+//    @Inject(method = "getMovementSpeed", at = @At("RETURN"), cancellable = true)
+//    private void injectedSpeedBooster(CallbackInfoReturnable<Float> cir) {
+//        float base = cir.getReturnValue();
+//        cir.setReturnValue(base * SPEED_MULTIPLIER);
+//    }
+
     @Shadow
     @Final
     private Abilities abilities;

@@ -1,7 +1,8 @@
-package me.hypherionmc.morecreativetabs.utils;
+package org.zipcoder.creativetabs.utils;
 
-import me.hypherionmc.morecreativetabs.client.data.CustomCreativeTabJsonHelper;
-import me.hypherionmc.morecreativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.ModConstants;
+import org.zipcoder.creativetabs.client.data.CustomCreativeTabJsonHelper;
+import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -64,13 +65,13 @@ public class CreativeTabUtils {
     }
 
     public static ItemStack getItemStack(String jsonItem) {
-        if(jsonItem == null) return ItemStack.EMPTY;
+        if (jsonItem == null) return ItemStack.EMPTY;
         Optional<Item> itemOptional = BuiltInRegistries.ITEM.getOptional(new ResourceLocation(jsonItem));
         return itemOptional.map(Item::getDefaultInstance).orElse(ItemStack.EMPTY);
     }
 
     public static String prefix(String tabName) {
-        return String.format("%s.%s", "morecreativetabs", tabName);
+        return String.format("%s.%s", ModConstants.RESOURCE_ID, tabName);
     }
 
     public static String getTabKey(Component component) {
@@ -81,8 +82,8 @@ public class CreativeTabUtils {
     }
 
     public static String fileToTab(String input) {
-        input = input.replace("morecreativetabs/", "");
-        input = input.replace("morecreativetabs", "");
+        input = input.replace(ModConstants.RESOURCE_ID + "/", "");
+        input = input.replace(ModConstants.RESOURCE_ID, "");
         input = input.replace(".json", "");
 
         return input;

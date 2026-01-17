@@ -1,6 +1,6 @@
-package org.zipcoder.neutrontools.mixin.moreCreativeTabs;
+package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import me.hypherionmc.morecreativetabs.MoreCreativeTabs;
+import org.zipcoder.creativetabs.CreativeTabs;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
@@ -19,7 +19,7 @@ public class ForgeReloadableResourceManagerMixin {
 
     @Inject(method = "createReload", at = @At("RETURN"))
     private void injectReload(Executor p_143930_, Executor p_143931_, CompletableFuture<Unit> p_143932_, List<PackResources> p_143933_, CallbackInfoReturnable<ReloadInstance> cir) {
-        MoreCreativeTabs.reloadResources();
+        CreativeTabs.reloadResources();
     }
 
 }

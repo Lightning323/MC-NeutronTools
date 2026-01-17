@@ -1,6 +1,6 @@
-package org.zipcoder.neutrontools.mixin.moreCreativeTabs;
+package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import me.hypherionmc.morecreativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.common.CreativeModeTabRegistry;
 import org.spongepowered.asm.mixin.Mixin;

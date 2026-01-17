@@ -1,9 +1,9 @@
-package me.hypherionmc.morecreativetabs.client.tabs;
+package org.zipcoder.creativetabs.client.tabs;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import me.hypherionmc.morecreativetabs.ModConstants;
-import me.hypherionmc.morecreativetabs.client.data.CustomCreativeTabJsonHelper;
-import me.hypherionmc.morecreativetabs.client.data.ItemTabJsonHelper;
+import org.zipcoder.creativetabs.ModConstants;
+import org.zipcoder.creativetabs.client.data.CustomCreativeTabJsonHelper;
+import org.zipcoder.creativetabs.client.data.ItemTabJsonHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static me.hypherionmc.morecreativetabs.utils.CreativeTabUtils.getItemStack;
+import static org.zipcoder.creativetabs.utils.CreativeTabUtils.getItemStack;
 
 /**
  * TODO: There is an issue where some items (like a light item) dont get added to creative tab

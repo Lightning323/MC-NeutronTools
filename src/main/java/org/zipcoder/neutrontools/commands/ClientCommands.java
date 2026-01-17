@@ -1,9 +1,9 @@
-package me.hypherionmc.morecreativetabs.client.commands;
+package org.zipcoder.neutrontools.commands;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import me.hypherionmc.morecreativetabs.ModConstants;
-import me.hypherionmc.morecreativetabs.MoreCreativeTabs;
-import me.hypherionmc.morecreativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.ModConstants;
+import org.zipcoder.creativetabs.CreativeTabs;
+import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,7 +18,7 @@ import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
  * Register Client Side Commands
  */
 @Mod.EventBusSubscriber(modid = ModConstants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
-public class MoreCreativeTabsCommand {
+public class ClientCommands {
 
     @SubscribeEvent
     public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
@@ -32,7 +32,7 @@ public class MoreCreativeTabsCommand {
                                     context.getSource().sendSuccess(() -> enabled ? Component.literal("Showing tab registry names") : Component.literal("Showing tab names"), true);
                                     return 1;
                                 }))).then(Commands.literal("reloadTabs").executes(context -> {
-                            MoreCreativeTabs.reloadResources();
+                            CreativeTabs.reloadResources();
                             context.getSource().sendSuccess(() -> Component.literal("Reloaded Custom Tabs"), true);
                             return 1;
                         }))

@@ -1,7 +1,7 @@
-package me.hypherionmc.morecreativetabs;
+package org.zipcoder.creativetabs;
 
-import me.hypherionmc.morecreativetabs.client.impl.CreativeModeTabMixin_I;
-import me.hypherionmc.morecreativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.client.impl.CreativeModeTabMixin_I;
+import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -21,11 +21,11 @@ import java.util.Map;
  * @author HypherionSA
  */
 //@Mod(ModConstants.MOD_ID)
-public class MoreCreativeTabs {
+public class CreativeTabs {
 
     private static boolean hasRun = false;
 
-    public MoreCreativeTabs() {
+    public CreativeTabs() {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "", (a, b) -> true));
 //        CustomCreativeTabRegistry.INSTANCE.setForge(true);
     }
@@ -53,15 +53,15 @@ public class MoreCreativeTabs {
             ResourceManager manager = Minecraft.getInstance().getResourceManager();
 
             //Find the json file that does not contain "disabled_tabs" or "ordered_tabs", to create a new custom tab entry
-            Map<ResourceLocation, Resource> customTabs = manager.listResources("morecreativetabs",
+            Map<ResourceLocation, Resource> customTabs = manager.listResources(ModConstants.RESOURCE_ID,
                     path -> path.getPath().endsWith(".json")
                             && !path.getPath().contains("disabled_tabs")
                             && !path.getPath().contains("ordered_tabs")
                             && !path.getPath().contains("tab_items"));//Added by me
 
-            Map<ResourceLocation, Resource> disabledTabs = manager.listResources("morecreativetabs", path -> path.getPath().contains("disabled_tabs.json"));
-            Map<ResourceLocation, Resource> orderedTabs = manager.listResources("morecreativetabs", path -> path.getPath().contains("ordered_tabs.json"));
-            Map<ResourceLocation, Resource> items = manager.listResources("morecreativetabs", path -> path.getPath().contains("tab_items.json"));//Added by me
+            Map<ResourceLocation, Resource> disabledTabs = manager.listResources(ModConstants.RESOURCE_ID, path -> path.getPath().contains("disabled_tabs.json"));
+            Map<ResourceLocation, Resource> orderedTabs = manager.listResources(ModConstants.RESOURCE_ID, path -> path.getPath().contains("ordered_tabs.json"));
+            Map<ResourceLocation, Resource> items = manager.listResources(ModConstants.RESOURCE_ID, path -> path.getPath().contains("tab_items.json"));//Added by me
 
 
             //Load disabled tabs

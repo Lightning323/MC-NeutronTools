@@ -1,4 +1,4 @@
-package me.hypherionmc.morecreativetabs.client.impl;
+package org.zipcoder.creativetabs.client.impl;
 
 public interface ForgeTabData {
     int getPageIndex();

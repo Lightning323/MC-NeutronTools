@@ -1,4 +1,4 @@
-package org.zipcoder.neutrontools.mixin.moreCreativeTabs.accessor;
+package org.zipcoder.neutrontools.mixin.creativeTabs.accessor;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
