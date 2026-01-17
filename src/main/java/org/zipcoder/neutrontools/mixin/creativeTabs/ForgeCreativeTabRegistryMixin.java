@@ -1,6 +1,6 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.common.CreativeModeTabRegistry;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,7 +22,7 @@ public abstract class ForgeCreativeTabRegistryMixin {
     //https://www.bing.com/search?q=Unable+to+locate+obfuscation+mapping+for+%40Inject+target+getSortedCreativeModeTabs&cvid=0a15e365a2384902b52b45d60b343891&gs_lcrp=EgRlZGdlKgYIABBFGDkyBggAEEUYOdIBBzQyMmowajSoAgiwAgE&FORM=ANAB01&adppc=EDGEXST&PC=W093
     @Inject(method = "getSortedCreativeModeTabs", at = @At("RETURN"), cancellable = true, remap = false)
     private static void injectCustomTabs(CallbackInfoReturnable<List<CreativeModeTab>> cir) {
-        cir.setReturnValue(CustomCreativeTabRegistry.INSTANCE.sortedTabs().stream().filter(t -> !getDefaultTabs().contains(t)).toList());
+        cir.setReturnValue(CreativeTabCustomizationData.INSTANCE.sortedTabs().stream().filter(t -> !getDefaultTabs().contains(t)).toList());
     }
 
 }

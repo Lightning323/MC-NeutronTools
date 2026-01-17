@@ -1,8 +1,7 @@
 package org.zipcoder.creativetabs.utils;
 
-import org.zipcoder.creativetabs.ModConstants;
 import org.zipcoder.creativetabs.client.data.CustomCreativeTabJsonHelper;
-import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -52,26 +51,21 @@ public class CreativeTabUtils {
                 }
             }
             icon.set(stack);
+            icon.get().setCount(1);
         }
-        icon.set(fixIcon(icon.get()));
+        if (icon.get().isEmpty()) icon.set(new ItemStack(Items.GRASS_BLOCK, 1));
         return icon::get;
     }
 
-    public static ItemStack fixIcon(ItemStack icon) {
-        if (icon.isEmpty()) icon = new ItemStack(Items.GRASS_BLOCK, 1);
-        icon.setCount(1);
-        System.out.println("ICON: " + icon.toString());
-        return icon;
-    }
 
-    public static ItemStack getItemStack(String jsonItem) {
-        if (jsonItem == null) return ItemStack.EMPTY;
-        Optional<Item> itemOptional = BuiltInRegistries.ITEM.getOptional(new ResourceLocation(jsonItem));
+    public static ItemStack getItemStack(String itemId) {
+        if (itemId == null) return ItemStack.EMPTY;
+        Optional<Item> itemOptional = BuiltInRegistries.ITEM.getOptional(new ResourceLocation(itemId));
         return itemOptional.map(Item::getDefaultInstance).orElse(ItemStack.EMPTY);
     }
 
     public static String prefix(String tabName) {
-        return String.format("%s.%s", ModConstants.RESOURCE_ID, tabName);
+        return String.format("%s.%s", NeutronTools.RESOURCE_ID, tabName);
     }
 
     public static String getTabKey(Component component) {
@@ -82,19 +76,19 @@ public class CreativeTabUtils {
     }
 
     public static String fileToTab(String input) {
-        input = input.replace(ModConstants.RESOURCE_ID + "/", "");
-        input = input.replace(ModConstants.RESOURCE_ID, "");
+        input = input.replace(NeutronTools.RESOURCE_ID + "/", "");
+        input = input.replace(NeutronTools.RESOURCE_ID, "");
         input = input.replace(".json", "");
 
         return input;
     }
 
     public static Optional<Pair<CustomCreativeTabJsonHelper, List<ItemStack>>> replacementTab(String tabName) {
-        if (CustomCreativeTabRegistry.INSTANCE.getReplacedTabs().containsKey(tabName)) {
-            return Optional.of(CustomCreativeTabRegistry.INSTANCE.getReplacedTabs().get(tabName));
+        if (CreativeTabCustomizationData.INSTANCE.getReplacedTabs().containsKey(tabName)) {
+            return Optional.of(CreativeTabCustomizationData.INSTANCE.getReplacedTabs().get(tabName));
         }
-        if (CustomCreativeTabRegistry.INSTANCE.getReplacedTabs().containsKey(tabName.toLowerCase())) {
-            return Optional.of(CustomCreativeTabRegistry.INSTANCE.getReplacedTabs().get(tabName.toLowerCase()));
+        if (CreativeTabCustomizationData.INSTANCE.getReplacedTabs().containsKey(tabName.toLowerCase())) {
+            return Optional.of(CreativeTabCustomizationData.INSTANCE.getReplacedTabs().get(tabName.toLowerCase()));
         }
         return Optional.empty();
     }

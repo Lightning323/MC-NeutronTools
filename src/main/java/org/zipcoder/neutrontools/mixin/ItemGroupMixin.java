@@ -1,6 +1,6 @@
 package org.zipcoder.neutrontools.mixin;
 
-import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -56,33 +56,43 @@ public abstract class ItemGroupMixin {
 //        assert tabName != null;
 //        String tabID = tabName.toString();
         String tabID = getTabKey(((CreativeModeTabAccessor) self).getInternalDisplayName());
-        NeutronTools.LOGGER.debug("Updating creative tab: " + tabID);
+        NeutronTools.LOGGER.debug("Updating creative tab: {}",tabID);
 
         /**
          * Item removal
          */
-        List<String> itemsToDelete = CustomCreativeTabRegistry.INSTANCE.addon.itemsToDelete.get(tabID);
+        List<String> itemsToDelete = CreativeTabCustomizationData.INSTANCE.itemsToDelete.get(tabID);
         if (itemsToDelete != null && !itemsToDelete.isEmpty()) {
-            //System.out.println("Removing items from tab: " + tabID);
-            itemsToDelete.forEach(removeItem -> { //For each item in this tab we want to delete
-
+            itemsToDelete.forEach(removalID -> { //For each item in this tab we want to delete
                 displayItems.removeIf(stack -> {//If the tab has the same item ID, remove it
-                    String tabItemID = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-                    return removeItem.equals(tabItemID);
+                    String stackId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString(); //O(1) time complexity
+                    return removalID.equals(stackId);
                 });
-
                 displayItemsSearchTab.removeIf(stack -> {
-                    String tabItemID = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-                    return removeItem.equals(tabItemID);
+                    String stackId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+                    return removalID.equals(stackId);
                 });
+            });
+        }
 
+        Set<String> itemBlacklist = CreativeTabCustomizationData.INSTANCE.disabledItems;
+        if (itemBlacklist != null && !itemBlacklist.isEmpty()) {
+            itemBlacklist.forEach(removalID -> {
+                displayItems.removeIf(stack -> {//If the tab has the same item ID, remove it
+                    String stackId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+                    return removalID.equals(stackId);
+                });
+                displayItemsSearchTab.removeIf(stack -> {
+                    String stackId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+                    return removalID.equals(stackId);
+                });
             });
         }
 
         /**
          * Item addition
          */
-        List<ItemStack> itemsToAdd = CustomCreativeTabRegistry.INSTANCE.addon.itemsToAdd.get(tabID);
+        List<ItemStack> itemsToAdd = CreativeTabCustomizationData.INSTANCE.itemsToAdd.get(tabID);
         if (itemsToAdd != null && !itemsToAdd.isEmpty()) {
             //System.out.println("\nAdding items to tab: " + tabID + " (" + itemsToAdd.size() + ")\n" + itemsToAdd);
             displayItems.addAll(itemsToAdd);

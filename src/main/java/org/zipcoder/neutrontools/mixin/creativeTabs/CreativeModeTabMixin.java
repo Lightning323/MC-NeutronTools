@@ -2,7 +2,7 @@ package org.zipcoder.neutrontools.mixin.creativeTabs;
 
 import org.zipcoder.creativetabs.client.data.CustomCreativeTabJsonHelper;
 import org.zipcoder.creativetabs.client.impl.CreativeModeTabMixin_I;
-import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
 import org.zipcoder.creativetabs.utils.CreativeTabUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -44,12 +44,12 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
         CreativeModeTab self = (CreativeModeTab) (Object) this;
 
-        if (CustomCreativeTabRegistry.INSTANCE.getCustomTabs().contains(self) && CustomCreativeTabRegistry.INSTANCE.getTabItems().containsKey(self)) {
+        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) && CreativeTabCustomizationData.INSTANCE.getTabItems().containsKey(self)) {
             ci.cancel();
 
             displayItems.clear();
             displayItemsSearchTab.clear();
-            List<ItemStack> stacks = CustomCreativeTabRegistry.INSTANCE.getTabItems().get(self);
+            List<ItemStack> stacks = CreativeTabCustomizationData.INSTANCE.getTabItems().get(self);
 
             displayItems.addAll(stacks);
             displayItemsSearchTab.addAll(stacks);
@@ -61,8 +61,8 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectHasAnyItems(CallbackInfoReturnable<Boolean> cir) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
 
-        if (CustomCreativeTabRegistry.INSTANCE.getCustomTabs().contains(self)
-                && CustomCreativeTabRegistry.INSTANCE.getTabItems().containsKey(self)) {
+        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self)
+                && CreativeTabCustomizationData.INSTANCE.getTabItems().containsKey(self)) {
             cir.setReturnValue(true);
         }
     }
@@ -71,12 +71,12 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectDisplayName(CallbackInfoReturnable<Component> cir) {
         Component value = this.displayName;
         CreativeTabUtils.replacementTab(convertName(getTabKey(value))).ifPresent(tabData -> {
-            if (!CustomCreativeTabRegistry.INSTANCE.isShowTabNames()) {
+            if (!CreativeTabCustomizationData.INSTANCE.isShowTabNames()) {
                 cir.setReturnValue(Component.translatable(CreativeTabUtils.prefix(tabData.getLeft().getTabName())));
             }
         });
 
-        if (!CustomCreativeTabRegistry.INSTANCE.isShowTabNames())
+        if (!CreativeTabCustomizationData.INSTANCE.isShowTabNames())
             return;
 
         cir.setReturnValue(Component.literal(getTabKey(value)));
@@ -150,7 +150,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Unique
     private Collection<ItemStack> filterItems(Collection<ItemStack> inputStacks) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
-        if (CustomCreativeTabRegistry.INSTANCE.getCustomTabs().contains(self) || self.getType() == CreativeModeTab.Type.SEARCH)
+        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) || self.getType() == CreativeModeTab.Type.SEARCH)
             return inputStacks;
 
         Collection<ItemStack> oldStacks = this.displayItems;
@@ -160,7 +160,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             List<ItemStack> returnStacks = new ArrayList<>(replacementTab.get().getRight());
 
             if (replacementTab.get().getLeft().getTabItems().stream().anyMatch(i -> i.getName().equalsIgnoreCase("existing"))) {
-                returnStacks.addAll(oldStacks.stream().filter(i -> !CustomCreativeTabRegistry.INSTANCE.getHiddenItems().contains(i.getItem())).toList());
+                returnStacks.addAll(oldStacks.stream().filter(i -> !CreativeTabCustomizationData.INSTANCE.getHiddenItems().contains(i.getItem())).toList());
             }
 
             return returnStacks;
@@ -170,7 +170,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
         if (oldStacks != null && !oldStacks.isEmpty()) {
             oldStacks.forEach(i -> {
-                if (!CustomCreativeTabRegistry.INSTANCE.getHiddenItems().contains(i.getItem())) {
+                if (!CreativeTabCustomizationData.INSTANCE.getHiddenItems().contains(i.getItem())) {
                     filteredStacks.add(i);
                 }
             });

@@ -38,6 +38,7 @@ public class PreInitConfig {
     public int portalWaitTime = 80;//80 is minecraft default
     public boolean crashCommands = false;
     public float hungerMultiplier = 1.0f;//Casting from double to float
+    public boolean hideCreativeTabItemsFromJEIBlacklist = true;
     //--------------------------------------------------------------------
 
     /**
@@ -48,6 +49,7 @@ public class PreInitConfig {
         config.set("common.crash_commands", crashCommands);
         config.set("common.portal_wait_time", portalWaitTime);
         config.set("common.hunger_multiplier", (double) hungerMultiplier);
+        config.set("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
         //--------------------------------------------------------------------
         config.save();
     }
@@ -64,6 +66,8 @@ public class PreInitConfig {
 
         double hungerMultiplier_double = config.getOrElse("common.hunger_multiplier", (double) hungerMultiplier);
         hungerMultiplier = clamp((float) hungerMultiplier_double, 0, 1000);
+
+        hideCreativeTabItemsFromJEIBlacklist = config.getOrElse("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
         //--------------------------------------------------------------------
     }
 }

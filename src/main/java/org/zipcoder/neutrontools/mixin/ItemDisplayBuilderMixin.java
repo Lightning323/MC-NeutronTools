@@ -38,10 +38,4 @@ public abstract class ItemDisplayBuilderMixin {
             ci.cancel();
         }
     }
-
-//    @Inject(method = "accept(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/CreativeModeTab$TabVisibility;)V",
-//            at = @At("TAIL"))
-//    private void onAcceptTail(ItemStack stack, CreativeModeTab.TabVisibility visibility, CallbackInfo ci) {
-//        System.out.println("[Mixin] Finished adding " + stack.getDisplayName().getString());
-//    }
 }

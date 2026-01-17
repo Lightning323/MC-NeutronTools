@@ -1,6 +1,7 @@
 package org.zipcoder.neutrontools;
 
 import com.mojang.logging.LogUtils;
+import org.apache.logging.log4j.LogManager;
 import org.zipcoder.creativetabs.CreativeTabs;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,8 +24,12 @@ import org.zipcoder.neutrontools.network.SyncConfigPacket;
 @Mod(NeutronTools.MODID)
 public class NeutronTools {
     public static final String MODID = "neutrontools";
-    public static final Logger LOGGER = LogUtils.getLogger();
     public static final PreInitConfig CONFIG = new PreInitConfig();
+
+    public static final Logger LOGGER = LogUtils.getLogger();
+    public static final org.apache.logging.log4j.Logger TAB_LOGGER = LogManager.getLogger("Neutron Tools Creative Tabs");
+    
+    public static final String RESOURCE_ID = "neutron";
 
     public static float clamp(float value, float min, float max) {
         if (value > max) return max;

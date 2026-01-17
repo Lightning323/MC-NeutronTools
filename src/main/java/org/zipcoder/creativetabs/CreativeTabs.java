@@ -1,7 +1,7 @@
 package org.zipcoder.creativetabs;
 
 import org.zipcoder.creativetabs.client.impl.CreativeModeTabMixin_I;
-import org.zipcoder.creativetabs.client.tabs.CustomCreativeTabRegistry;
+import org.zipcoder.creativetabs.client.tabs.CreativeTabCustomizationData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -35,7 +35,7 @@ public class CreativeTabs {
      */
     public static void reloadResources() {
         if (!hasRun) {
-            CustomCreativeTabRegistry.INSTANCE.setVanillaTabs(new ArrayList<>(BuiltInRegistries.CREATIVE_MODE_TAB.stream().toList()));
+            CreativeTabCustomizationData.INSTANCE.setVanillaTabs(new ArrayList<>(BuiltInRegistries.CREATIVE_MODE_TAB.stream().toList()));
             reloadTabs();
             hasRun = true;
         } else {
@@ -47,40 +47,29 @@ public class CreativeTabs {
      * Called to reload all creative tabs
      */
     private static void reloadTabs() {
-        ModConstants.logger.info("Checking for custom creative tabs");
-        CustomCreativeTabRegistry.INSTANCE.clearTabs();
+        NeutronTools.TAB_LOGGER.info("Checking for custom creative tabs");
+        CreativeTabCustomizationData.INSTANCE.clearTabs();
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             ResourceManager manager = Minecraft.getInstance().getResourceManager();
 
-            //Find the json file that does not contain "disabled_tabs" or "ordered_tabs", to create a new custom tab entry
-            Map<ResourceLocation, Resource> customTabs = manager.listResources(ModConstants.RESOURCE_ID,
-                    path -> path.getPath().endsWith(".json")
-                            && !path.getPath().contains("disabled_tabs")
-                            && !path.getPath().contains("ordered_tabs")
-                            && !path.getPath().contains("tab_items"));//Added by me
+            //Find the json file that is under the new_tabs directory
+            Map<ResourceLocation, Resource> customTabs = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().endsWith(".json") && path.getPath().contains("new_tabs"));
+            CreativeTabCustomizationData.INSTANCE.loadCustomTabs(customTabs);
 
-            Map<ResourceLocation, Resource> disabledTabs = manager.listResources(ModConstants.RESOURCE_ID, path -> path.getPath().contains("disabled_tabs.json"));
-            Map<ResourceLocation, Resource> orderedTabs = manager.listResources(ModConstants.RESOURCE_ID, path -> path.getPath().contains("ordered_tabs.json"));
-            Map<ResourceLocation, Resource> items = manager.listResources(ModConstants.RESOURCE_ID, path -> path.getPath().contains("tab_items.json"));//Added by me
+            Map<ResourceLocation, Resource> disabledItemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().contains("disabled_items.json"));
+            CreativeTabCustomizationData.INSTANCE.loadDisabledItems(disabledItemsJson);
 
+            Map<ResourceLocation, Resource> disabledTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().contains("disabled_tabs.json"));
+            CreativeTabCustomizationData.INSTANCE.loadDisabledTabs(disabledTabsJson);
 
-            //Load disabled tabs
-            if (!disabledTabs.isEmpty()) {
-                CustomCreativeTabRegistry.INSTANCE.loadDisabledTabs(disabledTabs);
-            }
+            Map<ResourceLocation, Resource> orderedTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().contains("ordered_tabs.json"));
+            CreativeTabCustomizationData.INSTANCE.loadOrderedTabs(orderedTabsJson);
 
-            //Load ordered tabs
-            if (!orderedTabs.isEmpty()) {
-                CustomCreativeTabRegistry.INSTANCE.loadOrderedTabs(orderedTabs);
-            }
+            Map<ResourceLocation, Resource> itemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().contains("tab_items.json"));
+            CreativeTabCustomizationData.INSTANCE.loadItemsForTabs(itemsJson);
 
-            //Process custom tabs
-            CustomCreativeTabRegistry.INSTANCE.processEntries(customTabs);
-
-            //Load items to remove or add
-            if (!items.isEmpty()) {
-                CustomCreativeTabRegistry.INSTANCE.addon.loadItemsForTabs(items);
-            }
+            //Update creative tabs after all information has been loaded
+            CreativeTabCustomizationData.INSTANCE.reorderTabs();
 
             //Rebuild cache for all tabs
             for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {

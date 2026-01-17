@@ -3,6 +3,7 @@ package org.zipcoder.neutrontools.commands;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -10,27 +11,30 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import org.zipcoder.creativetabs.ModConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.zipcoder.neutrontools.CompassUtils;
 import org.zipcoder.neutrontools.NeutronTools;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Mod.EventBusSubscriber(modid = ModConstants.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(modid = NeutronTools.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModCommands {
 
     public final static String NAMESPACE = "neutron";
@@ -116,6 +120,43 @@ public class ModCommands {
         // === Create ONE clean namespace root ===
         root = Commands.literal(NAMESPACE);
 
+        // === /neutron pointcompass <x> <y> <z> (OP only) ===
+//        root.then(Commands.literal("pointcompass")
+//                .requires(source -> source.hasPermission(2))  // Requires OP level 2
+//                .then(Commands.argument("x", IntegerArgumentType.integer())
+//                        .then(Commands.argument("y", IntegerArgumentType.integer())
+//                                .then(Commands.argument("z", IntegerArgumentType.integer())
+//                                        .executes(context -> {
+//                                            // Get the command source and coordinates
+//                                            CommandSourceStack source = context.getSource();
+//                                            int x = IntegerArgumentType.getInteger(context, "x");
+//                                            int y = IntegerArgumentType.getInteger(context, "y");
+//                                            int z = IntegerArgumentType.getInteger(context, "z");
+//
+//                                            if (!(source.getEntity() instanceof Player player)) {
+//                                                source.sendFailure(Component.literal("This command can only be used by players!"));
+//                                                return 0;
+//                                            }
+//
+//                                            // Update the compass
+//                                            boolean success = CompassUtils.updateHeldCompass(
+//                                                    player,
+//                                                    new BlockPos(x, y, z),
+//                                                    source.getLevel()
+//                                            );
+//
+//                                            if (!success) {
+//                                                source.sendFailure(Component.literal("You must be holding a compass!"));
+//                                                return 0;
+//                                            }
+//
+//                                            return 1;
+//                                        })
+//                                )
+//                        )
+//                )
+//        );
+
         // === /neutron kill near  (OP only) ===
         root.then(
                 Commands.literal("kill")
@@ -130,7 +171,6 @@ public class ModCommands {
         );
 
 
-
         // === /neutron locate <player> (OP only) ===
         root.then(
                 Commands.literal("locate")
@@ -143,11 +183,22 @@ public class ModCommands {
                                             double y = player.getY();
                                             double z = player.getZ();
 
+                                            MutableComponent literal = Component.literal(
+                                                    String.format("%s's position → X: %.2f  Y: %.2f  Z: %.2f",
+                                                            player.getName().getString(), x, y, z)
+                                            );
+
+
+//                                            if (ctx.getSource().getEntity() instanceof Player thisPlayer) {
+//                                                if (!CompassUtils.updateHeldCompass(
+//                                                        thisPlayer, new BlockPos((int) x, (int) y, (int) z), ctx.getSource().getLevel()
+//                                                )) {
+//                                                    literal.append("\nNote: If a compass is held, it will be updated to point to this player.");
+//                                                }
+//                                            }
+
                                             ctx.getSource().sendSuccess(
-                                                    () -> Component.literal(
-                                                            String.format("%s's position → X: %.2f  Y: %.2f  Z: %.2f",
-                                                                    player.getName().getString(), x, y, z)
-                                                    ),
+                                                    () -> literal,
                                                     false
                                             );
 
