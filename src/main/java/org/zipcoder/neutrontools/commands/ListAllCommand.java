@@ -111,7 +111,7 @@ public class ListAllCommand {
         NeutronTools.LOGGER.info("Saving creative mode tab list to {}", saveFile.getAbsolutePath());
         try (FileWriter writer = new FileWriter(saveFile)) {
             // Header with columns: Tab name (40 chars) | Tab Mod-ID (30 chars)
-            writer.write(String.format("%-40s   %-30s%n", "TAB NAME", "MOD ID"));
+            writer.write(String.format("%-40s   %-30s%n", "MOD ID", "TAB NAME"));
             writer.write(String.join("", Collections.nCopies(75, "-")) + "\n");
 
             // Data rows
@@ -119,9 +119,7 @@ public class ListAllCommand {
                 CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(id);
                 String tabInternalName = getTabKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
                 // Left-justified name (40 chars) | Left-justified mod ID (30 chars)
-                writer.write(String.format("%-40s   %-30s%n",
-                        truncate(tabInternalName, 38),  // Truncate if too long
-                        id.getNamespace()));            // Just the namespace (mod ID)
+                writer.write(String.format("%-40s   %-30s%n", id.getNamespace(), tabInternalName));
             }
             NeutronTools.LOGGER.info("Saved creative mode tab list to: {}", saveFile.getAbsolutePath());
             return true;
@@ -131,11 +129,6 @@ public class ListAllCommand {
         return false;
     }
 
-    // Helper method to truncate long strings with ellipsis
-    private static String truncate(String str, int maxLength) {
-        if (str.length() <= maxLength) return str;
-        return str.substring(0, maxLength - 3) + "...";
-    }
 
     private static boolean listEntitiesToFile(File saveFile) {
         NeutronTools.LOGGER.info("Saving entity list to {}", saveFile.getAbsolutePath());
