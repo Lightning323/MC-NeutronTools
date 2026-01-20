@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.*;
 import org.apache.commons.lang3.tuple.Pair;
+import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,20 +36,17 @@ public class CreativeTabCustomizationData {
     protected final Gson GSON = new Gson();
 
     private final List<CreativeModeTab> vanillaTabs = new ArrayList<>();
-
-    private final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
     private final LinkedList<CreativeModeTab> currentTabs = new LinkedList<>();
+    private final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
 
-    public final HashMap<String, List<ItemStack>> tabAdditions = new HashMap<>();
-    public final HashMap<String, List<String>> tabDeletions = new HashMap<>();
+    public final HashMap<CreativeModeTab, List<ItemStack>> tabAdditions = new HashMap<>();
+    public final HashMap<CreativeModeTab, Set<String>> tabDeletions = new HashMap<>();
 
     public final Set<String> disabledTabs = new HashSet<>();
-    public final Set<String> disabledItems = new HashSet<>();
+    private final Set<Item> hiddenItems = new HashSet<>();
 
     private final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
-    public final HashMap<CreativeModeTab, List<ItemStack>> newTabItems = new HashMap<>();
 
-    private final Set<Item> hiddenItems = new HashSet<>();
 
     /**
      * Clear all cached data for reloading
@@ -60,17 +58,15 @@ public class CreativeTabCustomizationData {
         newTabs.clear();
         hiddenItems.clear();
         disabledTabs.clear();
-        disabledItems.clear();
-        newTabItems.clear();
+        tabAdditions.clear();
         tabOrder.clear();
         currentTabs.clear();
         replacedTabs.clear();
-        tabAdditions.clear();
         tabDeletions.clear();
     }
 
     public ItemStack makeStack(CustomCreativeTabJsonHelper.TabItem item) {
-        ItemStack stack = getItemStack(item.getName());
+        ItemStack stack = makeItemStack(item.getName());
         if (stack.isEmpty()) return stack;
 
         if (item.getNbt() != null && !item.getNbt().isEmpty()) {
@@ -100,26 +96,26 @@ public class CreativeTabCustomizationData {
                     ItemTabJsonHelper json = GSON.fromJson(new InputStreamReader(stream), ItemTabJsonHelper.class);
 
                     //Iterate over each tab in the json file
-                    json.getTabs().forEach(tab -> {
-                        String tabName = tab.tabName;
+                    json.getTabs().forEach(tabJson -> {
+                        CreativeModeTab tab = CreativeTabUtils.getTabFromString(tabJson.tabName);
 
-                        //Add new tab entries if they don't exist
-                        if (tabAdditions.get(tabName) == null) {
-                            tabAdditions.put(tabName, new ArrayList<>());
-                        }
-                        if (tabDeletions.get(tabName) == null) {
-                            tabDeletions.put(tabName, new ArrayList<>());
-                        }
+                        if (tab != null) {
+                            //Add new tab entries if they don't exist
+                            if (tabAdditions.get(tab) == null) {
+                                tabAdditions.put(tab, new ArrayList<>());
+                            }
+                            if (tabDeletions.get(tab) == null) {
+                                tabDeletions.put(tab, new HashSet<>());
+                            }
 
-                        //Add the items to the final entry
-                        for (int i = 0; i < tab.itemsAdd.length; i++) {
-                            ItemStack stack = makeStack(tab.itemsAdd[i]);
-                            //Only add item stacks that actually exist
-                            if (!stack.isEmpty()) tabAdditions.get(tabName).add(stack);
-                        }
+                            for (int i = 0; i < tabJson.itemsAdd.length; i++) {
+                                ItemStack stack = makeStack(tabJson.itemsAdd[i]);
+                                if (!stack.isEmpty()) tabAdditions.get(tab).add(stack);
+                            }
 
-                        for (int i = 0; i < tab.itemsRemove.length; i++) {
-                            tabDeletions.get(tabName).add(tab.itemsRemove[i]);
+                            for (int i = 0; i < tabJson.itemsRemove.length; i++) {
+                                tabDeletions.get(tab).add(tabJson.itemsRemove[i]);
+                            }
                         }
 
                     });
@@ -194,7 +190,7 @@ public class CreativeTabCustomizationData {
                     if (item.getName().equalsIgnoreCase("existing"))
                         json.setKeepExisting(true);
 
-                    ItemStack stack = getItemStack(item.getName());
+                    ItemStack stack = makeItemStack(item.getName());
                     if (stack.isEmpty())
                         continue;
 
@@ -228,7 +224,7 @@ public class CreativeTabCustomizationData {
 
                     CreativeModeTab tab = builder.build();
                     newTabs.add(tab);
-                    newTabItems.put(tab, stacks);
+                    tabAdditions.put(tab, stacks);
                 }
             } catch (Exception e) {
                 NeutronTools.LOGGER.error("Failed to process creative tab", e);
@@ -258,7 +254,11 @@ public class CreativeTabCustomizationData {
                 NeutronTools.LOGGER.info("Processing tab data {}", location.toString());
                 try (InputStream stream = resource.open()) {//Process each resource
                     DisabledItemsJsonHelper json = new Gson().fromJson(new InputStreamReader(stream), DisabledItemsJsonHelper.class);
-                    disabledItems.addAll(json.getDisabledItems());
+
+                    json.getDisabledItems().forEach(e -> {
+                        hiddenItems.add(makeItemStack(e).getItem());
+                    });
+
                 } catch (Exception e) {
                     NeutronTools.LOGGER.error("Failed to process disabled items for {}", location, e);
                 }
@@ -272,7 +272,7 @@ public class CreativeTabCustomizationData {
                 try {
                     Files.readAllLines(jeiBlacklist.toPath()).forEach(line -> {
                         if (!line.isBlank()) {
-                            disabledItems.add(line.strip());
+                            hiddenItems.add(makeItemStack(line.strip()).getItem());
                         }
                     });
                 } catch (IOException e) {
@@ -308,7 +308,7 @@ public class CreativeTabCustomizationData {
             for (String orderedTab : tabOrder) {
                 if (!orderedTab.equalsIgnoreCase("existing")) {
                     oldTabs.stream()
-                            .filter(tab -> getTabKey(((CreativeModeTabAccessor) tab).getInternalDisplayName()).equals(orderedTab))
+                            .filter(tab -> getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName()).equals(orderedTab))
                             .findFirst().ifPresent(pTab -> processTab(pTab, filteredTabs));
                 } else {
                     addExisting = true;
@@ -354,7 +354,7 @@ public class CreativeTabCustomizationData {
     }
 
     private void processTab(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
-        String tabName = getTabKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
+        String tabName = getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
         NeutronTools.LOGGER.debug("Processing tab: {}", tabName);
         if (!disabledTabs.contains(tabName)) {
             filteredTabs.add(tab);

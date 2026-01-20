@@ -40,7 +40,7 @@ public class CreativeTabUtils {
 
         /* Resolve the Icon from the Item Registry */
         CustomCreativeTabJsonHelper.TabIcon finalTabIcon = tabIcon;
-        ItemStack stack = getItemStack(tabIcon.getName());
+        ItemStack stack = makeItemStack(tabIcon.getName());
 
         if (!stack.isEmpty()) {
             if (finalTabIcon.getNbt() != null && !finalTabIcon.getNbt().isEmpty()) { // Apply the Stack NBT
@@ -61,7 +61,7 @@ public class CreativeTabUtils {
     }
 
 
-    public static ItemStack getItemStack(String itemId) {
+    public static ItemStack makeItemStack(String itemId) {
         if (itemId == null) return ItemStack.EMPTY;
         Optional<Item> itemOptional = BuiltInRegistries.ITEM.getOptional(new ResourceLocation(itemId));
         return itemOptional.map(Item::getDefaultInstance).orElse(ItemStack.EMPTY);
@@ -71,16 +71,19 @@ public class CreativeTabUtils {
         return String.format("%s.%s", NeutronTools.RESOURCE_ID, tabName);
     }
 
-    public static String getTabKey(Component component) {
+    public static ResourceLocation getRegistryID(CreativeModeTab tab) {
+        return BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab);
+    }
+
+    public static String getTranslationKey(Component component) {
         if (component.getContents() instanceof TranslatableContents contents) {
             return contents.getKey();
         }
         return component.getString();
-
     }
 
-    public static String getTabKey(CreativeModeTab tab){
-        return getTabKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
+    public static String getTranslationKey(CreativeModeTab tab) {
+        return getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
     }
 
     public static String fileToTab(String input) {
@@ -100,4 +103,39 @@ public class CreativeTabUtils {
         }
         return Optional.empty();
     }
+
+
+    /**
+     * Gets the tab from registry ID or translation key
+     *
+     * @param key
+     * @return
+     */
+    public static CreativeModeTab getTabFromString(String key) {
+        if (isValidRegistryId(key)) {
+            try {
+                ResourceLocation r = new ResourceLocation(key);
+                if (r != null) return BuiltInRegistries.CREATIVE_MODE_TAB.get(r);
+            } catch (Exception e) {
+                NeutronTools.LOGGER.error("Failed to get tab from registry ID: {}", key, e);
+            }
+        }
+
+        return BuiltInRegistries.CREATIVE_MODE_TAB.stream()
+                .filter(tab -> tab.getDisplayName().getContents() instanceof TranslatableContents translatable
+                        && translatable.getKey().equals(key))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Determines if a string is a valid format for a Registry ID (ResourceLocation).
+     * Valid format is "namespace:path" (e.g., "minecraft:iron_ingot")
+     * using only lowercase a-z, 0-9, dot, underscore, and dash.
+     */
+    public static boolean isValidRegistryId(String key) {
+        return ResourceLocation.isValidResourceLocation(key);
+    }
+
+
 }

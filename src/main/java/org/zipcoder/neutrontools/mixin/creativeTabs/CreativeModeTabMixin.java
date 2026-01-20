@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTabKey;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 
 @Mixin(CreativeModeTab.class)
@@ -45,12 +45,12 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         CreativeModeTab self = (CreativeModeTab) (Object) this;
 //        String tabID = getTabKey(self);
 
-        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) && CreativeTabCustomizationData.INSTANCE.newTabItems.containsKey(self)) {
+        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) && CreativeTabCustomizationData.INSTANCE.tabAdditions.containsKey(self)) {
             ci.cancel();
 
             displayItems.clear();
             displayItemsSearchTab.clear();
-            List<ItemStack> stacks = CreativeTabCustomizationData.INSTANCE.newTabItems.get(self);
+            List<ItemStack> stacks = CreativeTabCustomizationData.INSTANCE.tabAdditions.get(self);
 
             displayItems.addAll(stacks);
             displayItemsSearchTab.addAll(stacks);
@@ -62,7 +62,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectHasAnyItems(CallbackInfoReturnable<Boolean> cir) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
 
-        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) && CreativeTabCustomizationData.INSTANCE.newTabItems.containsKey(self)) {
+        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) && CreativeTabCustomizationData.INSTANCE.tabAdditions.containsKey(self)) {
             cir.setReturnValue(true);
         }
     }
@@ -70,7 +70,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void injectDisplayName(CallbackInfoReturnable<Component> cir) {
         Component value = this.displayName;
-        CreativeTabUtils.replacementTab(convertName(getTabKey(value))).ifPresent(tabData -> {
+        CreativeTabUtils.replacementTab(convertName(getTranslationKey(value))).ifPresent(tabData -> {
             if (!CreativeTabCustomizationData.INSTANCE.isShowTabNames()) {
                 cir.setReturnValue(Component.translatable(CreativeTabUtils.prefix(tabData.getLeft().getTabName())));
             }
@@ -79,7 +79,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         if (!CreativeTabCustomizationData.INSTANCE.isShowTabNames())
             return;
 
-        cir.setReturnValue(Component.literal(getTabKey(value)));
+        cir.setReturnValue(Component.literal(getTranslationKey(value)));
     }
 
     @Inject(method = "contains", at = @At("RETURN"), cancellable = true)
@@ -135,7 +135,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectIcon(CallbackInfoReturnable<ItemStack> cir) {
         if (!isCachedCustomIcon) {
             //Set the tab icon
-            String tabKey = getTabKey(this.displayName);
+            String tabKey = getTranslationKey(this.displayName);
             CreativeTabUtils.replacementTab(convertName(tabKey)).ifPresent(tabData -> {
                 LOGGER.info("tab {}: \tCaching tab icon...", this.displayName.getString());
                 cached_TabIcon = CreativeTabUtils.makeTabIcon(tabData.getLeft()).get();
@@ -155,7 +155,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
         Collection<ItemStack> oldStacks = this.displayItems;
 
-        Optional<Pair<CustomCreativeTabJsonHelper, List<ItemStack>>> replacementTab = CreativeTabUtils.replacementTab(convertName(getTabKey(this.displayName)));
+        Optional<Pair<CustomCreativeTabJsonHelper, List<ItemStack>>> replacementTab = CreativeTabUtils.replacementTab(convertName(getTranslationKey(this.displayName)));
         if (replacementTab.isPresent()) {
             List<ItemStack> returnStacks = new ArrayList<>(replacementTab.get().getRight());
 

@@ -18,7 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTabKey;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
 
 public class ListAllCommand {
@@ -111,15 +111,15 @@ public class ListAllCommand {
         NeutronTools.LOGGER.info("Saving creative mode tab list to {}", saveFile.getAbsolutePath());
         try (FileWriter writer = new FileWriter(saveFile)) {
             // Header with columns: Tab name (40 chars) | Tab Mod-ID (30 chars)
-            writer.write(String.format("%-40s   %-30s%n", "MOD ID", "TAB NAME"));
+            writer.write(String.format("%-40s   %-30s%n", "REGISTRY ID", "TRANSLATION KEY"));
             writer.write(String.join("", Collections.nCopies(75, "-")) + "\n");
 
             // Data rows
             for (ResourceLocation id : BuiltInRegistries.CREATIVE_MODE_TAB.keySet()) {
                 CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(id);
-                String tabInternalName = getTabKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
+                String tabInternalName = getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
                 // Left-justified name (40 chars) | Left-justified mod ID (30 chars)
-                writer.write(String.format("%-40s   %-30s%n", id.getNamespace(), tabInternalName));
+                writer.write(String.format("%-40s   %-30s%n", id.toString(), tabInternalName));
             }
             NeutronTools.LOGGER.info("Saved creative mode tab list to: {}", saveFile.getAbsolutePath());
             return true;

@@ -14,12 +14,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
+import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTabKey;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 
 @Mixin(value = CreativeModeTab.class, priority = 10000)
 public abstract class ItemGroupMixin {
@@ -44,20 +45,18 @@ public abstract class ItemGroupMixin {
                 self == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()) ||
                         self == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getHotbarTab()) ||
                         self == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getInventoryTab())) {
-            //System.out.println("Skipping");
             return;
         }
 
         /**
          * Get Tab ID
          */
-        String tabID = getTabKey(self);
-        NeutronTools.LOGGER.debug("Updating creative tab: {}",tabID);
+        NeutronTools.LOGGER.debug("Updating creative tab: {}", CreativeTabUtils.getTranslationKey(self));
 
         /**
          * Item removal
          */
-        List<String> itemsToDelete = CreativeTabCustomizationData.INSTANCE.tabDeletions.get(tabID);
+        Set<String> itemsToDelete = CreativeTabCustomizationData.INSTANCE.tabDeletions.get(self);
         if (itemsToDelete != null && !itemsToDelete.isEmpty()) {
             itemsToDelete.forEach(removalID -> { //For each item in this tab we want to delete
                 displayItems.removeIf(stack -> {//If the tab has the same item ID, remove it
@@ -71,26 +70,11 @@ public abstract class ItemGroupMixin {
             });
         }
 
-        Set<String> itemBlacklist = CreativeTabCustomizationData.INSTANCE.disabledItems;
-        if (itemBlacklist != null && !itemBlacklist.isEmpty()) {
-            itemBlacklist.forEach(removalID -> {
-                displayItems.removeIf(stack -> {//If the tab has the same item ID, remove it
-                    String stackId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-                    return removalID.equals(stackId);
-                });
-                displayItemsSearchTab.removeIf(stack -> {
-                    String stackId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-                    return removalID.equals(stackId);
-                });
-            });
-        }
-
         /**
          * Item addition
          */
-        List<ItemStack> itemsToAdd = CreativeTabCustomizationData.INSTANCE.tabAdditions.get(tabID);
+        List<ItemStack> itemsToAdd = CreativeTabCustomizationData.INSTANCE.tabAdditions.get(self);
         if (itemsToAdd != null && !itemsToAdd.isEmpty()) {
-            //System.out.println("\nAdding items to tab: " + tabID + " (" + itemsToAdd.size() + ")\n" + itemsToAdd);
             displayItems.addAll(itemsToAdd);
             displayItemsSearchTab.addAll(itemsToAdd);
         }

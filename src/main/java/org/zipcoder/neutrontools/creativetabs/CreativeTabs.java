@@ -74,7 +74,7 @@ public class CreativeTabs {
             sb.append("Creative tabs have been reloaded:\n")
                     .append(CreativeTabCustomizationData.INSTANCE.getNewTabs().size()).append(" New tabs\n")
                     .append(CreativeTabCustomizationData.INSTANCE.disabledTabs.size()).append(" Disabled tabs\n")
-                    .append(CreativeTabCustomizationData.INSTANCE.disabledItems.size()).append(" Disabled items\n")
+                    .append(CreativeTabCustomizationData.INSTANCE.getHiddenItems().size()).append(" Disabled items\n")
                     .append(CreativeTabCustomizationData.INSTANCE.tabAdditions.size()).append(" Tab additions\n")
                     .append(CreativeTabCustomizationData.INSTANCE.tabDeletions.size()).append(" Tab subtractions\n");
             NeutronTools.LOGGER.info(sb.toString());
