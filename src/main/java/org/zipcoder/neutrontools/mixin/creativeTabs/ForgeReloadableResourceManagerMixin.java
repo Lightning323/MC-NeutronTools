@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.zipcoder.neutrontools.events.TagEventHandler;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -19,7 +20,12 @@ public class ForgeReloadableResourceManagerMixin {
 
     @Inject(method = "createReload", at = @At("RETURN"))
     private void injectReload(Executor p_143930_, Executor p_143931_, CompletableFuture<Unit> p_143932_, List<PackResources> p_143933_, CallbackInfoReturnable<ReloadInstance> cir) {
-        CreativeTabs.reloadTabs();
+
+        //We already reload in the TagEventHandler so we dont need to do it here
+//        if(!TagEventHandler.tagsUpdated){ //TODO: A hacky way to prevent this from running multiple times
+//            return;
+//        }
+//        CreativeTabs.reloadTabs();
     }
 
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 //@NoArgsConstructor
 //@AllArgsConstructor
 //@Getter
-public class CustomCreativeTabJsonHelper {
+public class NewTabJsonHelper {
 
     @SerializedName("tab_enabled")
     private boolean tabEnabled;
@@ -54,6 +54,12 @@ public class CustomCreativeTabJsonHelper {
 
     @SerializedName("tab_items")
     private ArrayList<TabItem> tabItems;
+
+    @SerializedName("matches_to_add")
+    public ItemMatch[] matchesToAdd;
+
+    @SerializedName("hide_matches_from_other_tabs")
+    public boolean hideMatchesFromOtherTabs;
 
     public ArrayList<TabItem> getTabItems() {
         return tabItems;

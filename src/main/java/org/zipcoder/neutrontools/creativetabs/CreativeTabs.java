@@ -1,5 +1,7 @@
 package org.zipcoder.neutrontools.creativetabs;
 
+import net.minecraft.world.item.CreativeModeTabs;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabCustomizationData;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -38,13 +40,14 @@ public class CreativeTabs {
             hasRun = true;
         }
         NeutronTools.LOGGER.info("Reloading creative tabs");
+        long startTime = System.currentTimeMillis();
         CreativeTabCustomizationData.INSTANCE.clearTabs();
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             ResourceManager manager = Minecraft.getInstance().getResourceManager();
 
             //Find the json file that is under the new_tabs directory
             Map<ResourceLocation, Resource> customTabs = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().endsWith(".json") && path.getPath().contains("new_tabs"));
-            CreativeTabCustomizationData.INSTANCE.loadCustomTabs(customTabs);
+            CreativeTabCustomizationData.INSTANCE.loadNewTabs(customTabs);
 
             Map<ResourceLocation, Resource> disabledItemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().contains("disabled_items.json"));
             CreativeTabCustomizationData.INSTANCE.loadDisabledItems(disabledItemsJson);
@@ -61,24 +64,42 @@ public class CreativeTabs {
             //Update creative tabs after all information has been loaded
             CreativeTabCustomizationData.INSTANCE.reorderTabs();
 
-            //Rebuild cache for all tabs
+            CreativeModeTabs.validate();
+
+            //Rebuild cache for all tabs (mostly just icon cache)
             for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
-                NeutronTools.LOGGER.info("Building cache for '{}'", tab.getDisplayName().getString());
-                // BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab)
                 CreativeModeTabMixin_I mixinTab = (CreativeModeTabMixin_I) tab;
                 mixinTab.rebuildCache();
             }
 
             //Log the final result
             StringBuilder sb = new StringBuilder();
-            sb.append("Creative tabs have been reloaded:\n")
-                    .append(CreativeTabCustomizationData.INSTANCE.getNewTabs().size()).append(" New tabs\n")
-                    .append(CreativeTabCustomizationData.INSTANCE.disabledTabs.size()).append(" Disabled tabs\n")
-                    .append(CreativeTabCustomizationData.INSTANCE.getHiddenItems().size()).append(" Disabled items\n")
-                    .append(CreativeTabCustomizationData.INSTANCE.tabAdditions.size()).append(" Tab additions\n")
-                    .append(CreativeTabCustomizationData.INSTANCE.tabDeletions.size()).append(" Tab subtractions\n");
+            sb.append("Creative tabs reloaded ").append("(").append((System.currentTimeMillis() - startTime) / 1000).append("s elapsed time)\n")
+                    .append(CreativeTabCustomizationData.INSTANCE.getNewTabs().size()).append(" New tabs\t")
+                    .append(CreativeTabCustomizationData.INSTANCE.disabledTabs.size()).append(" Disabled tabs\t")
+                    .append(CreativeTabCustomizationData.INSTANCE.getHiddenItems().size()).append(" Disabled items\t")
+                    .append(CreativeTabCustomizationData.INSTANCE.tabAdditions.size()).append(" Tab additions\t")
+                    .append(CreativeTabCustomizationData.INSTANCE.tabRemovals.size()).append(" Tab subtractions");
             NeutronTools.LOGGER.info(sb.toString());
 
         });
     }
+
+    public static void refreshTabs() {
+        if (!hasRun) { //If this is our first time
+            reloadTabs();
+            hasRun = true;
+            return;
+        }
+
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
+                CreativeModeTabMixin_I mixinTab = (CreativeModeTabMixin_I) tab;
+                mixinTab.reload();
+            }
+            CreativeModeTabs.validate();
+            NeutronTools.LOGGER.info("Creative tabs have been refreshed");
+        });
+    }
+
 }

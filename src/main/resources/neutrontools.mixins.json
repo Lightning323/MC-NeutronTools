@@ -16,9 +16,7 @@
     "creativeTabs.ForgeCreativeTabRegistryMixin",
     "creativeTabs.ForgeCreativeTabsMixin",
     "creativeTabs.ForgeCreativeTabsScreenPageMixin",
-    "creativeTabs.ForgeReloadableResourceManagerMixin",
     "creativeTabs.accessor.ForceCreativeTabAccessor",
-    "creativeTabs.ItemGroupMixin",
     "ItemDisplayBuilderMixin"
   ],
   "injectors": {

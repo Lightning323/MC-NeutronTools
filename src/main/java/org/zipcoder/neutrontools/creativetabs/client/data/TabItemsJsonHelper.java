@@ -7,12 +7,12 @@ import java.util.ArrayList;
 //@NoArgsConstructor
 //@AllArgsConstructor
 //@Getter
-public class ItemTabJsonHelper {
+public class TabItemsJsonHelper {
 
     @SerializedName("tabs")
     private ArrayList<TabItemEntry> tabs;
 
-    public ArrayList<TabItemEntry> getTabs(){
+    public ArrayList<TabItemEntry> getTabs() {
         return tabs;
     }
 
@@ -21,16 +21,16 @@ public class ItemTabJsonHelper {
         public String tabName;
 
         @SerializedName("items_to_add")
-        public CustomCreativeTabJsonHelper.TabItem[] itemsAdd;
+        public NewTabJsonHelper.TabItem[] itemsAdd;
 
         @SerializedName("items_to_remove")
         public String[] itemsRemove;
 
-        @SerializedName("regex_matches_to_add")
-        public String[] regexMatchesToAdd;
+        @SerializedName("matches_to_add")
+        public ItemMatch[] matchesToAdd;
 
-        @SerializedName("regex_matches_to_remove")
-        public String[] regexMatchesToRemove;
+        @SerializedName("matches_to_remove")
+        public ItemMatch[] matchesToRemove;
     }
 
 }
