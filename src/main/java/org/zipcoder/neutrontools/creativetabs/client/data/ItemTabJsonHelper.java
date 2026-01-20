@@ -17,14 +17,6 @@ public class ItemTabJsonHelper {
     }
 
     public static class TabItemEntry {
-        public TabItemEntry(String tabName,
-                            CustomCreativeTabJsonHelper.TabItem[] itemsAdd,
-                            String[] itemsDelete) {
-            this.tabName = tabName;
-            this.itemsAdd = itemsAdd;
-            this.itemsRemove = itemsDelete;
-        }
-
         @SerializedName("tab_name")
         public String tabName;
 
@@ -33,6 +25,12 @@ public class ItemTabJsonHelper {
 
         @SerializedName("items_to_remove")
         public String[] itemsRemove;
+
+        @SerializedName("regex_matches_to_add")
+        public String[] regexMatchesToAdd;
+
+        @SerializedName("regex_matches_to_remove")
+        public String[] regexMatchesToRemove;
     }
 
 }

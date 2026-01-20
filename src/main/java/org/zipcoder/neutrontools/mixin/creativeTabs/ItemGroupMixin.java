@@ -1,6 +1,6 @@
-package org.zipcoder.neutrontools.mixin;
+package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabCustomizationData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 
 import java.util.Collection;
@@ -52,16 +51,13 @@ public abstract class ItemGroupMixin {
         /**
          * Get Tab ID
          */
-//        ResourceLocation tabName = BuiltInRegistries.CREATIVE_MODE_TAB.getKey(self);
-//        assert tabName != null;
-//        String tabID = tabName.toString();
-        String tabID = getTabKey(((CreativeModeTabAccessor) self).getInternalDisplayName());
+        String tabID = getTabKey(self);
         NeutronTools.LOGGER.debug("Updating creative tab: {}",tabID);
 
         /**
          * Item removal
          */
-        List<String> itemsToDelete = CreativeTabCustomizationData.INSTANCE.itemsToDelete.get(tabID);
+        List<String> itemsToDelete = CreativeTabCustomizationData.INSTANCE.tabDeletions.get(tabID);
         if (itemsToDelete != null && !itemsToDelete.isEmpty()) {
             itemsToDelete.forEach(removalID -> { //For each item in this tab we want to delete
                 displayItems.removeIf(stack -> {//If the tab has the same item ID, remove it
@@ -92,7 +88,7 @@ public abstract class ItemGroupMixin {
         /**
          * Item addition
          */
-        List<ItemStack> itemsToAdd = CreativeTabCustomizationData.INSTANCE.itemsToAdd.get(tabID);
+        List<ItemStack> itemsToAdd = CreativeTabCustomizationData.INSTANCE.tabAdditions.get(tabID);
         if (itemsToAdd != null && !itemsToAdd.isEmpty()) {
             //System.out.println("\nAdding items to tab: " + tabID + " (" + itemsToAdd.size() + ")\n" + itemsToAdd);
             displayItems.addAll(itemsToAdd);

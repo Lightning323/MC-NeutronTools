@@ -1,7 +1,8 @@
 package org.zipcoder.neutrontools.utils;
 
+import net.minecraft.world.item.CreativeModeTab;
 import org.zipcoder.neutrontools.creativetabs.client.data.CustomCreativeTabJsonHelper;
-import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabCustomizationData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -13,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 import org.zipcoder.neutrontools.NeutronTools;
 import net.minecraft.world.item.Items;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
 
 import java.util.List;
@@ -74,6 +76,11 @@ public class CreativeTabUtils {
             return contents.getKey();
         }
         return component.getString();
+
+    }
+
+    public static String getTabKey(CreativeModeTab tab){
+        return getTabKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
     }
 
     public static String fileToTab(String input) {

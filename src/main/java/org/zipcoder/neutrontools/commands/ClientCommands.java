@@ -2,7 +2,7 @@ package org.zipcoder.neutrontools.commands;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
-import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabCustomizationData;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;

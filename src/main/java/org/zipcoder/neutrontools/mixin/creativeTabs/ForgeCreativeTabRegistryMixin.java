@@ -1,6 +1,6 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabCustomizationData;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.common.CreativeModeTabRegistry;
 import org.spongepowered.asm.mixin.Mixin;

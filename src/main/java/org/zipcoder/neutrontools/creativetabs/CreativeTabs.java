@@ -1,7 +1,6 @@
 package org.zipcoder.neutrontools.creativetabs;
 
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
-import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -76,8 +75,8 @@ public class CreativeTabs {
                     .append(CreativeTabCustomizationData.INSTANCE.getNewTabs().size()).append(" New tabs\n")
                     .append(CreativeTabCustomizationData.INSTANCE.disabledTabs.size()).append(" Disabled tabs\n")
                     .append(CreativeTabCustomizationData.INSTANCE.disabledItems.size()).append(" Disabled items\n")
-                    .append(CreativeTabCustomizationData.INSTANCE.itemsToAdd.size()).append(" Tab additions\n")
-                    .append(CreativeTabCustomizationData.INSTANCE.itemsToDelete.size()).append(" Tab subtractions\n");
+                    .append(CreativeTabCustomizationData.INSTANCE.tabAdditions.size()).append(" Tab additions\n")
+                    .append(CreativeTabCustomizationData.INSTANCE.tabDeletions.size()).append(" Tab subtractions\n");
             NeutronTools.LOGGER.info(sb.toString());
 
         });

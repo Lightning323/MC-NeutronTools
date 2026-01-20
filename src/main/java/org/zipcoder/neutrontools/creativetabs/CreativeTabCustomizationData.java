@@ -1,4 +1,4 @@
-package org.zipcoder.neutrontools.creativetabs.client.tabs;
+package org.zipcoder.neutrontools.creativetabs;
 
 import com.google.gson.Gson;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -35,14 +35,19 @@ public class CreativeTabCustomizationData {
     protected final Gson GSON = new Gson();
 
     private final List<CreativeModeTab> vanillaTabs = new ArrayList<>();
-    private final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
-    public final Set<String> disabledTabs = new HashSet<>();
-    public final Set<String> disabledItems = new HashSet<>();
+
     private final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
     private final LinkedList<CreativeModeTab> currentTabs = new LinkedList<>();
-    public final HashMap<String, List<ItemStack>> itemsToAdd = new HashMap<>();
-    public final HashMap<String, List<String>> itemsToDelete = new HashMap<>();
-    private final HashMap<CreativeModeTab, List<ItemStack>> tabItems = new HashMap<>();
+
+    public final HashMap<String, List<ItemStack>> tabAdditions = new HashMap<>();
+    public final HashMap<String, List<String>> tabDeletions = new HashMap<>();
+
+    public final Set<String> disabledTabs = new HashSet<>();
+    public final Set<String> disabledItems = new HashSet<>();
+
+    private final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
+    public final HashMap<CreativeModeTab, List<ItemStack>> newTabItems = new HashMap<>();
+
     private final Set<Item> hiddenItems = new HashSet<>();
 
     /**
@@ -56,12 +61,12 @@ public class CreativeTabCustomizationData {
         hiddenItems.clear();
         disabledTabs.clear();
         disabledItems.clear();
-        tabItems.clear();
+        newTabItems.clear();
         tabOrder.clear();
         currentTabs.clear();
         replacedTabs.clear();
-        itemsToAdd.clear();
-        itemsToDelete.clear();
+        tabAdditions.clear();
+        tabDeletions.clear();
     }
 
     public ItemStack makeStack(CustomCreativeTabJsonHelper.TabItem item) {
@@ -99,22 +104,22 @@ public class CreativeTabCustomizationData {
                         String tabName = tab.tabName;
 
                         //Add new tab entries if they don't exist
-                        if (itemsToAdd.get(tabName) == null) {
-                            itemsToAdd.put(tabName, new ArrayList<>());
+                        if (tabAdditions.get(tabName) == null) {
+                            tabAdditions.put(tabName, new ArrayList<>());
                         }
-                        if (itemsToDelete.get(tabName) == null) {
-                            itemsToDelete.put(tabName, new ArrayList<>());
+                        if (tabDeletions.get(tabName) == null) {
+                            tabDeletions.put(tabName, new ArrayList<>());
                         }
 
                         //Add the items to the final entry
                         for (int i = 0; i < tab.itemsAdd.length; i++) {
                             ItemStack stack = makeStack(tab.itemsAdd[i]);
                             //Only add item stacks that actually exist
-                            if (!stack.isEmpty()) itemsToAdd.get(tabName).add(stack);
+                            if (!stack.isEmpty()) tabAdditions.get(tabName).add(stack);
                         }
 
                         for (int i = 0; i < tab.itemsRemove.length; i++) {
-                            itemsToDelete.get(tabName).add(tab.itemsRemove[i]);
+                            tabDeletions.get(tabName).add(tab.itemsRemove[i]);
                         }
 
                     });
@@ -140,10 +145,6 @@ public class CreativeTabCustomizationData {
         return replacedTabs;
     }
 
-
-    public HashMap<CreativeModeTab, List<ItemStack>> getTabItems() {
-        return tabItems;
-    }
 
     public Set<Item> getHiddenItems() {
         return hiddenItems;
@@ -227,7 +228,7 @@ public class CreativeTabCustomizationData {
 
                     CreativeModeTab tab = builder.build();
                     newTabs.add(tab);
-                    tabItems.put(tab, stacks);
+                    newTabItems.put(tab, stacks);
                 }
             } catch (Exception e) {
                 NeutronTools.LOGGER.error("Failed to process creative tab", e);

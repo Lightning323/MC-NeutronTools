@@ -2,7 +2,7 @@ package org.zipcoder.neutrontools.mixin.creativeTabs;
 
 import org.zipcoder.neutrontools.creativetabs.client.data.CustomCreativeTabJsonHelper;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
-import org.zipcoder.neutrontools.creativetabs.client.tabs.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabCustomizationData;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -43,13 +43,14 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Inject(method = "buildContents", at = @At("HEAD"), cancellable = true)
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
         CreativeModeTab self = (CreativeModeTab) (Object) this;
+//        String tabID = getTabKey(self);
 
-        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) && CreativeTabCustomizationData.INSTANCE.getTabItems().containsKey(self)) {
+        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) && CreativeTabCustomizationData.INSTANCE.newTabItems.containsKey(self)) {
             ci.cancel();
 
             displayItems.clear();
             displayItemsSearchTab.clear();
-            List<ItemStack> stacks = CreativeTabCustomizationData.INSTANCE.getTabItems().get(self);
+            List<ItemStack> stacks = CreativeTabCustomizationData.INSTANCE.newTabItems.get(self);
 
             displayItems.addAll(stacks);
             displayItemsSearchTab.addAll(stacks);
@@ -61,8 +62,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectHasAnyItems(CallbackInfoReturnable<Boolean> cir) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
 
-        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self)
-                && CreativeTabCustomizationData.INSTANCE.getTabItems().containsKey(self)) {
+        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) && CreativeTabCustomizationData.INSTANCE.newTabItems.containsKey(self)) {
             cir.setReturnValue(true);
         }
     }
