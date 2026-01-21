@@ -27,7 +27,7 @@ public class TabItem {
     public String name;
 
     @SerializedName("hide_old_tab")
-    public boolean hideFromOtherTabs = true;
+    public boolean hideFromOtherTabs = false;
 
     @SerializedName("nbt")
     public String nbt;
