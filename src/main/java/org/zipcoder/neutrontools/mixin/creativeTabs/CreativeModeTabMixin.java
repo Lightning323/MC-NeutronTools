@@ -175,7 +175,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Inject(method = "getDisplayItems", at = @At("RETURN"), cancellable = true)
     private void injectDisplayItemsFilter(CallbackInfoReturnable<Collection<ItemStack>> cir) {
         if (cached_FilteredDisplayItems == null && !cir.getReturnValue().isEmpty()) { //Cache the display items
-            LOGGER.info("tab {}: \tCaching display items...", this.displayName.getString());
+            LOGGER.debug("tab {}: \tCaching display items...", this.displayName.getString());
             cached_FilteredDisplayItems = editItemStacks(cir.getReturnValue());
         }
         if (cached_FilteredDisplayItems != null) cir.setReturnValue(cached_FilteredDisplayItems);
@@ -184,7 +184,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Inject(method = "getSearchTabDisplayItems", at = @At("RETURN"), cancellable = true)
     private void injectSearchItemsFilter(CallbackInfoReturnable<Collection<ItemStack>> cir) {
         if (cached_filteredSearchTab == null && !cir.getReturnValue().isEmpty()) { //Cache the search tab
-            LOGGER.info("tab {}: \tCaching search tab display items...", this.displayName.getString());
+            LOGGER.debug("tab {}: \tCaching search tab display items...", this.displayName.getString());
             cached_filteredSearchTab = editItemStacks(cir.getReturnValue());
         }
 
@@ -228,7 +228,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         if (!isCachedCustomIcon) {
             Pair<NewTabJsonHelper, List<ItemStack>> replacementTab = CreativeTabUtils.getReplacementTab(self);
             if (replacementTab != null) {
-                LOGGER.info("tab {}: \tCaching tab icon...", this.displayName.getString());
+                LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
                 cached_TabIcon = CreativeTabUtils.makeTabIcon(replacementTab.getLeft()).get();
             }
             isCachedCustomIcon = true;
