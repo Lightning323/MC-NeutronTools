@@ -1,7 +1,7 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
 import org.zipcoder.neutrontools.creativetabs.client.impl.ForgeTabData;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.ForceCreativeTabAccessor;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,7 +33,7 @@ public abstract class ForgeCreativeTabsMixin {
 
     @Inject(method = "streamAllTabs", at = @At("RETURN"), cancellable = true)
     private static void injectCustomTabs(CallbackInfoReturnable<Stream<CreativeModeTab>> cir) {
-        cir.setReturnValue(CreativeTabCustomizationData.INSTANCE.sortedTabs().stream());
+        cir.setReturnValue(CreativeTabEdits.INSTANCE.sortedTabs().stream());
     }
 
     // Supplementaries crashes the game with our tabs, since they are not registered (they are fake tabs)
@@ -58,7 +58,7 @@ public abstract class ForgeCreativeTabsMixin {
         int TABS_PER_PAGE = 10;
         int count = 0;
 
-        for (CreativeModeTab tab : CreativeTabCustomizationData.INSTANCE.sortedTabs()) {
+        for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.sortedTabs()) {
 
             ForgeTabData forgeTab = (ForgeTabData) tab;
             if (CreativeModeTabRegistry.getDefaultTabs().contains(tab)) {
@@ -79,7 +79,7 @@ public abstract class ForgeCreativeTabsMixin {
         record ItemGroupPosition(CreativeModeTab.Row row, int column, int page) { }
         var map = new HashMap<ItemGroupPosition, String>();
 
-        for (CreativeModeTab tab : CreativeTabCustomizationData.INSTANCE.sortedTabs()) {
+        for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.sortedTabs()) {
             final ForgeTabData forgeTabData = (ForgeTabData) tab;
             final String displayName = tab.getDisplayName().getString();
             final var position = new ItemGroupPosition(tab.row(), tab.column(), forgeTabData.getPageIndex());
@@ -93,9 +93,9 @@ public abstract class ForgeCreativeTabsMixin {
 
     @Inject(method = "tryRebuildTabContents", at = @At("HEAD"))
     private static void injectReload(FeatureFlagSet arg, boolean bl, HolderLookup.Provider arg2, CallbackInfoReturnable<Boolean> cir) {
-        if (CreativeTabCustomizationData.INSTANCE.isWasReloaded()) {
+        if (CreativeTabEdits.INSTANCE.isWasReloaded()) {
             CACHED_PARAMETERS = null;
-            CreativeTabCustomizationData.INSTANCE.setWasReloaded(false);
+            CreativeTabEdits.INSTANCE.setWasReloaded(false);
         }
     }
 

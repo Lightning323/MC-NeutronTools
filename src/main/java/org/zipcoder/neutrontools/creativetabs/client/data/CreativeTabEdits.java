@@ -29,9 +29,9 @@ import static org.zipcoder.neutrontools.utils.CreativeTabUtils.*;
 
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)
 //@Getter
-public class CreativeTabCustomizationData {
+public class CreativeTabEdits {
 
-    public static final CreativeTabCustomizationData INSTANCE = new CreativeTabCustomizationData();
+    public static final CreativeTabEdits INSTANCE = new CreativeTabEdits();
     protected final Gson GSON = new Gson();
 
     private final List<CreativeModeTab> vanillaTabs = new ArrayList<>();
@@ -92,8 +92,12 @@ public class CreativeTabCustomizationData {
                                     List<ItemStack> thisTabAdditions = tabAdditions.get(tab);
 
                                     for (int i = 0; i < json.itemsAdd.length; i++) {
-                                        ItemStack stack = makeStack(json.itemsAdd[i]);
-                                        if (!stack.isEmpty()) thisTabAdditions.add(stack);
+                                        NewTabJsonHelper.TabItem tabItem = json.itemsAdd[i];
+                                        ItemStack stack = makeStack(tabItem);
+                                        if (!stack.isEmpty()) {
+                                            thisTabAdditions.add(stack);
+                                            if (tabItem.hideFromOtherTabs) hiddenItems.add(stack.getItem());
+                                        }
                                     }
                                     if (json.matchesToAdd != null && json.matchesToAdd.length > 0) {
                                         NeutronTools.LOGGER.info("Processing item addition matches for {}", json.tabName);
@@ -186,25 +190,27 @@ public class CreativeTabCustomizationData {
                     continue;
 
                 for (NewTabJsonHelper.TabItem item : json.getTabItems()) {
-                    if (item.getName().equalsIgnoreCase("existing"))
+                    if (item.name.equalsIgnoreCase("existing"))
                         json.setKeepExisting(true);
 
-                    ItemStack stack = makeItemStack(item.getName());
+                    ItemStack stack = makeItemStack(item.name);
                     if (stack.isEmpty())
                         continue;
 
-                    if (item.isHideOldTab())
+                    if (item.hideFromOtherTabs)
                         hiddenItems.add(stack.getItem());
 
-                    if (item.getNbt() != null && !item.getNbt().isEmpty()) {
-                        try {
-                            CompoundTag tag = TagParser.parseTag(item.getNbt());
-                            stack.setTag(tag);
+                    if (item.nbt != null) {
+                        if (!item.nbt.isEmpty()) {
+                            try {
+                                CompoundTag tag = TagParser.parseTag(item.nbt);
+                                stack.setTag(tag);
 
-                            if (tag.contains("customName"))
-                                stack.setHoverName(Component.literal(tag.getString("customName")));
-                        } catch (CommandSyntaxException e) {
-                            NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.getName(), e);
+                                if (tag.contains("customName"))
+                                    stack.setHoverName(Component.literal(tag.getString("customName")));
+                            } catch (CommandSyntaxException e) {
+                                NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.name, e);
+                            }
                         }
                     }
 
@@ -326,12 +332,12 @@ public class CreativeTabCustomizationData {
             allTabs.stream()
                     .filter(tab -> {
                         String key = getTranslationKey(tab);
-                        if(key.equalsIgnoreCase(orderedTab)
+                        if (key.equalsIgnoreCase(orderedTab)
                                 || key.replace("itemGroup.", "").equalsIgnoreCase(orderedTab))
                             return true;
 
                         ResourceLocation id = CreativeTabUtils.getRegistryID(tab);
-                        if(id != null && id.toString().equalsIgnoreCase(orderedTab)) return true;
+                        if (id != null && id.toString().equalsIgnoreCase(orderedTab)) return true;
 
                         return false;
                     })

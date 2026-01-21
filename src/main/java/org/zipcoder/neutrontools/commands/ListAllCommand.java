@@ -11,10 +11,8 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import org.checkerframework.checker.units.qual.A;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabCustomizationData;
-import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
@@ -27,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.makeItemStack;
 
 public class ListAllCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -160,21 +157,11 @@ public class ListAllCommand {
             for (ResourceLocation id : BuiltInRegistries.ITEM.keySet()) {
                 Item item = BuiltInRegistries.ITEM.get(id);
 
-                AtomicBoolean found = new AtomicBoolean(false);
-                for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
-                    tab.getDisplayItems().forEach(stack -> {
-                        if (stack.getItem() == item) {
-                            found.set(true);
-                        }
-                    });
-                }
-
-                if (!found.get()) {
-                    hiddenItems.add(id);
-                } else {
+                if (CreativeTabUtils.itemIsVisible(item)) {
                     items.add(id);
+                } else {
+                    hiddenItems.add(id);
                 }
-
             }
             writer.write("Items:\n");
             for (ResourceLocation id : items) {

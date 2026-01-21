@@ -2,8 +2,9 @@ package org.zipcoder.neutrontools.utils;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.world.item.CreativeModeTab;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 import org.zipcoder.neutrontools.creativetabs.client.data.NewTabJsonHelper;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -23,6 +24,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -92,12 +94,67 @@ public class CreativeTabUtils {
         return getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
     }
 
+    public static boolean itemIsVisible(Item item) {
+        AtomicBoolean found = new AtomicBoolean(false);
+        for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
+            tab.getDisplayItems().forEach(stack -> {
+                if (stack.getItem() == item) {
+                    found.set(true);
+                }
+            });
+        }
+        CreativeTabs.getItemsFromUnregisteredTabs().forEach(stack -> {
+            if (stack.getItem() == item) {
+                found.set(true);
+            }
+        });
+        return found.get();
+    }
+
+    record StackFingerprint(Item item, Object components) {
+    }
+
+    public static List<ItemStack> getUniqueNbtOrderedStacks(Collection<ItemStack> input) {
+        // A record to serve as a unique fingerprint for the stack
+        // It ignores 'count' but respects Item type and NBT data
+
+
+        Set<StackFingerprint> seen = new HashSet<>();
+        List<ItemStack> result = new ArrayList<>();
+
+        for (ItemStack stack : input) {
+            // For 1.12 - 1.20.4: use stack.getTag()
+            // For 1.20.5+: use stack.getComponents()
+            StackFingerprint fingerprint = new StackFingerprint(stack.getItem(), stack.getTag());
+
+            if (seen.add(fingerprint)) {
+                result.add(stack);
+            }
+        }
+        return result;
+    }
+
+    public static List<ItemStack> getUniqueOrderedStacks(Collection<ItemStack> input) {
+        // This set tracks the singleton Item instances we've already processed
+        Set<Item> seenItems = new LinkedHashSet<>();
+        List<ItemStack> result = new ArrayList<>();
+
+        for (ItemStack stack : input) {
+            // If the item (e.g., Items.IRON_INGOT) is successfully added to the set,
+            // it means we haven't seen it yet in this loop.
+            if (seenItems.add(stack.getItem())) {
+                result.add(stack);
+            }
+        }
+        return result;
+    }
+
 
     public static Pair<NewTabJsonHelper, List<ItemStack>> getReplacementTab(CreativeModeTab tab) {
 
         String tabTranslation = getTranslationKey(tab);
         Pair<NewTabJsonHelper, List<ItemStack>> newTabJsonHelperListPair =
-                CreativeTabCustomizationData.INSTANCE.getReplacedTabs().get(tabTranslation);
+                CreativeTabEdits.INSTANCE.getReplacedTabs().get(tabTranslation);
         if (tabTranslation != null && newTabJsonHelperListPair != null) {
 //            System.out.println("Found replacement tab! for " + tab);
             return newTabJsonHelperListPair;
@@ -105,7 +162,7 @@ public class CreativeTabUtils {
 
         ResourceLocation tabID = getRegistryID(tab);
         if (tabID != null) {
-            newTabJsonHelperListPair = CreativeTabCustomizationData.INSTANCE.getReplacedTabs().get(tabID.toString());
+            newTabJsonHelperListPair = CreativeTabEdits.INSTANCE.getReplacedTabs().get(tabID.toString());
             if (newTabJsonHelperListPair != null) {
 //                System.out.println("Found replacement tab! for " + tab);
                 return newTabJsonHelperListPair;
@@ -139,18 +196,20 @@ public class CreativeTabUtils {
     }
 
     public static ItemStack makeStack(NewTabJsonHelper.TabItem item) {
-        ItemStack stack = makeItemStack(item.getName());
+        ItemStack stack = makeItemStack(item.name);
         if (stack.isEmpty()) return stack;
 
-        if (item.getNbt() != null && !item.getNbt().isEmpty()) {
-            try {
-                CompoundTag tag = TagParser.parseTag(item.getNbt());
-                stack.setTag(tag);
+        if (item.nbt != null) {
+            if (!item.nbt.isEmpty()) {
+                try {
+                    CompoundTag tag = TagParser.parseTag(item.nbt);
+                    stack.setTag(tag);
 
-                if (tag.contains("customName"))
-                    stack.setHoverName(Component.literal(tag.getString("customName")));
-            } catch (CommandSyntaxException e) {
-                NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.getName(), e);
+                    if (tag.contains("customName"))
+                        stack.setHoverName(Component.literal(tag.getString("customName")));
+                } catch (CommandSyntaxException e) {
+                    NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.name, e);
+                }
             }
         }
         return stack;

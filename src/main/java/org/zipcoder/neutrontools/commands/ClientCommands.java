@@ -1,10 +1,9 @@
 package org.zipcoder.neutrontools.commands;
 
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.SharedSuggestionProvider;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -33,14 +32,14 @@ public class ClientCommands {
 
                                 .then(Commands.argument("mode", StringArgumentType.word())
                                         .suggests((context, builder) ->
-                                                SharedSuggestionProvider.suggest(Arrays.stream(CreativeTabCustomizationData.TabNameMode.values())
+                                                SharedSuggestionProvider.suggest(Arrays.stream(CreativeTabEdits.TabNameMode.values())
                                                         .map(Enum::name).map(String::toLowerCase), builder))
 
                                         .executes(context -> {
                                             String input = StringArgumentType.getString(context, "mode").toUpperCase();
                                             try {
-                                                CreativeTabCustomizationData.TabNameMode mode = CreativeTabCustomizationData.TabNameMode.valueOf(input);
-                                                CreativeTabCustomizationData.INSTANCE.setTabNameMode(mode);
+                                                CreativeTabEdits.TabNameMode mode = CreativeTabEdits.TabNameMode.valueOf(input);
+                                                CreativeTabEdits.INSTANCE.setTabNameMode(mode);
 
                                                 String msg = switch (mode) {
                                                     case NORMAL -> "Showing standard tab names";

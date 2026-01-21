@@ -66,24 +66,12 @@ public class NewTabJsonHelper {
 //    @NoArgsConstructor
 //    @Getter
     public static class TabItem {
-        private String name;
+        public String name;
 
         @SerializedName("hide_old_tab")
-        private boolean hideOldTab;
+        public boolean hideFromOtherTabs;
 
-        private String nbt;
-
-        public String getName() {
-            return name;
-        }
-
-        public String getNbt() {
-            return nbt;
-        }
-
-        public boolean isHideOldTab() {
-            return hideOldTab;
-        }
+        public String nbt;
     }
 
     //    @AllArgsConstructor
