@@ -171,17 +171,22 @@ public class CreativeTabUtils {
      */
     public static CreativeModeTab getTabFromString(String key) {
         if (ResourceLocation.isValidResourceLocation(key)) {
-            try {
-                ResourceLocation r = new ResourceLocation(key);
-                if (r != null) return BuiltInRegistries.CREATIVE_MODE_TAB.get(r);
-            } catch (Exception e) {
-                NeutronTools.LOGGER.error("Failed to get tab from registry ID: {}", key, e);
+            ResourceLocation r = new ResourceLocation(key);
+            CreativeModeTab creativeModeTab = BuiltInRegistries.CREATIVE_MODE_TAB.get(r);
+            if (creativeModeTab != null) return creativeModeTab;
+        }
+        for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
+            if (getTranslationKey(tab).equals(key)) {
+                return tab;
             }
         }
-
-        return BuiltInRegistries.CREATIVE_MODE_TAB.stream().filter(tab -> tab.getDisplayName().getContents() instanceof TranslatableContents translatable && translatable.getKey().equals(key)).findFirst().orElse(null);
+        for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.newTabs) {
+            if (getTranslationKey(tab).equals(key)) {
+                return tab;
+            }
+        }
+        return null;
     }
-
 
 
     public static Set<Item> getItemsByTags(List<ResourceLocation> tagLocations) {

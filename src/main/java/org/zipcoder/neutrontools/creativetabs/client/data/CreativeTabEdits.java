@@ -3,7 +3,6 @@ package org.zipcoder.neutrontools.creativetabs.client.data;
 import com.google.gson.Gson;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -81,32 +80,26 @@ public class CreativeTabEdits {
 
                                 if (tab != null) {
                                     //Add new tab entries if they don't exist
-                                    if (tabAdditions.get(tab) == null) {
-                                        tabAdditions.put(tab, new ArrayList<>());
-                                    }
-                                    if (tabRemovals.get(tab) == null) {
-                                        tabRemovals.put(tab, new HashSet<>());
-                                    }
+                                    tabAdditions.computeIfAbsent(tab, k -> new ArrayList<>());
+                                    tabRemovals.computeIfAbsent(tab, k -> new HashSet<>());
 
                                     List<ItemStack> thisTabAdditions = tabAdditions.get(tab);
                                     for (int i = 0; i < json.itemsAdd.length; i++) {
                                         TabItem tabItem = json.itemsAdd[i];
-                                        Set<ItemStack> stuff = tabItem.makeStacks(true);
-                                        thisTabAdditions.addAll(stuff);
+                                        thisTabAdditions.addAll(tabItem.makeStacksForAdditions());
                                     }
                                     Set<Item> thisTabDeletions = tabRemovals.get(tab);
                                     for (int i = 0; i < json.itemsRemove.length; i++) {
                                         TabItem tabItem = json.itemsRemove[i];
-                                        Set<ItemStack> stuff = tabItem.makeStacks(false);
-                                        thisTabDeletions.addAll(stuff.stream().map(ItemStack::getItem).collect(Collectors.toSet()));
+                                        thisTabDeletions.addAll(tabItem.makeItemsForRemoval());
                                     }
 
                                 }
 
                             });
-
+                    System.out.println("HIDDEN ITEMS: " + hiddenItems);
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to process items in creative tab", e);
+                    NeutronTools.LOGGER.warn("Failed to process items in creative tab", e);
                 }
             }
         }
@@ -169,11 +162,10 @@ public class CreativeTabEdits {
                     continue;
 
                 for (TabItem item : json.getTabItems()) {
-                    if (item.name != null  && item.name.equalsIgnoreCase("existing"))
+                    if (item.name != null && item.name.equalsIgnoreCase("existing"))
                         json.setKeepExisting(true);
 
-                    Set<ItemStack> stuff = item.makeStacks(true);
-                    stacks.addAll(stuff);
+                    stacks.addAll(item.makeStacksForAdditions());
                 }
 
 
@@ -194,7 +186,7 @@ public class CreativeTabEdits {
                     tabAdditions.put(tab, stacks);
                 }
             } catch (Exception e) {
-                NeutronTools.LOGGER.error("Failed to process creative tab", e);
+                NeutronTools.LOGGER.warn("Failed to process creative tab", e);
             }
         }
     }
@@ -208,7 +200,7 @@ public class CreativeTabEdits {
                     DisabledTabsJsonHelper json = new Gson().fromJson(new InputStreamReader(stream), DisabledTabsJsonHelper.class);
                     disabledTabs.addAll(json.getDisabledTabs());
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to process disabled tabs for {}", location, e);
+                    NeutronTools.LOGGER.warn("Failed to process disabled tabs for {}", location, e);
                 }
             });
         }
@@ -227,7 +219,7 @@ public class CreativeTabEdits {
                     });
 
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to process disabled items for {}", location, e);
+                    NeutronTools.LOGGER.warn("Failed to process disabled items for {}", location, e);
                 }
             });
         }
@@ -243,7 +235,7 @@ public class CreativeTabEdits {
                         }
                     });
                 } catch (IOException e) {
-                    NeutronTools.LOGGER.error("Failed to process JEI blacklisted items {}", e);
+                    NeutronTools.LOGGER.warn("Failed to process JEI blacklisted items {}", e);
                 }
             }
         }
@@ -257,7 +249,7 @@ public class CreativeTabEdits {
                     OrderedTabsJsonHelper tabs = new Gson().fromJson(new InputStreamReader(stream), OrderedTabsJsonHelper.class);
                     tabOrder.addAll(tabs.tabs);
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to process ordered tabs for {}", location, e);
+                    NeutronTools.LOGGER.warn("Failed to process ordered tabs for {}", location, e);
                 }
             });
         }
