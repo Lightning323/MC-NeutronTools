@@ -6,7 +6,6 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -36,7 +35,7 @@ public class CreativeTabCustomizationData {
     protected final Gson GSON = new Gson();
 
     private final List<CreativeModeTab> vanillaTabs = new ArrayList<>();
-    private final LinkedList<CreativeModeTab> currentTabs = new LinkedList<>();
+    public final LinkedList<CreativeModeTab> sortedTabs = new LinkedList<>();
     private final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
 
     public final HashMap<CreativeModeTab, List<ItemStack>> tabAdditions = new HashMap<>();
@@ -45,7 +44,7 @@ public class CreativeTabCustomizationData {
     public final Set<String> disabledTabs = new HashSet<>();
     private final Set<Item> hiddenItems = new HashSet<>();
 
-    private final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
+    public final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
 
 
     /**
@@ -60,7 +59,7 @@ public class CreativeTabCustomizationData {
         disabledTabs.clear();
         tabAdditions.clear();
         tabOrder.clear();
-        currentTabs.clear();
+        sortedTabs.clear();
         replacedTabs.clear();
         tabRemovals.clear();
     }
@@ -130,13 +129,6 @@ public class CreativeTabCustomizationData {
         }
     }
 
-    public LinkedList<CreativeModeTab> getCurrentTabs() {
-        return currentTabs;
-    }
-
-    public LinkedHashSet<CreativeModeTab> getNewTabs() {
-        return newTabs;
-    }
 
     private final HashMap<String, Pair<NewTabJsonHelper, List<ItemStack>>> replacedTabs = new HashMap<>();
 
@@ -235,6 +227,7 @@ public class CreativeTabCustomizationData {
                     replacedTabs.put(json.replaceTab, Pair.of(json, stacks));
                 } else {
                     CreativeModeTab.Builder builder = new CreativeModeTab.Builder(null, -1);
+
                     builder.title(Component.translatable(prefix(json.getTabName())));
                     builder.icon(makeTabIcon(json));
 
@@ -307,7 +300,7 @@ public class CreativeTabCustomizationData {
                 NeutronTools.LOGGER.info("Processing tab data {}", location.toString());
                 try (InputStream stream = resource.open()) {
                     OrderedTabsJsonHelper tabs = new Gson().fromJson(new InputStreamReader(stream), OrderedTabsJsonHelper.class);
-                    tabOrder.addAll(tabs.getTabs());
+                    tabOrder.addAll(tabs.tabs);
                 } catch (Exception e) {
                     NeutronTools.LOGGER.error("Failed to process ordered tabs for {}", location, e);
                 }
@@ -316,60 +309,53 @@ public class CreativeTabCustomizationData {
     }
 
     public void reorderTabs() {
-        List<CreativeModeTab> oldTabs = new ArrayList<>();
-        oldTabs.addAll(vanillaTabs);
-        oldTabs.addAll(newTabs);
+        List<CreativeModeTab> allTabs = new ArrayList<>();
+        allTabs.addAll(vanillaTabs);
+        allTabs.addAll(newTabs);
 
         LinkedHashSet<CreativeModeTab> filteredTabs = new LinkedHashSet<>();
-        boolean addExisting = false;
+        boolean addRemaining = false;
 
-        if (!tabOrder.isEmpty()) {
-            for (String orderedTab : tabOrder) {
-                if (!orderedTab.equalsIgnoreCase("existing")) {
-                    oldTabs.stream()
-                            .filter(tab -> getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName()).equals(orderedTab))
-                            .findFirst().ifPresent(pTab -> processTab(pTab, filteredTabs));
-                } else {
-                    addExisting = true;
-                }
+        // 1. Process specific ordering
+        for (String orderedTab : tabOrder) {
+            if (orderedTab.equalsIgnoreCase("existing")) {
+                addRemaining = true;
+                continue;
             }
-        } else {
-            addExisting = true;
+
+            allTabs.stream()
+                    .filter(tab -> {
+                        String key = getTranslationKey(tab);
+                        if(key.equalsIgnoreCase(orderedTab)
+                                || key.replace("itemGroup.", "").equalsIgnoreCase(orderedTab))
+                            return true;
+
+                        ResourceLocation id = CreativeTabUtils.getRegistryID(tab);
+                        if(id != null && id.toString().equalsIgnoreCase(orderedTab)) return true;
+
+                        return false;
+                    })
+                    .findFirst()
+                    .ifPresent(pTab -> processTab(pTab, filteredTabs));
         }
 
-
-        if (addExisting) {
-            for (CreativeModeTab tab : oldTabs) {
+        // 2. Process "existing" (catch-all for tabs not mentioned in tabOrder)
+        if (addRemaining || tabOrder.isEmpty()) {
+            for (CreativeModeTab tab : allTabs) {
                 processTab(tab, filteredTabs);
             }
         }
 
-        // Don't disable the Survival Inventory, Search and Hotbar
+        // 3. Final safety for mandatory tabs (only adds if not already present)
         filteredTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()));
         filteredTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getHotbarTab()));
         filteredTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getInventoryTab()));
 
-        // Don't disable Custom Tabs
-        filteredTabs.addAll(newTabs);
+        // 4. Update the final list
+        sortedTabs.clear();
+        sortedTabs.addAll(filteredTabs);
 
-        CreativeModeTabAccessor searchTab = (CreativeModeTabAccessor) BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab());
-        searchTab.setDisplayItemsGenerator((itemDisplayParameters, output) -> {
-            Set<ItemStack> stacks = ItemStackLinkedSet.createTypeAndTagSet();
-
-            for (CreativeModeTab tab : getCurrentTabs()) {
-                if (tab.getType() == CreativeModeTab.Type.SEARCH)
-                    continue;
-
-                stacks.addAll(tab.getSearchTabDisplayItems());
-            }
-
-            output.acceptAll(stacks);
-        });
-
-        currentTabs.clear();
-        currentTabs.addAll(filteredTabs.stream().toList());
-
-
+//        sortedTabs.forEach(tab -> NeutronTools.LOGGER.debug("\tORDERED Tab: {}", tab.getDisplayName().getString()));
     }
 
     private void processTab(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
@@ -380,18 +366,8 @@ public class CreativeTabCustomizationData {
         }
     }
 
-
     public List<CreativeModeTab> sortedTabs() {
-        return this.currentTabs;
-    }
-
-    public List<CreativeModeTab> displayedTabs() {
-        return this.currentTabs.stream().filter(t -> {
-            if (t == OP_TAB && !Minecraft.getInstance().options.operatorItemsTab().get())
-                return false;
-
-            return t.shouldDisplay();
-        }).toList();
+        return this.sortedTabs;
     }
 
     public void setVanillaTabs(List<CreativeModeTab> tabs) {

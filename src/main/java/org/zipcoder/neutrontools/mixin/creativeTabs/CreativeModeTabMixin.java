@@ -1,6 +1,5 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.zipcoder.neutrontools.NeutronTools;
@@ -54,7 +53,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         CreativeModeTab self = (CreativeModeTab) (Object) this;
 
         //Add new tabs
-        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self)
+        if (CreativeTabCustomizationData.INSTANCE.newTabs.contains(self)
                 && CreativeTabCustomizationData.INSTANCE.tabAdditions.containsKey(self)) {
 
             NeutronTools.LOGGER.debug("Adding contents of new tab: {}", self.getDisplayName().getString());
@@ -79,7 +78,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
 
         //If this is a new tab or the search tab, return the input stacks
-        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) || self.getType() == CreativeModeTab.Type.SEARCH)
+        if (CreativeTabCustomizationData.INSTANCE.newTabs.contains(self) || self.getType() == CreativeModeTab.Type.SEARCH)
             return inputStacks;
 
         //Get the original stacks
@@ -136,7 +135,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectHasAnyItems(CallbackInfoReturnable<Boolean> cir) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
 
-        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self) && CreativeTabCustomizationData.INSTANCE.tabAdditions.containsKey(self)) {
+        if (CreativeTabCustomizationData.INSTANCE.newTabs.contains(self) && CreativeTabCustomizationData.INSTANCE.tabAdditions.containsKey(self)) {
             cir.setReturnValue(true);
         }
     }

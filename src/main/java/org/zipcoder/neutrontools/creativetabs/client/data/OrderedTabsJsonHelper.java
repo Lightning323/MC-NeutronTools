@@ -1,5 +1,7 @@
 package org.zipcoder.neutrontools.creativetabs.client.data;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 //@NoArgsConstructor
@@ -7,9 +9,6 @@ import java.util.List;
 //@Getter
 public class OrderedTabsJsonHelper {
 
-    private List<String> tabs;
-
-    public List<String> getTabs() {
-        return tabs;
-    }
+    @SerializedName("tabs")
+    public List<String> tabs;
 }

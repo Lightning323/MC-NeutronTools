@@ -10,16 +10,24 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import org.checkerframework.checker.units.qual.A;
 import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabCustomizationData;
+import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
+import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.makeItemStack;
 
 public class ListAllCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -147,7 +155,33 @@ public class ListAllCommand {
     private static boolean listItemsToFile(File saveFile) {
         NeutronTools.LOGGER.info("Saving item list to {}", saveFile.getAbsolutePath());
         try (FileWriter writer = new FileWriter(saveFile)) {
+            ArrayList<ResourceLocation> items = new ArrayList<>();
+            ArrayList<ResourceLocation> hiddenItems = new ArrayList<>();
             for (ResourceLocation id : BuiltInRegistries.ITEM.keySet()) {
+                Item item = BuiltInRegistries.ITEM.get(id);
+
+                AtomicBoolean found = new AtomicBoolean(false);
+                for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
+                    tab.getDisplayItems().forEach(stack -> {
+                        if (stack.getItem() == item) {
+                            found.set(true);
+                        }
+                    });
+                }
+
+                if (!found.get()) {
+                    hiddenItems.add(id);
+                } else {
+                    items.add(id);
+                }
+
+            }
+            writer.write("Items:\n");
+            for (ResourceLocation id : items) {
+                writer.write(id.toString() + "\n");
+            }
+            writer.write("\n\nHidden Items:\n");
+            for (ResourceLocation id : hiddenItems) {
                 writer.write(id.toString() + "\n");
             }
             NeutronTools.LOGGER.info("Saved item list to: {}", saveFile.getAbsolutePath());

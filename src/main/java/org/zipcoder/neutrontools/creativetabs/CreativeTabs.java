@@ -75,7 +75,7 @@ public class CreativeTabs {
             //Log the final result
             StringBuilder sb = new StringBuilder();
             sb.append("Creative tabs reloaded ").append("(").append((System.currentTimeMillis() - startTime) / 1000).append("s elapsed time)\n")
-                    .append(CreativeTabCustomizationData.INSTANCE.getNewTabs().size()).append(" New tabs\t")
+                    .append(CreativeTabCustomizationData.INSTANCE.newTabs.size()).append(" New tabs\t")
                     .append(CreativeTabCustomizationData.INSTANCE.disabledTabs.size()).append(" Disabled tabs\t")
                     .append(CreativeTabCustomizationData.INSTANCE.getHiddenItems().size()).append(" Disabled items\t")
                     .append(CreativeTabCustomizationData.INSTANCE.tabAdditions.size()).append(" Tab additions\t")
