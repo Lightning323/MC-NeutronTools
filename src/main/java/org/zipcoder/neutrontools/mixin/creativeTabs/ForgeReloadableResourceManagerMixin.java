@@ -18,14 +18,10 @@ import java.util.concurrent.Executor;
 @Mixin(ReloadableResourceManager.class)
 public class ForgeReloadableResourceManagerMixin {
 
-    @Inject(method = "createReload", at = @At("RETURN"))
-    private void injectReload(Executor p_143930_, Executor p_143931_, CompletableFuture<Unit> p_143932_, List<PackResources> p_143933_, CallbackInfoReturnable<ReloadInstance> cir) {
-
-        //We already reload in the TagEventHandler so we dont need to do it here
-//        if(!TagEventHandler.tagsUpdated){ //TODO: A hacky way to prevent this from running multiple times
-//            return;
-//        }
+    //Called before the tags are loaded so this place is not a good place to reload the tabs
+//    @Inject(method = "createReload", at = @At("RETURN"))
+//    private void injectReload(Executor p_143930_, Executor p_143931_, CompletableFuture<Unit> p_143932_, List<PackResources> p_143933_, CallbackInfoReturnable<ReloadInstance> cir) {
 //        CreativeTabs.reloadTabs();
-    }
+//    }
 
 }

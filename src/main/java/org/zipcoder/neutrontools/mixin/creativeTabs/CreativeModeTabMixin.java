@@ -1,13 +1,12 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.creativetabs.client.data.NewTabJsonHelper;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabCustomizationData;
-import org.zipcoder.neutrontools.events.TagEventHandler;
-import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -24,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getRegistryID;
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 
@@ -45,13 +45,16 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Shadow
     public abstract Collection<ItemStack> getDisplayItems();
 
+    @Shadow
+    @Final
+    private int searchBarWidth;
+
     @Inject(method = "buildContents", at = @At("HEAD"), cancellable = true)
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
         CreativeModeTab self = (CreativeModeTab) (Object) this;
 
         //Add new tabs
-        if (TagEventHandler.tagsUpdated &&
-                CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self)
+        if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self)
                 && CreativeTabCustomizationData.INSTANCE.tabAdditions.containsKey(self)) {
 
             NeutronTools.LOGGER.info("Adding contents of new tab: {}", self.getDisplayName().getString());
@@ -66,62 +69,13 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         }
     }
 
-    @Inject(method = "buildContents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CreativeModeTab;rebuildSearchTree()V"))
-    private void addon_buildContents(CreativeModeTab.ItemDisplayParameters displayContext, CallbackInfo ci) {
-        CreativeModeTab self = (CreativeModeTab) (Object) this;
-        if (
-                !TagEventHandler.tagsUpdated ||
-                        self == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()) ||
-                        self == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getHotbarTab()) ||
-                        self == BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getInventoryTab())) {
-            return;
-        }
-        boolean rebuildTree = false;
-        NeutronTools.LOGGER.info("Building contents of tab: {}", self.getDisplayName().getString());
-
-
-        /**
-         * Item removal
-         * Always do this first!
-         */
-        Set<String> itemsToDelete = CreativeTabCustomizationData.INSTANCE.tabRemovals.get(self);
-        if (itemsToDelete != null && !itemsToDelete.isEmpty()) {
-            rebuildTree = true;
-            itemsToDelete.forEach(removalID -> { //For each item in this tab we want to delete
-                displayItems.removeIf(stack -> {//If the tab has the same item ID, remove it
-                    String stackId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString(); //O(1) time complexity
-                    return removalID.equals(stackId);
-                });
-                displayItemsSearchTab.removeIf(stack -> {
-                    String stackId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
-                    return removalID.equals(stackId);
-                });
-            });
-        }
-
-        /**
-         * Item addition
-         */
-        List<ItemStack> itemsToAdd = CreativeTabCustomizationData.INSTANCE.tabAdditions.get(self);
-        if (itemsToAdd != null && !itemsToAdd.isEmpty()) {
-            rebuildTree = true;
-            displayItems.addAll(itemsToAdd);
-            displayItemsSearchTab.addAll(itemsToAdd);
-        }
-
-        //If anything has changed, rebuild search tree
-        if (rebuildTree) {
-            rebuildSearchTree();
-        }
-    }
-
-    public void reload() {
-        rebuildSearchTree();
-    }
+//    @Inject(method = "buildContents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CreativeModeTab;rebuildSearchTree()V"))
+//    private void addon_buildContents(CreativeModeTab.ItemDisplayParameters displayContext, CallbackInfo ci) {
+//    }
 
 
     @Unique
-    private Collection<ItemStack> filterItems(Collection<ItemStack> inputStacks) {
+    private Collection<ItemStack> editItemStacks(Collection<ItemStack> inputStacks) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
 
         //If this is a new tab or the search tab, return the input stacks
@@ -134,23 +88,27 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         //Get the items to remove
         Set<Item> itemsToRemove = new HashSet<>();
         itemsToRemove.addAll(CreativeTabCustomizationData.INSTANCE.getHiddenItems());
-//        Set<String> itemsToDelete = CreativeTabCustomizationData.INSTANCE.tabRemovals.get(self);
-//        if (itemsToDelete != null && !itemsToDelete.isEmpty()) {
-//            itemsToRemove.addAll(itemsToDelete.stream().map(BuiltInRegistries.ITEM::get).toList());
-//        }
+
+        Set<Item> tabRemovals = CreativeTabCustomizationData.INSTANCE.tabRemovals.get(self);
+        if (tabRemovals != null && !tabRemovals.isEmpty()) {
+            itemsToRemove.addAll(tabRemovals);
+        }
+
+        //get the items to add
+        List<ItemStack> itemsToAdd = CreativeTabCustomizationData.INSTANCE.tabAdditions.get(self);
 
 
-        Optional<Pair<NewTabJsonHelper, List<ItemStack>>> replacementTab =
-                CreativeTabUtils.replacementTab(convertName(getTranslationKey(this.displayName)));
-        if (replacementTab.isPresent()) {
-            List<ItemStack> returnStacks = new ArrayList<>(replacementTab.get().getRight());
+        Pair<NewTabJsonHelper, List<ItemStack>> replacementTab = CreativeTabUtils.getReplacementTab(self);
+        if (replacementTab != null) {
+            List<ItemStack> returnStacks = new ArrayList<>(replacementTab.getRight());
 
-            if (replacementTab.get().getLeft().getTabItems().stream().anyMatch(i -> i.getName().equalsIgnoreCase("existing"))) {
+            if (replacementTab.getLeft().getTabItems().stream().anyMatch(i -> i.getName().equalsIgnoreCase("existing"))) {
                 returnStacks.addAll(originalStacks.stream().filter(
                         i ->
                                 !itemsToRemove.contains(i.getItem())).toList());
             }
 
+            if (itemsToAdd != null) returnStacks.addAll(itemsToAdd); //Add items right before returning it
             return returnStacks;
         }
 
@@ -164,10 +122,12 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             });
 
             if (!filteredStacks.isEmpty()) {
+                if (itemsToAdd != null) filteredStacks.addAll(itemsToAdd); //Add items right before returning it
                 return filteredStacks;
             }
         }
 
+        if (itemsToAdd != null) inputStacks.addAll(itemsToAdd); //Add items right before returning it
         return inputStacks;
     }
 
@@ -183,17 +143,28 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void injectDisplayName(CallbackInfoReturnable<Component> cir) {
-        Component value = this.displayName;
-        CreativeTabUtils.replacementTab(convertName(getTranslationKey(value))).ifPresent(tabData -> {
-            if (!CreativeTabCustomizationData.INSTANCE.isShowTabNames()) {
-                cir.setReturnValue(Component.translatable(CreativeTabUtils.prefix(tabData.getLeft().getTabName())));
+        CreativeModeTab self = (CreativeModeTab) ((Object) this);
+
+        if (cached_displayName == null) {
+            Pair<NewTabJsonHelper, List<ItemStack>> replaceTab = CreativeTabUtils.getReplacementTab(self);
+            if (replaceTab == null) {
+                cached_displayName = this.displayName;
+            } else {
+                cached_displayName = Component.translatable(CreativeTabUtils.prefix(replaceTab.getLeft().getTabName()));
+                isCachedCustomDisplayName = true;
             }
-        });
+        }
 
-        if (!CreativeTabCustomizationData.INSTANCE.isShowTabNames())
-            return;
-
-        cir.setReturnValue(Component.literal(getTranslationKey(value)));
+        if (CreativeTabCustomizationData.INSTANCE.getTabNameMode() == CreativeTabCustomizationData.TabNameMode.RESOURCE_ID) {
+            ResourceLocation resourceLocation = getRegistryID(self);
+            if (resourceLocation != null) {
+                cir.setReturnValue(Component.literal(resourceLocation.toString()));
+            } else {
+                cir.setReturnValue(Component.literal(""));
+            }
+        } else if (CreativeTabCustomizationData.INSTANCE.getTabNameMode() == CreativeTabCustomizationData.TabNameMode.TRANSLATION_KEY) {
+            cir.setReturnValue(Component.literal(getTranslationKey(cached_displayName)));
+        } else cir.setReturnValue(cached_displayName);
     }
 
     @Inject(method = "contains", at = @At("RETURN"), cancellable = true)
@@ -205,7 +176,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectDisplayItemsFilter(CallbackInfoReturnable<Collection<ItemStack>> cir) {
         if (cached_FilteredDisplayItems == null && !cir.getReturnValue().isEmpty()) { //Cache the display items
             LOGGER.info("tab {}: \tCaching display items...", this.displayName.getString());
-            cached_FilteredDisplayItems = filterItems(cir.getReturnValue());
+            cached_FilteredDisplayItems = editItemStacks(cir.getReturnValue());
         }
         if (cached_FilteredDisplayItems != null) cir.setReturnValue(cached_FilteredDisplayItems);
     }
@@ -214,7 +185,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectSearchItemsFilter(CallbackInfoReturnable<Collection<ItemStack>> cir) {
         if (cached_filteredSearchTab == null && !cir.getReturnValue().isEmpty()) { //Cache the search tab
             LOGGER.info("tab {}: \tCaching search tab display items...", this.displayName.getString());
-            cached_filteredSearchTab = filterItems(cir.getReturnValue());
+            cached_filteredSearchTab = editItemStacks(cir.getReturnValue());
         }
 
         if (cached_filteredSearchTab != null) cir.setReturnValue(cached_filteredSearchTab);
@@ -225,6 +196,10 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private ItemStack cached_TabIcon = null;
     @Unique
     private boolean isCachedCustomIcon = false;
+    @Unique
+    private boolean isCachedCustomDisplayName = false;
+    @Unique
+    private Component cached_displayName = null;
 
     @Unique
     private Collection<ItemStack> cached_FilteredDisplayItems = null;
@@ -237,9 +212,11 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Override
     public void rebuildCache() {
         isCachedCustomIcon = false;
+        isCachedCustomDisplayName = false;
         cached_TabIcon = null;
         cached_FilteredDisplayItems = null;
         cached_filteredSearchTab = null;
+        cached_displayName = null;
     }
 
 
@@ -247,13 +224,13 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     //This method is called EVERY time the icon is requested, so we need to cache it
     @Inject(method = "getIconItem", at = @At("RETURN"), cancellable = true)
     private void injectIcon(CallbackInfoReturnable<ItemStack> cir) {
+        CreativeModeTab self = (CreativeModeTab) ((Object) this);
         if (!isCachedCustomIcon) {
-            //Set the tab icon
-            String tabKey = getTranslationKey(this.displayName);
-            CreativeTabUtils.replacementTab(convertName(tabKey)).ifPresent(tabData -> {
+            Pair<NewTabJsonHelper, List<ItemStack>> replacementTab = CreativeTabUtils.getReplacementTab(self);
+            if (replacementTab != null) {
                 LOGGER.info("tab {}: \tCaching tab icon...", this.displayName.getString());
-                cached_TabIcon = CreativeTabUtils.makeTabIcon(tabData.getLeft()).get();
-            });
+                cached_TabIcon = CreativeTabUtils.makeTabIcon(replacementTab.getLeft()).get();
+            }
             isCachedCustomIcon = true;
         }
 
@@ -262,8 +239,4 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     }
 
 
-    @Unique
-    private String convertName(String tabName) {
-        return tabName.replace(".", "_");
-    }
 }

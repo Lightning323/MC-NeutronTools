@@ -93,10 +93,6 @@ public class CreativeTabs {
         }
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
-                CreativeModeTabMixin_I mixinTab = (CreativeModeTabMixin_I) tab;
-                mixinTab.reload();
-            }
             CreativeModeTabs.validate();
             NeutronTools.LOGGER.info("Creative tabs have been refreshed");
         });

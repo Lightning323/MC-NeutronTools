@@ -3,7 +3,6 @@ package org.zipcoder.neutrontools.creativetabs.client.data;
 import com.google.gson.Gson;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
@@ -41,7 +40,7 @@ public class CreativeTabCustomizationData {
     private final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
 
     public final HashMap<CreativeModeTab, List<ItemStack>> tabAdditions = new HashMap<>();
-    public final HashMap<CreativeModeTab, Set<String>> tabRemovals = new HashMap<>();
+    public final HashMap<CreativeModeTab, Set<Item>> tabRemovals = new HashMap<>();
 
     public final Set<String> disabledTabs = new HashSet<>();
     private final Set<Item> hiddenItems = new HashSet<>();
@@ -101,23 +100,22 @@ public class CreativeTabCustomizationData {
                                         NeutronTools.LOGGER.info("Processing item addition matches for {}", json.tabName);
                                         for (ItemMatch match : json.matchesToAdd) {
                                             for (Item item : CreativeTabUtils.getItemsByItemMatch(match)) {
-                                                if(match.hideFromOtherTabs) hiddenItems.add(item);
+                                                if (match.hideFromOtherTabs) hiddenItems.add(item);
                                                 thisTabAdditions.add(new ItemStack(item));
                                             }
                                         }
                                     }
 
 
-                                    Set<String> thisTabDeletions = tabRemovals.get(tab);
+                                    Set<Item> thisTabDeletions = tabRemovals.get(tab);
                                     for (int i = 0; i < json.itemsRemove.length; i++) {
-                                        thisTabDeletions.add(json.itemsRemove[i]);
+                                        thisTabDeletions.add(getItemByName(json.itemsRemove[i]));
                                     }
                                     if (json.matchesToRemove != null && json.matchesToRemove.length > 0) {
                                         NeutronTools.LOGGER.info("Processing item removal matches for {}", json.tabName);
                                         for (ItemMatch match : json.matchesToRemove) {
                                             for (Item item : CreativeTabUtils.getItemsByItemMatch(match)) {
-                                                ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
-                                                thisTabDeletions.add(key.toString());
+                                                thisTabDeletions.add(item);
                                             }
                                         }
                                     }
@@ -151,15 +149,19 @@ public class CreativeTabCustomizationData {
         return hiddenItems;
     }
 
-    //    @Setter
-    private boolean showTabNames = false;
 
-    public void setShowTabNames(boolean showTabNames) {
-        this.showTabNames = showTabNames;
+    public enum TabNameMode {
+        NORMAL, TRANSLATION_KEY, RESOURCE_ID
     }
 
-    public boolean isShowTabNames() {
-        return showTabNames;
+    private TabNameMode tabNameMode = TabNameMode.NORMAL;
+
+    public void setTabNameMode(TabNameMode tabNameMode) {
+        this.tabNameMode = tabNameMode;
+    }
+
+    public TabNameMode getTabNameMode() {
+        return tabNameMode;
     }
 
 
@@ -228,8 +230,9 @@ public class CreativeTabCustomizationData {
                 }
 
 
-                if (json.isReplace()) {
-                    replacedTabs.put(fileToTab(location.getPath()).toLowerCase(), Pair.of(json, stacks));
+                if (json.replaceTab != null && !json.replaceTab.isBlank()) {
+                    NeutronTools.LOGGER.info("Replaced Tab {} with {}", json.getTabName(), json.replaceTab);
+                    replacedTabs.put(json.replaceTab, Pair.of(json, stacks));
                 } else {
                     CreativeModeTab.Builder builder = new CreativeModeTab.Builder(null, -1);
                     builder.title(Component.translatable(prefix(json.getTabName())));

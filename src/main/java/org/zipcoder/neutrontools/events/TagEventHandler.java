@@ -13,14 +13,12 @@ import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I
 @Mod.EventBusSubscriber(modid = NeutronTools.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class TagEventHandler {
 
-    public static boolean tagsUpdated = false;
-
     @SubscribeEvent
     public static void onTagsUpdated(TagsUpdatedEvent event) {
-        // This check ensures we only update the creative tabs when Item tags are updated, since we need them in order to determine which items go in which tabs
+        // This check ensures we only update the creative tabs when Item tags are updated,
+        // since we need them in order to determine which items go in which tabs
         if (event.getRegistryAccess().registry(Registries.ITEM).isPresent()) {
-            NeutronTools.LOGGER.info("Tags have been registered and are now bound! Rebuilding creative tabs");
-            tagsUpdated = true;
+            NeutronTools.LOGGER.info("Item tags have been registered and are now bound! Reloading creative tabs");
             CreativeTabs.reloadTabs();
         }
     }

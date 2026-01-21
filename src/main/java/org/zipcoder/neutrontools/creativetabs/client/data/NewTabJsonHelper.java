@@ -38,11 +38,8 @@ public class NewTabJsonHelper {
         return tabBackground;
     }
 
-    private boolean replace;
-
-    public boolean isReplace() {
-        return replace;
-    }
+    @SerializedName("replace_tab")
+    public String replaceTab;
 
 
     //    @Setter
