@@ -12,6 +12,8 @@ import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 public class PreInitConfig {
 
 
+
+
     public PreInitConfig() {
         try {
             Path path = FMLPaths.CONFIGDIR.get();
@@ -38,6 +40,7 @@ public class PreInitConfig {
     public boolean crashCommands = false;
     public float hungerMultiplier = 1.0f;//Casting from double to float
     public boolean hideCreativeTabItemsFromJEIBlacklist = true;
+    public boolean ensureNoDuplicatesBetweenTabs = true;
     //--------------------------------------------------------------------
 
     /**
@@ -49,6 +52,7 @@ public class PreInitConfig {
         config.set("common.portal_wait_time", portalWaitTime);
         config.set("common.hunger_multiplier", (double) hungerMultiplier);
         config.set("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
+        config.set("ensure_no_duplicates_between_creative_tabs",ensureNoDuplicatesBetweenTabs);
         //--------------------------------------------------------------------
         config.save();
     }
@@ -67,6 +71,7 @@ public class PreInitConfig {
         hungerMultiplier = MathUtils.clamp((float) hungerMultiplier_double, 0, 1000);
 
         hideCreativeTabItemsFromJEIBlacklist = config.getOrElse("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
+        ensureNoDuplicatesBetweenTabs = config.getOrElse("ensure_no_duplicates_between_creative_tabs",ensureNoDuplicatesBetweenTabs);
         //--------------------------------------------------------------------
     }
 }

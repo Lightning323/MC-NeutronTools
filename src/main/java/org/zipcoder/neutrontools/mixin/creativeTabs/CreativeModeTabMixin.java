@@ -1,6 +1,5 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
@@ -69,11 +68,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         }
     }
 
-//    @Inject(method = "buildContents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/CreativeModeTab;rebuildSearchTree()V"))
-//    private void addon_buildContents(CreativeModeTab.ItemDisplayParameters displayContext, CallbackInfo ci) {
-//    }
-
-
     @Unique
     private Collection<ItemStack> editItemStacks(Collection<ItemStack> inputStacks, boolean isSearchItems) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
@@ -133,7 +127,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         //We need to add the items from unregistered tabs to the search tab otherwise they will not show up in the search tab
         if (isSearchItems) inputStacks.addAll(CreativeTabs.getItemsFromUnregisteredTabs());
         if (itemsToAdd != null) inputStacks.addAll(itemsToAdd);
-
         return CreativeTabUtils.getUniqueNbtOrderedStacks(inputStacks);
     }
 
@@ -163,12 +156,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         }
 
         if (CreativeTabEdits.INSTANCE.getTabNameMode() == CreativeTabEdits.TabNameMode.RESOURCE_ID) {
-            ResourceLocation resourceLocation = getRegistryID(self);
-            if (resourceLocation != null) {
-                cir.setReturnValue(Component.literal(resourceLocation.toString()));
-            } else {
-                cir.setReturnValue(Component.literal(""));
-            }
+            cir.setReturnValue(Component.literal(getRegistryID(self)));
         } else if (CreativeTabEdits.INSTANCE.getTabNameMode() == CreativeTabEdits.TabNameMode.TRANSLATION_KEY) {
             cir.setReturnValue(Component.literal(getTranslationKey(cached_displayName)));
         } else cir.setReturnValue(cached_displayName);
@@ -194,7 +182,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             LOGGER.debug("tab {}: \tCaching search tab display items...", this.displayName.getString());
             cached_filteredSearchTab = editItemStacks(cir.getReturnValue(), true);
         }
-
         if (cached_filteredSearchTab != null) cir.setReturnValue(cached_filteredSearchTab);
     }
 
@@ -207,7 +194,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private boolean isCachedCustomDisplayName = false;
     @Unique
     private Component cached_displayName = null;
-
     @Unique
     private Collection<ItemStack> cached_FilteredDisplayItems = null;
     @Unique
@@ -228,7 +214,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
 
     //TODO: Make sure things like this arent happening anywhere else
-    //This method is called EVERY time the icon is requested, so we need to cache it
+    //This method was called EVERY time the icon is requested, so we need to cache it
     @Inject(method = "getIconItem", at = @At("RETURN"), cancellable = true)
     private void injectIcon(CallbackInfoReturnable<ItemStack> cir) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);

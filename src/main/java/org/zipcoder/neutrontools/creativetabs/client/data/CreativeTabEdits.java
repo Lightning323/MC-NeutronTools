@@ -1,15 +1,11 @@
 package org.zipcoder.neutrontools.creativetabs.client.data;
 
 import com.google.gson.Gson;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -46,6 +42,16 @@ public class CreativeTabEdits {
     public final Set<String> disabledTabs = new HashSet<>();
     private final Set<Item> hiddenItems = new HashSet<>();
 
+
+    //Used for checking duplicates
+    private final static Set<Item> itemsThatMustBeUnique = new HashSet<>();
+
+    public static Collection<ItemStack> removeDuplicatesFromTotalItems(Collection<ItemStack> inputStacks) {
+        inputStacks.removeIf(stack -> itemsThatMustBeUnique.contains(stack.getItem()));
+        return inputStacks;
+    }
+
+
     public final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
 
 
@@ -64,6 +70,7 @@ public class CreativeTabEdits {
         sortedTabs.clear();
         replacedTabs.clear();
         tabRemovals.clear();
+        itemsThatMustBeUnique.clear();
     }
 
 
@@ -94,16 +101,13 @@ public class CreativeTabEdits {
                                     List<ItemStack> thisTabAdditions = tabAdditions.get(tab);
                                     for (int i = 0; i < json.itemsAdd.length; i++) {
                                         TabItem tabItem = json.itemsAdd[i];
-                                        Set<ItemStack> stuff = makeStacks(tabItem);
+                                        Set<ItemStack> stuff = tabItem.makeStacks(true);
                                         thisTabAdditions.addAll(stuff);
-                                        if (tabItem.hideFromOtherTabs) hiddenItems.
-                                                addAll(stuff.stream().map(ItemStack::getItem).collect(Collectors.toSet()));
                                     }
-
                                     Set<Item> thisTabDeletions = tabRemovals.get(tab);
                                     for (int i = 0; i < json.itemsRemove.length; i++) {
                                         TabItem tabItem = json.itemsRemove[i];
-                                        Set<ItemStack> stuff = makeStacks(tabItem);
+                                        Set<ItemStack> stuff = tabItem.makeStacks(false);
                                         thisTabDeletions.addAll(stuff.stream().map(ItemStack::getItem).collect(Collectors.toSet()));
                                     }
 
@@ -175,18 +179,12 @@ public class CreativeTabEdits {
                     continue;
 
                 for (TabItem item : json.getTabItems()) {
-                    if (item.name != null
-                            && item.name.equalsIgnoreCase("existing"))
+                    if (item.name != null  && item.name.equalsIgnoreCase("existing"))
                         json.setKeepExisting(true);
 
-                    Set<ItemStack> stuff = makeStacks(item);
-
-                    if (item.hideFromOtherTabs)
-                        hiddenItems.addAll(stuff.stream().map(ItemStack::getItem).collect(Collectors.toSet()));
-
+                    Set<ItemStack> stuff = item.makeStacks(true);
                     stacks.addAll(stuff);
                 }
-
 
 
                 if (json.replaceTab != null && !json.replaceTab.isBlank()) {
@@ -297,19 +295,18 @@ public class CreativeTabEdits {
                                 || key.replace("itemGroup.", "").equalsIgnoreCase(orderedTab))
                             return true;
 
-                        ResourceLocation id = CreativeTabUtils.getRegistryID(tab);
-                        if (id != null && id.toString().equalsIgnoreCase(orderedTab)) return true;
+                        if (CreativeTabUtils.getRegistryID(tab).equalsIgnoreCase(orderedTab)) return true;
 
                         return false;
                     })
                     .findFirst()
-                    .ifPresent(pTab -> processTab(pTab, filteredTabs));
+                    .ifPresent(pTab -> addTabToFilteredList(pTab, filteredTabs));
         }
 
         // 2. Process "existing" (catch-all for tabs not mentioned in tabOrder)
         if (addRemaining || tabOrder.isEmpty()) {
             for (CreativeModeTab tab : allTabs) {
-                processTab(tab, filteredTabs);
+                addTabToFilteredList(tab, filteredTabs);
             }
         }
 
@@ -325,10 +322,10 @@ public class CreativeTabEdits {
 //        sortedTabs.forEach(tab -> NeutronTools.LOGGER.debug("\tORDERED Tab: {}", tab.getDisplayName().getString()));
     }
 
-    private void processTab(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
-        String tabName = getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
-        NeutronTools.LOGGER.debug("Processing tab: {}", tabName);
-        if (!disabledTabs.contains(tabName)) {
+    private void addTabToFilteredList(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
+        //If our tab is not in the disabled tabs list, it makes it into the filtered list
+        if (!disabledTabs.contains(getTranslationKey(tab)) &&
+                !disabledTabs.contains(getRegistryID(tab))) {
             filteredTabs.add(tab);
         }
     }

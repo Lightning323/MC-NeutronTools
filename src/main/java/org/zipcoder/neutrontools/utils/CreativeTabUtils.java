@@ -78,8 +78,8 @@ public class CreativeTabUtils {
         return String.format("%s.%s", NeutronTools.RESOURCE_ID, tabName);
     }
 
-    public static ResourceLocation getRegistryID(CreativeModeTab tab) {
-        return BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab);
+    public static String getTranslationKey(CreativeModeTab tab) {
+        return getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
     }
 
     public static String getTranslationKey(Component component) {
@@ -89,9 +89,12 @@ public class CreativeTabUtils {
         return component.getString();
     }
 
-    public static String getTranslationKey(CreativeModeTab tab) {
-        return getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
+    public static String getRegistryID(CreativeModeTab tab) {
+        ResourceLocation res = BuiltInRegistries.CREATIVE_MODE_TAB.getKey(tab);
+        if (res != null) return res.toString();
+        else return "";
     }
+
 
     public static boolean itemIsVisible(Item item) {
         AtomicBoolean found = new AtomicBoolean(false);
@@ -150,23 +153,13 @@ public class CreativeTabUtils {
 
 
     public static Pair<NewTabJsonHelper, List<ItemStack>> getReplacementTab(CreativeModeTab tab) {
-
-        String tabTranslation = getTranslationKey(tab);
-        Pair<NewTabJsonHelper, List<ItemStack>> newTabJsonHelperListPair = CreativeTabEdits.INSTANCE.getReplacedTabs().get(tabTranslation);
-        if (tabTranslation != null && newTabJsonHelperListPair != null) {
-//            System.out.println("Found replacement tab! for " + tab);
+        Pair<NewTabJsonHelper, List<ItemStack>> newTabJsonHelperListPair = CreativeTabEdits.INSTANCE.getReplacedTabs().get(getTranslationKey(tab));
+        if (newTabJsonHelperListPair != null) {
             return newTabJsonHelperListPair;
         }
 
-        ResourceLocation tabID = getRegistryID(tab);
-        if (tabID != null) {
-            newTabJsonHelperListPair = CreativeTabEdits.INSTANCE.getReplacedTabs().get(tabID.toString());
-            if (newTabJsonHelperListPair != null) {
-//                System.out.println("Found replacement tab! for " + tab);
-                return newTabJsonHelperListPair;
-            }
-        }
-        return null;
+        newTabJsonHelperListPair = CreativeTabEdits.INSTANCE.getReplacedTabs().get(getRegistryID(tab));
+        return newTabJsonHelperListPair;
     }
 
 
@@ -189,124 +182,7 @@ public class CreativeTabUtils {
         return BuiltInRegistries.CREATIVE_MODE_TAB.stream().filter(tab -> tab.getDisplayName().getContents() instanceof TranslatableContents translatable && translatable.getKey().equals(key)).findFirst().orElse(null);
     }
 
-    public static Set<ItemStack> makeStacks(TabItem item) {
-        Set<ItemStack> items = new HashSet<>();
 
-        if (//If this tab item is a match instead
-                (item.nameRegex != null && !item.nameRegex.isBlank()) ||
-                        (item.tags != null && item.tags.length > 0)
-        ) {
-            Set<Item> tagMatches = addItemsContainingAllTags(item, new HashSet<>());
-            Set<Item> regexMatches = addByNameRegex(item, new HashSet<>());
-
-            // 3. Determine the intersection
-            if (item.tags != null && item.tags.length > 0 && item.nameRegex != null) {
-                // If BOTH are provided, intersect them
-                tagMatches.retainAll(regexMatches);
-                tagMatches.forEach(i -> {
-                    items.add(new ItemStack(i, 1));
-                });
-            } else if (item.nameRegex != null) {// Only Regex was provided
-                regexMatches.forEach(i -> {
-                    items.add(new ItemStack(i, 1));
-                });
-            } else {// Only Tags were provided (or nothing)
-                tagMatches.forEach(i -> {
-                    items.add(new ItemStack(i, 1));
-                });
-            }
-            return items;
-        } else {//If this is just a normal item
-            ItemStack stack = makeItemStack(item.name);
-            if (stack != null && !stack.isEmpty()) {
-                //Add NBT
-                if (item.nbt != null) {
-                    if (!item.nbt.isEmpty()) {
-                        try {
-                            CompoundTag tag = TagParser.parseTag(item.nbt);
-                            stack.setTag(tag);
-
-                            if (tag.contains("customName"))
-                                stack.setHoverName(Component.literal(tag.getString("customName")));
-                        } catch (CommandSyntaxException e) {
-                            NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.name, e);
-                        }
-                    }
-                }
-                items.add(stack);
-            }
-            return items;
-        }
-    }
-
-    /**
-     * Returns a list of items that match the given item match
-     * The match is based on if ALL conditions are met
-     * If an item with every tag specified and every name regex specified is found, it will be added to the list
-     *
-     * @param match
-     * @return
-     */
-
-
-    private static Set<Item> addByNameRegex(TabItem match, Set<Item> allItems) {
-        if (match.nameRegex != null && !match.nameRegex.isEmpty()) {
-            Pattern pattern = Pattern.compile(match.nameRegex);
-
-            allItems.addAll(ForgeRegistries.ITEMS.getValues().stream().filter(item -> {
-                // Get the registry name (e.g., "minecraft:iron_ore")
-                String registryName = ForgeRegistries.ITEMS.getKey(item).toString();
-                return pattern.matcher(registryName).matches();
-            }).collect(Collectors.toList()));
-        }
-        return allItems;
-    }
-
-    private static Set<Item> addItemsContainingAllTags(TabItem match, Set<Item> allItems) {
-        if (match.tags == null || match.tags.length == 0) {
-            return allItems;
-        }
-
-        var tagManager = ForgeRegistries.ITEMS.tags();
-        Set<Item> intersectingItems = null;
-
-        for (String tag : match.tags) {
-            if (ResourceLocation.isValidResourceLocation(tag)) {
-                ResourceLocation location = new ResourceLocation(tag);
-                TagKey<Item> tagKey = tagManager.createTagKey(location);
-                ITag<Item> tagContents = tagManager.getTag(tagKey);
-
-                if (!tagManager.isKnownTagName(tagKey)) {
-                    NeutronTools.LOGGER.error("No known tag name found for: {}", tagKey);
-                    // If one tag in the list doesn't exist, the intersection is empty
-                    return allItems;
-                }
-
-                // Convert current tag contents to a temporary set for comparison
-                Set<Item> currentTagSet = tagContents.stream().collect(Collectors.toSet());
-
-                if (intersectingItems == null) {
-                    // First tag: this is our starting point
-                    intersectingItems = currentTagSet;
-                } else {
-                    // Subsequent tags: only keep items that exist in BOTH sets
-                    intersectingItems.retainAll(currentTagSet);
-                }
-
-                // Optimization: if the intersection becomes empty, stop looking
-                if (intersectingItems.isEmpty()) break;
-
-            } else {
-                NeutronTools.LOGGER.error("Invalid tag: {}", tag);
-            }
-        }
-
-        if (intersectingItems != null) {
-            allItems.addAll(intersectingItems);
-        }
-
-        return allItems;
-    }
 
     public static Set<Item> getItemsByTags(List<ResourceLocation> tagLocations) {
         Set<Item> allItems = new HashSet<>();

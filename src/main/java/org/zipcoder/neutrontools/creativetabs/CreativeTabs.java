@@ -1,6 +1,7 @@
 package org.zipcoder.neutrontools.creativetabs;
 
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
@@ -16,10 +17,7 @@ import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import org.zipcoder.neutrontools.NeutronTools;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author HypherionSA
@@ -49,19 +47,27 @@ public class CreativeTabs {
             ResourceManager manager = Minecraft.getInstance().getResourceManager();
 
             //Find the json file that is under the new_tabs directory
-            Map<ResourceLocation, Resource> customTabs = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().endsWith(".json") && path.getPath().contains("new_tabs"));
+            Map<ResourceLocation, Resource> customTabs = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                    path.getPath().endsWith(".json") && path.getPath().contains("new_tabs"));
             CreativeTabEdits.INSTANCE.loadNewTabs(customTabs);
 
-            Map<ResourceLocation, Resource> disabledItemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().contains("disabled_items.json"));
+            Map<ResourceLocation, Resource> disabledItemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                    path.getPath().endsWith("disabled_items.json"));
             CreativeTabEdits.INSTANCE.loadDisabledItems(disabledItemsJson);
 
-            Map<ResourceLocation, Resource> disabledTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().contains("disabled_tabs.json"));
+            Map<ResourceLocation, Resource> disabledTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                    path.getPath().endsWith("disabled_tabs.json"));
             CreativeTabEdits.INSTANCE.loadDisabledTabs(disabledTabsJson);
 
-            Map<ResourceLocation, Resource> orderedTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().contains("ordered_tabs.json"));
+            Map<ResourceLocation, Resource> orderedTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                    path.getPath().endsWith("ordered_tabs.json"));
             CreativeTabEdits.INSTANCE.loadOrderedTabs(orderedTabsJson);
 
-            Map<ResourceLocation, Resource> itemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path -> path.getPath().contains("tab_items.json"));
+            Map<ResourceLocation, Resource> itemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                    path.getPath().endsWith("tab_items.json")
+                            || (path.getPath().endsWith(".json") && path.getPath().contains("tab_items")));
+
+
             CreativeTabEdits.INSTANCE.loadItemsForTabs(itemsJson);
 
             //Update creative tabs after all information has been loaded
@@ -70,20 +76,19 @@ public class CreativeTabs {
             CreativeModeTabs.validate();
 
             //reset cache for all tabs
-            for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
-//                System.out.println("Rebuilding cache for "+ CreativeTabUtils.getTranslationKey(tab));
-                CreativeModeTabMixin_I mixinTab = (CreativeModeTabMixin_I) tab;
-                mixinTab.resetCache();
-            }
             itemsFromUnregisteredTabs.clear();
-            for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.newTabs) {
+
+            for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.newTabs) {  //Do Unregistered tabs first!
                 if (CreativeTabEdits.INSTANCE.tabAdditions.get(tab) != null)
                     itemsFromUnregisteredTabs.addAll(CreativeTabEdits.INSTANCE.tabAdditions.get(tab));
-
-//                System.out.println("Rebuilding cache for "+ CreativeTabUtils.getTranslationKey(tab));
                 CreativeModeTabMixin_I mixinTab = (CreativeModeTabMixin_I) tab;
                 mixinTab.resetCache();
             }
+            for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
+                CreativeModeTabMixin_I mixinTab = (CreativeModeTabMixin_I) tab;
+                mixinTab.resetCache();
+            }
+
 
             //Log the final result
             StringBuilder sb = new StringBuilder();
@@ -95,6 +100,7 @@ public class CreativeTabs {
 
     //We need to add the items from unregistered tabs to the search tab otherwise they will not show up in the search
     final static Set<ItemStack> itemsFromUnregisteredTabs = new HashSet<>();
+
 
     public static Set<ItemStack> getItemsFromUnregisteredTabs() {
         return itemsFromUnregisteredTabs;
@@ -112,5 +118,4 @@ public class CreativeTabs {
             NeutronTools.LOGGER.info("Creative tabs have been refreshed");
         });
     }
-
 }
