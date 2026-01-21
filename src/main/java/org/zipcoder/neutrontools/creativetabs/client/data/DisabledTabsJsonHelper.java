@@ -9,7 +9,7 @@ import java.util.ArrayList;
 //@Getter
 public class DisabledTabsJsonHelper {
 
-    @SerializedName("disabled_tabs")
+    @SerializedName("tabs")
     private ArrayList<String> disabledTabs;
 
     public ArrayList<String> getDisabledTabs(){

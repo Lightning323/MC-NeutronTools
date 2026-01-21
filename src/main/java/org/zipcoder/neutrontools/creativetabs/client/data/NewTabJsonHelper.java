@@ -52,26 +52,11 @@ public class NewTabJsonHelper {
     @SerializedName("tab_items")
     private ArrayList<TabItem> tabItems;
 
-    @SerializedName("matches_to_add")
-    public ItemMatch[] matchesToAdd;
-
     @SerializedName("hide_matches_from_other_tabs")
     public boolean hideMatchesFromOtherTabs;
 
     public ArrayList<TabItem> getTabItems() {
         return tabItems;
-    }
-
-    //    @AllArgsConstructor
-//    @NoArgsConstructor
-//    @Getter
-    public static class TabItem {
-        public String name;
-
-        @SerializedName("hide_old_tab")
-        public boolean hideFromOtherTabs;
-
-        public String nbt;
     }
 
     //    @AllArgsConstructor

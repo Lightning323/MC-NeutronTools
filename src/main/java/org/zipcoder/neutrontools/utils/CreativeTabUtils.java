@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 import org.zipcoder.neutrontools.NeutronTools;
 import net.minecraft.world.item.Items;
-import org.zipcoder.neutrontools.creativetabs.client.data.ItemMatch;
+import org.zipcoder.neutrontools.creativetabs.client.data.TabItem;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
 import net.minecraft.tags.TagKey;
@@ -57,8 +57,7 @@ public class CreativeTabUtils {
                     CompoundTag tag = TagParser.parseTag(finalTabIcon.getNbt());
                     stack.setTag(tag);
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to Process NBT for Item Tag: \"{}\";\t Tab Name: \"{}\";\t NBT data: \"{}\"",
-                            finalTabIcon.getName(), json.getTabName(), finalTabIcon.getNbt(), e);
+                    NeutronTools.LOGGER.error("Failed to Process NBT for Item Tag: \"{}\";\t Tab Name: \"{}\";\t NBT data: \"{}\"", finalTabIcon.getName(), json.getTabName(), finalTabIcon.getNbt(), e);
                 }
             }
             icon.set(stack);
@@ -153,8 +152,7 @@ public class CreativeTabUtils {
     public static Pair<NewTabJsonHelper, List<ItemStack>> getReplacementTab(CreativeModeTab tab) {
 
         String tabTranslation = getTranslationKey(tab);
-        Pair<NewTabJsonHelper, List<ItemStack>> newTabJsonHelperListPair =
-                CreativeTabEdits.INSTANCE.getReplacedTabs().get(tabTranslation);
+        Pair<NewTabJsonHelper, List<ItemStack>> newTabJsonHelperListPair = CreativeTabEdits.INSTANCE.getReplacedTabs().get(tabTranslation);
         if (tabTranslation != null && newTabJsonHelperListPair != null) {
 //            System.out.println("Found replacement tab! for " + tab);
             return newTabJsonHelperListPair;
@@ -188,31 +186,57 @@ public class CreativeTabUtils {
             }
         }
 
-        return BuiltInRegistries.CREATIVE_MODE_TAB.stream()
-                .filter(tab -> tab.getDisplayName().getContents() instanceof TranslatableContents translatable
-                        && translatable.getKey().equals(key))
-                .findFirst()
-                .orElse(null);
+        return BuiltInRegistries.CREATIVE_MODE_TAB.stream().filter(tab -> tab.getDisplayName().getContents() instanceof TranslatableContents translatable && translatable.getKey().equals(key)).findFirst().orElse(null);
     }
 
-    public static ItemStack makeStack(NewTabJsonHelper.TabItem item) {
-        ItemStack stack = makeItemStack(item.name);
-        if (stack.isEmpty()) return stack;
+    public static Set<ItemStack> makeStacks(TabItem item) {
+        Set<ItemStack> items = new HashSet<>();
 
-        if (item.nbt != null) {
-            if (!item.nbt.isEmpty()) {
-                try {
-                    CompoundTag tag = TagParser.parseTag(item.nbt);
-                    stack.setTag(tag);
+        if (//If this tab item is a match instead
+                (item.nameRegex != null && !item.nameRegex.isBlank()) ||
+                        (item.tags != null && item.tags.length > 0)
+        ) {
+            Set<Item> tagMatches = addItemsContainingAllTags(item, new HashSet<>());
+            Set<Item> regexMatches = addByNameRegex(item, new HashSet<>());
 
-                    if (tag.contains("customName"))
-                        stack.setHoverName(Component.literal(tag.getString("customName")));
-                } catch (CommandSyntaxException e) {
-                    NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.name, e);
-                }
+            // 3. Determine the intersection
+            if (item.tags != null && item.tags.length > 0 && item.nameRegex != null) {
+                // If BOTH are provided, intersect them
+                tagMatches.retainAll(regexMatches);
+                tagMatches.forEach(i -> {
+                    items.add(new ItemStack(i, 1));
+                });
+            } else if (item.nameRegex != null) {// Only Regex was provided
+                regexMatches.forEach(i -> {
+                    items.add(new ItemStack(i, 1));
+                });
+            } else {// Only Tags were provided (or nothing)
+                tagMatches.forEach(i -> {
+                    items.add(new ItemStack(i, 1));
+                });
             }
+            return items;
+        } else {//If this is just a normal item
+            ItemStack stack = makeItemStack(item.name);
+            if (stack != null && !stack.isEmpty()) {
+                //Add NBT
+                if (item.nbt != null) {
+                    if (!item.nbt.isEmpty()) {
+                        try {
+                            CompoundTag tag = TagParser.parseTag(item.nbt);
+                            stack.setTag(tag);
+
+                            if (tag.contains("customName"))
+                                stack.setHoverName(Component.literal(tag.getString("customName")));
+                        } catch (CommandSyntaxException e) {
+                            NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.name, e);
+                        }
+                    }
+                }
+                items.add(stack);
+            }
+            return items;
         }
-        return stack;
     }
 
     /**
@@ -223,40 +247,22 @@ public class CreativeTabUtils {
      * @param match
      * @return
      */
-    public static Set<Item> getItemsByItemMatch(ItemMatch match) {
-        Set<Item> tagMatches = addItemsContainingAllTags(match, new HashSet<>());
-        Set<Item> regexMatches = addByNameRegex(match, new HashSet<>());
 
-        // 3. Determine the intersection
-        if (match.tags != null && match.tags.length > 0 && match.nameRegex != null) {
-            // If BOTH are provided, intersect them
-            tagMatches.retainAll(regexMatches);
-            return tagMatches;
-        } else if (match.nameRegex != null) {
-            // Only Regex was provided
-            return regexMatches;
-        } else {
-            // Only Tags were provided (or nothing)
-            return tagMatches;
-        }
-    }
 
-    private static Set<Item> addByNameRegex(ItemMatch match, Set<Item> allItems) {
+    private static Set<Item> addByNameRegex(TabItem match, Set<Item> allItems) {
         if (match.nameRegex != null && !match.nameRegex.isEmpty()) {
             Pattern pattern = Pattern.compile(match.nameRegex);
 
-            allItems.addAll(ForgeRegistries.ITEMS.getValues().stream()
-                    .filter(item -> {
-                        // Get the registry name (e.g., "minecraft:iron_ore")
-                        String registryName = ForgeRegistries.ITEMS.getKey(item).toString();
-                        return pattern.matcher(registryName).matches();
-                    })
-                    .collect(Collectors.toList()));
+            allItems.addAll(ForgeRegistries.ITEMS.getValues().stream().filter(item -> {
+                // Get the registry name (e.g., "minecraft:iron_ore")
+                String registryName = ForgeRegistries.ITEMS.getKey(item).toString();
+                return pattern.matcher(registryName).matches();
+            }).collect(Collectors.toList()));
         }
         return allItems;
     }
 
-    private static Set<Item> addItemsContainingAllTags(ItemMatch match, Set<Item> allItems) {
+    private static Set<Item> addItemsContainingAllTags(TabItem match, Set<Item> allItems) {
         if (match.tags == null || match.tags.length == 0) {
             return allItems;
         }
@@ -325,13 +331,11 @@ public class CreativeTabUtils {
     public static List<Item> getItemsByRegex(String regex) {
         Pattern pattern = Pattern.compile(regex);
 
-        return ForgeRegistries.ITEMS.getValues().stream()
-                .filter(item -> {
-                    // Get the registry name (e.g., "minecraft:iron_ore")
-                    String registryName = ForgeRegistries.ITEMS.getKey(item).toString();
-                    return pattern.matcher(registryName).matches();
-                })
-                .collect(Collectors.toList());
+        return ForgeRegistries.ITEMS.getValues().stream().filter(item -> {
+            // Get the registry name (e.g., "minecraft:iron_ore")
+            String registryName = ForgeRegistries.ITEMS.getKey(item).toString();
+            return pattern.matcher(registryName).matches();
+        }).collect(Collectors.toList());
     }
 
     public static Item getItemByName(String name) {

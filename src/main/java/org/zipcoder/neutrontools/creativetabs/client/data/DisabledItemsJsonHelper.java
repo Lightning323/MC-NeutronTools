@@ -9,7 +9,7 @@ import java.util.ArrayList;
 //@Getter
 public class DisabledItemsJsonHelper {
 
-    @SerializedName("disabled_items")
+    @SerializedName("items")
     private ArrayList<String> disabledItems;
 
     public ArrayList<String> getDisabledItems(){

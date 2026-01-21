@@ -193,10 +193,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         if (cached_filteredSearchTab == null && !cir.getReturnValue().isEmpty()) { //Cache the search tab
             LOGGER.debug("tab {}: \tCaching search tab display items...", this.displayName.getString());
             cached_filteredSearchTab = editItemStacks(cir.getReturnValue(), true);
-
-            cached_filteredSearchTab.forEach(item -> {
-                System.out.println("\t- " + item.getItem().toString());
-            });
         }
 
         if (cached_filteredSearchTab != null) cir.setReturnValue(cached_filteredSearchTab);

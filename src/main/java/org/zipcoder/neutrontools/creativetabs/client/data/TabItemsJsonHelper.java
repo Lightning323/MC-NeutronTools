@@ -21,16 +21,10 @@ public class TabItemsJsonHelper {
         public String tabName;
 
         @SerializedName("items_to_add")
-        public NewTabJsonHelper.TabItem[] itemsAdd;
+        public TabItem[] itemsAdd;
 
         @SerializedName("items_to_remove")
-        public String[] itemsRemove;
-
-        @SerializedName("matches_to_add")
-        public ItemMatch[] matchesToAdd;
-
-        @SerializedName("matches_to_remove")
-        public ItemMatch[] matchesToRemove;
+        public TabItem[] itemsRemove;
     }
 
 }

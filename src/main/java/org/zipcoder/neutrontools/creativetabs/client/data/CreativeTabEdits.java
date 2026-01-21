@@ -2,6 +2,7 @@ package org.zipcoder.neutrontools.creativetabs.client.data;
 
 import com.google.gson.Gson;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
@@ -23,6 +24,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.ibm.icu.util.LocalePriorityList.add;
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.*;
@@ -90,38 +92,21 @@ public class CreativeTabEdits {
                                     }
 
                                     List<ItemStack> thisTabAdditions = tabAdditions.get(tab);
-
                                     for (int i = 0; i < json.itemsAdd.length; i++) {
-                                        NewTabJsonHelper.TabItem tabItem = json.itemsAdd[i];
-                                        ItemStack stack = makeStack(tabItem);
-                                        if (!stack.isEmpty()) {
-                                            thisTabAdditions.add(stack);
-                                            if (tabItem.hideFromOtherTabs) hiddenItems.add(stack.getItem());
-                                        }
+                                        TabItem tabItem = json.itemsAdd[i];
+                                        Set<ItemStack> stuff = makeStacks(tabItem);
+                                        thisTabAdditions.addAll(stuff);
+                                        if (tabItem.hideFromOtherTabs) hiddenItems.
+                                                addAll(stuff.stream().map(ItemStack::getItem).collect(Collectors.toSet()));
                                     }
-                                    if (json.matchesToAdd != null && json.matchesToAdd.length > 0) {
-                                        NeutronTools.LOGGER.info("Processing item addition matches for {}", json.tabName);
-                                        for (ItemMatch match : json.matchesToAdd) {
-                                            for (Item item : CreativeTabUtils.getItemsByItemMatch(match)) {
-                                                if (match.hideFromOtherTabs) hiddenItems.add(item);
-                                                thisTabAdditions.add(new ItemStack(item));
-                                            }
-                                        }
-                                    }
-
 
                                     Set<Item> thisTabDeletions = tabRemovals.get(tab);
                                     for (int i = 0; i < json.itemsRemove.length; i++) {
-                                        thisTabDeletions.add(getItemByName(json.itemsRemove[i]));
+                                        TabItem tabItem = json.itemsRemove[i];
+                                        Set<ItemStack> stuff = makeStacks(tabItem);
+                                        thisTabDeletions.addAll(stuff.stream().map(ItemStack::getItem).collect(Collectors.toSet()));
                                     }
-                                    if (json.matchesToRemove != null && json.matchesToRemove.length > 0) {
-                                        NeutronTools.LOGGER.info("Processing item removal matches for {}", json.tabName);
-                                        for (ItemMatch match : json.matchesToRemove) {
-                                            for (Item item : CreativeTabUtils.getItemsByItemMatch(match)) {
-                                                thisTabDeletions.add(item);
-                                            }
-                                        }
-                                    }
+
                                 }
 
                             });
@@ -189,43 +174,19 @@ public class CreativeTabEdits {
                 if (!json.isTabEnabled())
                     continue;
 
-                for (NewTabJsonHelper.TabItem item : json.getTabItems()) {
-                    if (item.name.equalsIgnoreCase("existing"))
+                for (TabItem item : json.getTabItems()) {
+                    if (item.name != null
+                            && item.name.equalsIgnoreCase("existing"))
                         json.setKeepExisting(true);
 
-                    ItemStack stack = makeItemStack(item.name);
-                    if (stack.isEmpty())
-                        continue;
+                    Set<ItemStack> stuff = makeStacks(item);
 
                     if (item.hideFromOtherTabs)
-                        hiddenItems.add(stack.getItem());
+                        hiddenItems.addAll(stuff.stream().map(ItemStack::getItem).collect(Collectors.toSet()));
 
-                    if (item.nbt != null) {
-                        if (!item.nbt.isEmpty()) {
-                            try {
-                                CompoundTag tag = TagParser.parseTag(item.nbt);
-                                stack.setTag(tag);
-
-                                if (tag.contains("customName"))
-                                    stack.setHoverName(Component.literal(tag.getString("customName")));
-                            } catch (CommandSyntaxException e) {
-                                NeutronTools.LOGGER.error("Failed to Process NBT for Item {}", item.name, e);
-                            }
-                        }
-                    }
-
-                    stacks.add(stack);
+                    stacks.addAll(stuff);
                 }
-                //Add items that match the item match
-                if (json.matchesToAdd != null && json.matchesToAdd.length > 0) {
-                    NeutronTools.LOGGER.info("Processing item addition matches for {}", json.getTabName());
-                    for (ItemMatch match : json.matchesToAdd) {
-                        for (Item item : CreativeTabUtils.getItemsByItemMatch(match)) {
-                            stacks.add(new ItemStack(item));
-                            if (match.hideFromOtherTabs) hiddenItems.add(item);
-                        }
-                    }
-                }
+
 
 
                 if (json.replaceTab != null && !json.replaceTab.isBlank()) {
