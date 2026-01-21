@@ -57,7 +57,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         if (CreativeTabCustomizationData.INSTANCE.getNewTabs().contains(self)
                 && CreativeTabCustomizationData.INSTANCE.tabAdditions.containsKey(self)) {
 
-            NeutronTools.LOGGER.info("Adding contents of new tab: {}", self.getDisplayName().getString());
+            NeutronTools.LOGGER.debug("Adding contents of new tab: {}", self.getDisplayName().getString());
             ci.cancel(); //clear tab
             displayItems.clear();
             displayItemsSearchTab.clear();
