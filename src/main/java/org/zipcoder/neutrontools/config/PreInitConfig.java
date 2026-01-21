@@ -48,11 +48,13 @@ public class PreInitConfig {
      */
     private void writeConfig(FileConfig config) {
         //--------------------------------------------------------------------
+        //common
         config.set("common.crash_commands", crashCommands);
         config.set("common.portal_wait_time", portalWaitTime);
         config.set("common.hunger_multiplier", (double) hungerMultiplier);
-        config.set("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
-        config.set("ensure_no_duplicates_between_creative_tabs",ensureNoDuplicatesBetweenTabs);
+        //client
+        config.set("client.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
+        config.set("client.ensure_no_duplicates_between_creative_tabs",ensureNoDuplicatesBetweenTabs);
         //--------------------------------------------------------------------
         config.save();
     }
