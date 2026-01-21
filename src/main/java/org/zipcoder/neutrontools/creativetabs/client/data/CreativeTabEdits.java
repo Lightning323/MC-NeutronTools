@@ -43,15 +43,6 @@ public class CreativeTabEdits {
     private final Set<Item> hiddenItems = new HashSet<>();
 
 
-    //Used for checking duplicates
-    private final static Set<Item> itemsThatMustBeUnique = new HashSet<>();
-
-    public static Collection<ItemStack> removeDuplicatesFromTotalItems(Collection<ItemStack> inputStacks) {
-        inputStacks.removeIf(stack -> itemsThatMustBeUnique.contains(stack.getItem()));
-        return inputStacks;
-    }
-
-
     public final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
 
 
@@ -70,7 +61,6 @@ public class CreativeTabEdits {
         sortedTabs.clear();
         replacedTabs.clear();
         tabRemovals.clear();
-        itemsThatMustBeUnique.clear();
     }
 
 
