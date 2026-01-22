@@ -97,7 +97,11 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         if (replacementTab != null) {
             List<ItemStack> returnStacks = new ArrayList<>(replacementTab.getRight());
 
-            if (replacementTab.getLeft().getTabItems().stream().anyMatch(i -> i.name.equalsIgnoreCase("existing"))) {
+            if (replacementTab.getLeft().getTabItems().stream().anyMatch(
+                    i -> i != null &&
+                            i.name != null &&
+                            i.name.equalsIgnoreCase("existing")
+            )) {
                 returnStacks.addAll(originalStacks.stream().filter(
                         i ->
                                 !itemsToRemove.contains(i.getItem())).toList());
