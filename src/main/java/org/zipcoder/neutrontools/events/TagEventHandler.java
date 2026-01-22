@@ -1,19 +1,18 @@
 package org.zipcoder.neutrontools.events;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
-import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 
 
-@Mod.EventBusSubscriber(modid = NeutronTools.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(modid = NeutronTools.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class TagEventHandler {
 
     @SubscribeEvent

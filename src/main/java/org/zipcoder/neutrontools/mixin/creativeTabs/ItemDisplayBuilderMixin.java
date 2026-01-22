@@ -1,4 +1,4 @@
-package org.zipcoder.neutrontools.mixin;
+package org.zipcoder.neutrontools.mixin.creativeTabs;
 
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;

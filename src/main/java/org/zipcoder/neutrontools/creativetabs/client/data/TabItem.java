@@ -15,12 +15,10 @@ import net.minecraftforge.registries.tags.ITag;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
 
 public class TabItem {
     @SerializedName("name")
@@ -98,47 +96,26 @@ public class TabItem {
         final CompoundTag tag = tagt; //Our NBT data
 
         if (isMatch()) {
-            if (match_tab != null && !match_tab.isEmpty()) {
-                CreativeModeTab tabFromString = CreativeTabUtils.getTabFromString(match_tab);
-                if (tabFromString == null) {
-                    NeutronTools.LOGGER.warn("Failed to find tab for {}", match_tab);
-                } else {
-                    items.addAll(tabFromString.getDisplayItems());
+            //TODO: Implement this
+//            if (match_tab != null && !match_tab.isEmpty()) {
+//                CreativeModeTab tabFromString = CreativeTabUtils.getTabFromString(match_tab);
+//                if (tabFromString == null) {
+//                    NeutronTools.LOGGER.warn("Failed to find tab for {}", match_tab);
+//                } else if(cachedCreativeTabItems.containsKey(tabFromString)){
+//                    items.addAll(cachedCreativeTabItems.get(tabFromString));
+//                }
+//                return items;
+//            }
+
+            List<Item> itemsForMatch = getItemsForMatch();
+            itemsForMatch.forEach(i -> {
+                if (NeutronTools.CONFIG.ensureNoDuplicatesBetweenTabs) {
+                    //TODO: This is a hacky fix to prevent matches from creating items in multiple tabs, Duplicates may still occur, and the user may even want them, Create a better solution in the future.
+                    if (CreativeTabEdits.INSTANCE.getHiddenItems().contains(i))
+                        return; //Skip duplicates for matches
                 }
-            }
-
-            Set<Item> tagMatches = addItemsContainingAllTags(this, new HashSet<>());
-            Set<Item> regexMatches = addByNameRegex(this, new HashSet<>());
-
-            // 3. Determine the intersection
-            if (match_tags != null && match_tags.length > 0 && nameRegex != null) {
-                // If BOTH are provided, intersect them
-                tagMatches.retainAll(regexMatches);
-                tagMatches.forEach(i -> {
-                    if (NeutronTools.CONFIG.ensureNoDuplicatesBetweenTabs) {
-                        //TODO: This is a hacky fix to prevent matches from creating items in multiple tabs, Duplicates may still occur, and the user may even want them, Create a better solution in the future.
-                        if (CreativeTabEdits.INSTANCE.getHiddenItems().contains(i))
-                            return; //Skip duplicates for matches
-                    }
-                    items.add(makeStack(i, tag));
-                });
-            } else if (nameRegex != null) {// Only Regex was provided
-                regexMatches.forEach(i -> {
-                    if (NeutronTools.CONFIG.ensureNoDuplicatesBetweenTabs) {
-                        if (CreativeTabEdits.INSTANCE.getHiddenItems().contains(i))
-                            return; //Skip duplicates for matches
-                    }
-                    items.add(makeStack(i, tag));
-                });
-            } else {// Only Tags were provided (or nothing)
-                tagMatches.forEach(i -> {
-                    if (NeutronTools.CONFIG.ensureNoDuplicatesBetweenTabs) {
-                        if (CreativeTabEdits.INSTANCE.getHiddenItems().contains(i))
-                            return; //Skip duplicates for matches
-                    }
-                    items.add(makeStack(i, tag));
-                });
-            }
+                items.add(makeStack(i, tag));
+            });
             return items;
         } else {//If this is just a normal item
             ItemStack stack = makeStack(name, tag);
@@ -150,42 +127,36 @@ public class TabItem {
     }
 
     public Set<Item> makeItemsForRemoval() {
+        Set<Item> items = new HashSet<>();
         if (isMatch()) {
-            if (match_tab != null && !match_tab.isEmpty()) {
-                Set<Item> items = new HashSet<>();
-                CreativeModeTab tabFromString = CreativeTabUtils.getTabFromString(match_tab);
-                if (tabFromString == null) {
-                    NeutronTools.LOGGER.warn("Failed to find tab for {}", match_tab);
-                } else {
-                    items.addAll(tabFromString.getDisplayItems().stream().map(ItemStack::getItem).collect(Collectors.toSet()));
-                }
-                return items;
-            }
-            Set<Item> tagMatches = addItemsContainingAllTags(this, new HashSet<>());
-            Set<Item> regexMatches = addByNameRegex(this, new HashSet<>());
-
-            // 3. Determine the intersection
-            if (match_tags != null && match_tags.length > 0 && nameRegex != null) {
-                // If BOTH are provided, intersect them
-                tagMatches.retainAll(regexMatches);
-                return tagMatches;
-            } else if (nameRegex != null) {// Only Regex was provided
-                return regexMatches;
-            } else {// Only Tags were provided (or nothing)
-                return tagMatches;
-            }
+            items.addAll(getItemsForMatch());
         } else {//If this is just a normal item
-            Set<Item> items = new HashSet<>();
             Item item = CreativeTabUtils.getItemByName(name);
             if (item != null) {
                 items.add(item);
             }
-            return items;
+        }
+        return items;
+    }
+
+    private List<Item> getItemsForMatch() {
+        List<Item> tagMatches = addItemsContainingAllTags(this, new ArrayList<>());
+        List<Item> regexMatches = addByNameRegex(this, new ArrayList<>());
+
+        // 3. Determine the intersection
+        if (match_tags != null && match_tags.length > 0 && nameRegex != null) {
+            // If BOTH are provided, intersect them
+            tagMatches.retainAll(regexMatches);
+            return tagMatches;
+        } else if (nameRegex != null) {// Only Regex was provided
+            return regexMatches;
+        } else {// Only Tags were provided (or nothing)
+            return tagMatches;
         }
     }
 
 
-    private static Set<Item> addByNameRegex(TabItem match, Set<Item> allItems) {
+    private static List<Item> addByNameRegex(TabItem match, List<Item> allItems) {
         if (match.nameRegex != null && !match.nameRegex.isEmpty()) {
             Pattern pattern = Pattern.compile(match.nameRegex);
 
@@ -198,7 +169,7 @@ public class TabItem {
         return allItems;
     }
 
-    private static Set<Item> addItemsContainingAllTags(TabItem match, Set<Item> allItems) {
+    private static List<Item> addItemsContainingAllTags(TabItem match, List<Item> allItems) {
         if (match.match_tags == null || match.match_tags.length == 0) {
             return allItems;
         }
