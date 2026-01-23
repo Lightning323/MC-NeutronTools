@@ -110,20 +110,17 @@ public class TabItem {
                 } else {
                     List<ItemStack> itemStacks = CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab);
                     if (itemStacks != null) {
-                        items.addAll(itemStacks);
+                        itemStacks.forEach((stack) -> {//We dont want to reintroduce hidden items
+                            if (!CreativeTabEdits.INSTANCE.getHiddenItems().contains(stack.getItem())) items.add(stack);
+                        });
                     }
                 }
                 return items;
             }
 
             List<Item> itemsForMatch = getItemsForMatch();
-            itemsForMatch.forEach(i -> {
-                if (NeutronTools.CONFIG.ensureNoDuplicatesBetweenTabs) {
-                    //TODO: This is a hacky fix to prevent matches from creating items in multiple tabs, Duplicates may still occur, and the user may even want them, Create a better solution in the future.
-                    if (CreativeTabEdits.INSTANCE.getHiddenItems().contains(i))
-                        return; //Skip duplicates for matches
-                }
-                items.add(makeStack(i, tag));
+            itemsForMatch.forEach(i -> {//We dont want to reintroduce hidden items
+                if (!CreativeTabEdits.INSTANCE.getHiddenItems().contains(i)) items.add(makeStack(i, tag));
             });
             return items;
         } else if (names != null && names.length > 0) {
