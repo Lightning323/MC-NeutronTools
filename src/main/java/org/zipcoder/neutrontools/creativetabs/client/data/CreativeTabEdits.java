@@ -177,8 +177,9 @@ public class CreativeTabEdits {
                     continue;
 
                 for (TabItem item : json.getTabItems()) {
-                    if (item.name != null && item.name.equalsIgnoreCase("existing"))
-                        json.setKeepExisting(true);
+                    if (item.name != null && item.name.equalsIgnoreCase("existing")) {
+                        json.setKeepExisting(item.index);
+                    }
 
                     item.populateAdditions(additionList);
                 }
@@ -198,7 +199,6 @@ public class CreativeTabEdits {
 
                     CreativeModeTab tab = builder.build();
                     newTabs.add(tab);
-                    System.out.println("LOAD ADDITION LIST FOR TAB "+CreativeTabUtils.getTranslationKey(tab)+" _____________ "+additionList.size());
                     tabAdditions.put(tab, additionList);
                 }
             } catch (Exception e) {

@@ -107,7 +107,9 @@ public class ItemAdditionList {
                 itemsToAdd.removeIf(stack -> stack.getCount() != 1);
 
 
-                if (list.isEmpty() || (index >= 0 && index < list.size())) {//add relative to beginning
+                if (list.isEmpty()) {//add relative to beginning
+                    list.addAll(itemsToAdd);
+                } else if (index >= 0 && index < list.size()) {//add relative to beginning
                     list.addAll(index, itemsToAdd);
                 } else if (index == list.size() || index == -1) { //dd to the end
                     list.addAll(itemsToAdd);

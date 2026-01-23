@@ -47,14 +47,18 @@ public class NewTabJsonHelper {
         return tabItems;
     }
 
-    boolean keepExisting = false;
+    int existingTabIndex = Integer.MIN_VALUE;
 
     public boolean isShouldKeepExisting() {
-        return keepExisting;
+        return existingTabIndex != Integer.MIN_VALUE;
     }
 
-    public void setKeepExisting(boolean b) {
-        keepExisting = b;
+    public void setKeepExisting(int i) {
+        existingTabIndex = i;
+    }
+
+    public int getExistingIndex() {
+        return existingTabIndex;
     }
 
     //    @AllArgsConstructor

@@ -279,8 +279,6 @@ public class ModCommands {
 
 
     private static void ping(MinecraftServer server, ServerPlayer asking, ServerPlayer user) {
-        System.out.println("Pinging " + asking.getName().getString());
-//        int out = executeParsedCommandOP("spark ping --player " + asking.getName().getString(),true );
         int ping = asking.connection.player.latency;
         ChatFormatting color = ChatFormatting.GREEN;
         if (ping > 200) {

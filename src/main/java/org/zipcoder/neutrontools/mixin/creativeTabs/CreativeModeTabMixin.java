@@ -92,7 +92,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             displayItems.clear();
             displayItemsSearchTab.clear();
             ItemAdditionList stacks = CreativeTabEdits.INSTANCE.tabAdditions.get(self);
-            System.out.println("TAB ADDITIONS : "+stacks.size());
             stacks.apply(displayItems);
             stacks.apply(displayItemsSearchTab);
             rebuildSearchTree();
@@ -120,25 +119,24 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         }
 
 
+        //Add items of replacement tab
         Pair<NewTabJsonHelper, ItemAdditionList> replacementTab = CreativeTabEdits.INSTANCE.getReplacementTab(self);
         if (replacementTab != null) {
-            List<ItemStack> list = new ArrayList<>();
-
+            ItemAdditionList replacementTabAdditions = replacementTab.getRight();
             if (replacementTab.getLeft().isShouldKeepExisting()) {
+                List<ItemStack> existing = new ArrayList<>();
                 originalStacks.stream()
                         .filter(i -> !itemsToRemove.contains(i.getItem()))
-                        .forEach(list::add);
+                        .forEach(existing::add);
+                replacementTabAdditions.addStacks(replacementTab.getLeft().getExistingIndex(), existing);
             }
 
-            ItemAdditionList replacementTabAdditions = replacementTab.getRight();
+            List<ItemStack> list = new ArrayList<>();
             replacementTabAdditions.apply(list);
-
-            // 4. Return the final result
             return addAndReturn(list, isSearchItems);
         }
 
         Collection<ItemStack> filteredStacks = new ArrayList<>();
-
         if (originalStacks != null && !originalStacks.isEmpty()) {
             originalStacks.forEach(i -> {
                 if (!itemsToRemove.contains(i.getItem())) {
