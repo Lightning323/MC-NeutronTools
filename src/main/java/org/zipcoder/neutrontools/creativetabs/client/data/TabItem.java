@@ -24,6 +24,9 @@ public class TabItem {
     @SerializedName("name")
     public String name;
 
+    @SerializedName("names")
+    public String[] names;
+
     @SerializedName("hide_old_tab")
     public boolean hideFromOtherTabs = false;
 
@@ -96,16 +99,19 @@ public class TabItem {
         final CompoundTag tag = tagt; //Our NBT data
 
         if (isMatch()) {
-            //TODO: Implement this
-//            if (match_tab != null && !match_tab.isEmpty()) {
-//                CreativeModeTab tabFromString = CreativeTabUtils.getTabFromString(match_tab);
-//                if (tabFromString == null) {
-//                    NeutronTools.LOGGER.warn("Failed to find tab for {}", match_tab);
-//                } else if(cachedCreativeTabItems.containsKey(tabFromString)){
-//                    items.addAll(cachedCreativeTabItems.get(tabFromString));
-//                }
-//                return items;
-//            }
+
+            if (match_tab != null && !match_tab.isEmpty()) {
+                CreativeModeTab tab = CreativeTabUtils.getTabFromString(match_tab);
+                if (tab == null) {
+                    NeutronTools.LOGGER.warn("Failed to find tab for {}", match_tab);
+                } else {
+                    List<ItemStack> itemStacks = CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab);
+                    if (itemStacks != null) {
+                        items.addAll(itemStacks);
+                    }
+                }
+                return items;
+            }
 
             List<Item> itemsForMatch = getItemsForMatch();
             itemsForMatch.forEach(i -> {
@@ -116,6 +122,14 @@ public class TabItem {
                 }
                 items.add(makeStack(i, tag));
             });
+            return items;
+        } else if (names != null && names.length > 0) {
+            for (String name : names) {
+                ItemStack stack = makeStack(name, tag);
+                if (!stack.isEmpty()) {
+                    items.add(stack);
+                }
+            }
             return items;
         } else {//If this is just a normal item
             ItemStack stack = makeStack(name, tag);
@@ -140,7 +154,7 @@ public class TabItem {
     }
 
     private List<Item> getItemsForMatch() {
-        List<Item> tagMatches = addItemsContainingAllTags(this, new ArrayList<>());
+        List<Item> tagMatches = getItemsWithTags(this, new ArrayList<>());
         List<Item> regexMatches = addByNameRegex(this, new ArrayList<>());
 
         // 3. Determine the intersection
@@ -169,13 +183,12 @@ public class TabItem {
         return allItems;
     }
 
-    private static List<Item> addItemsContainingAllTags(TabItem match, List<Item> allItems) {
+    private static List<Item> getItemsWithTags(TabItem match, List<Item> allItems) {
         if (match.match_tags == null || match.match_tags.length == 0) {
             return allItems;
         }
 
         var tagManager = ForgeRegistries.ITEMS.tags();
-        Set<Item> intersectingItems = null;
 
         for (String tag : match.match_tags) {
             if (ResourceLocation.isValidResourceLocation(tag)) {
@@ -184,34 +197,14 @@ public class TabItem {
                 ITag<Item> tagContents = tagManager.getTag(tagKey);
 
                 if (!tagManager.isKnownTagName(tagKey)) {
-                    NeutronTools.LOGGER.error("No known tag name found for: {}", tagKey);
-                    // If one tag in the list doesn't exist, the intersection is empty
-                    return allItems;
+                    NeutronTools.LOGGER.warn("No known tag name found for: {}", tagKey);
+                    continue;
                 }
-
-                // Convert current tag contents to a temporary set for comparison
-                Set<Item> currentTagSet = tagContents.stream().collect(Collectors.toSet());
-
-                if (intersectingItems == null) {
-                    // First tag: this is our starting point
-                    intersectingItems = currentTagSet;
-                } else {
-                    // Subsequent tags: only keep items that exist in BOTH sets
-                    intersectingItems.retainAll(currentTagSet);
-                }
-
-                // Optimization: if the intersection becomes empty, stop looking
-                if (intersectingItems.isEmpty()) break;
-
+                allItems.addAll(tagContents.stream().collect(Collectors.toSet()));
             } else {
-                NeutronTools.LOGGER.error("Invalid tag: {}", tag);
+                NeutronTools.LOGGER.warn("Invalid tag: {}", tag);
             }
         }
-
-        if (intersectingItems != null) {
-            allItems.addAll(intersectingItems);
-        }
-
         return allItems;
     }
 

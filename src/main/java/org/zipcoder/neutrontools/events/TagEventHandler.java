@@ -2,18 +2,17 @@ package org.zipcoder.neutrontools.events;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 
 
 @Mod.EventBusSubscriber(modid = NeutronTools.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class TagEventHandler {
+
+    private static boolean tagsReady= false;
 
     @SubscribeEvent
     public static void onTagsUpdated(TagsUpdatedEvent event) {
@@ -21,9 +20,15 @@ public class TagEventHandler {
         // since we need them in order to determine which items go in which tabs
         if (event.getRegistryAccess().registry(Registries.ITEM).isPresent()) {
             if (FMLEnvironment.dist == Dist.CLIENT) {
-                NeutronTools.LOGGER.info("Item tags have been registered and are now bound! Reloading creative tabs");
-                CreativeTabs.reloadTabs();
+                tagsReady=(true);
+//                NeutronTools.LOGGER.info("Item tags have been registered and are now bound! Reloading creative tabs");
             }
         }
     }
+
+
+    public static boolean isTagsReady() {
+        return tagsReady;
+    }
+
 }

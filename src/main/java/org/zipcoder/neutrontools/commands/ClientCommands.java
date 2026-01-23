@@ -1,5 +1,6 @@
 package org.zipcoder.neutrontools.commands;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.SharedSuggestionProvider;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
@@ -28,6 +29,21 @@ public class ClientCommands {
         event.getDispatcher().register(Commands.literal(NAMESPACE)
                 .then(Commands.literal("creativetabs")
                         .requires(source -> source.hasPermission(2))
+
+                        // New "enabled" command section
+                        .then(Commands.literal("enable").executes(context -> {
+                            CreativeTabEdits.INSTANCE.setEnabled(true);
+                            CreativeTabs.reloadTabs();
+                            context.getSource().sendSuccess(() -> Component.literal("Creative tab customization enabled"), true);
+                            return 1;
+                        }))
+                        .then(Commands.literal("disable").executes(context -> {
+                            CreativeTabEdits.INSTANCE.setEnabled(false);
+                            CreativeTabs.reloadTabs();
+                            context.getSource().sendSuccess(() -> Component.literal("Creative tab customization disabled"), true);
+                            return 1;
+                        }))
+
                         .then(Commands.literal("nameMode")
 
                                 .then(Commands.argument("mode", StringArgumentType.word())

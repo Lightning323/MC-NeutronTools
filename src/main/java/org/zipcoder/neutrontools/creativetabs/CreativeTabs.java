@@ -44,32 +44,32 @@ public class CreativeTabs {
         long startTime = System.currentTimeMillis();
         CreativeTabEdits.INSTANCE.clearTabs();
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            ResourceManager manager = Minecraft.getInstance().getResourceManager();
 
-            //Find the json file that is under the new_tabs directory
-            Map<ResourceLocation, Resource> customTabs = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith(".json") && path.getPath().contains("new_tabs"));
-            CreativeTabEdits.INSTANCE.loadNewTabs(customTabs);
+            if(CreativeTabEdits.INSTANCE.isEnabled()) {
+                ResourceManager manager = Minecraft.getInstance().getResourceManager();
 
-            Map<ResourceLocation, Resource> disabledItemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith("disabled_items.json"));
-            CreativeTabEdits.INSTANCE.loadDisabledItems(disabledItemsJson);
+                //Find the json file that is under the new_tabs directory
+                Map<ResourceLocation, Resource> customTabs = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                        path.getPath().endsWith(".json") && path.getPath().contains("new_tabs"));
+                CreativeTabEdits.INSTANCE.loadNewTabs(customTabs);
 
-            Map<ResourceLocation, Resource> disabledTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith("disabled_tabs.json"));
-            CreativeTabEdits.INSTANCE.loadDisabledTabs(disabledTabsJson);
+                Map<ResourceLocation, Resource> disabledItemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                        path.getPath().endsWith("disabled_items.json"));
+                CreativeTabEdits.INSTANCE.loadDisabledItems(disabledItemsJson);
 
-            Map<ResourceLocation, Resource> orderedTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith("ordered_tabs.json"));
-            CreativeTabEdits.INSTANCE.loadOrderedTabs(orderedTabsJson);
+                Map<ResourceLocation, Resource> disabledTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                        path.getPath().endsWith("disabled_tabs.json"));
+                CreativeTabEdits.INSTANCE.loadDisabledTabs(disabledTabsJson);
 
-            Map<ResourceLocation, Resource> itemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith("tab_items.json")
-                            || (path.getPath().endsWith(".json") && path.getPath().contains("tab_items")));
+                Map<ResourceLocation, Resource> orderedTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                        path.getPath().endsWith("ordered_tabs.json"));
+                CreativeTabEdits.INSTANCE.loadOrderedTabs(orderedTabsJson);
 
-
-            CreativeTabEdits.INSTANCE.loadItemsForTabs(itemsJson);
-
+                Map<ResourceLocation, Resource> itemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
+                        path.getPath().endsWith("tab_items.json")
+                                || (path.getPath().endsWith(".json") && path.getPath().contains("tab_items")));
+                CreativeTabEdits.INSTANCE.loadItemsForTabs(itemsJson);
+            }
             //Update creative tabs after all information has been loaded
             CreativeTabEdits.INSTANCE.reorderTabs();
 
@@ -77,7 +77,6 @@ public class CreativeTabs {
 
             //reset cache for all tabs
             itemsFromUnregisteredTabs.clear();
-
             for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.newTabs) {  //Do Unregistered tabs first!
                 if (CreativeTabEdits.INSTANCE.tabAdditions.get(tab) != null)
                     itemsFromUnregisteredTabs.addAll(CreativeTabEdits.INSTANCE.tabAdditions.get(tab));

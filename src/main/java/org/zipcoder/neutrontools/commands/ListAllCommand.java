@@ -13,6 +13,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
@@ -21,10 +22,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public class ListAllCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -92,9 +99,119 @@ public class ListAllCommand {
                                 context.getSource().sendSuccess(() -> errorMessage, true);
                             }
                             return Command.SINGLE_SUCCESS;
+                        }))
+                        .then(Commands.literal("tab_items").executes(context -> {
+                            File savePath = new File("tab_item_list.json");
+                            if (listItemsInCreativeTabsToFile(savePath)) {
+                                Component successMessage = net.minecraft.network.chat.Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
+                                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                context.getSource().sendSuccess(() -> successMessage, true);
+                            } else {
+                                Component errorMessage = net.minecraft.network.chat.Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
+                                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                context.getSource().sendSuccess(() -> errorMessage, true);
+                            }
+                            return Command.SINGLE_SUCCESS;
+                        }))
+                        .then(Commands.literal("original_tab_items").executes(context -> {
+                            File savePath = new File("original_tab_item_list.json");
+                            if (listOriginalItemsInCreativeTabsToFile(savePath)) {
+                                Component successMessage = net.minecraft.network.chat.Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
+                                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                context.getSource().sendSuccess(() -> successMessage, true);
+                            } else {
+                                Component errorMessage = net.minecraft.network.chat.Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
+                                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                context.getSource().sendSuccess(() -> errorMessage, true);
+                            }
+                            return Command.SINGLE_SUCCESS;
                         })))
 
         );
+    }
+
+
+    private static boolean listItemsInCreativeTabsToFile(File saveFile) {
+        NeutronTools.LOGGER.info("Saving item creative tab list to {}", saveFile.getAbsolutePath());
+
+        // Use Gson for clean JSON formatting
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject root = new JsonObject();
+        JsonArray tabsArray = new JsonArray();
+
+        try (FileWriter writer = new FileWriter(saveFile)) {
+            // 1. Process Registered Tabs
+            List<CreativeModeTab> allTabs = new ArrayList<>();
+            allTabs.addAll(CreativeTabEdits.INSTANCE.sortedTabs);
+            allTabs.addAll(CreativeTabEdits.INSTANCE.newTabs);
+
+            for (CreativeModeTab tab : allTabs) {
+                JsonObject tabObj = new JsonObject();
+                tabObj.addProperty("tab", CreativeTabUtils.getTranslationKey(tab));
+
+                JsonArray itemsArray = new JsonArray();
+                tab.getDisplayItems().forEach(stack -> {
+                    // Get the registry name or standard string representation of the item
+                    itemsArray.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+                });
+                tabObj.add("names", itemsArray);
+                tabsArray.add(tabObj);
+            }
+
+            // 3. Assemble and Write
+            root.add("tabs", tabsArray);
+            gson.toJson(root, writer);
+
+            NeutronTools.LOGGER.info("Saved item list to: {}", saveFile.getAbsolutePath());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            NeutronTools.LOGGER.warn("Failed to save item list: {}", e.getMessage());
+        }
+        return false;
+    }
+
+    private static boolean listOriginalItemsInCreativeTabsToFile(File saveFile) {
+        NeutronTools.LOGGER.info("Saving item creative tab list to {}", saveFile.getAbsolutePath());
+
+        // Use Gson for clean JSON formatting
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject root = new JsonObject();
+        JsonArray tabsArray = new JsonArray();
+
+        try (FileWriter writer = new FileWriter(saveFile)) {
+            // 1. Process Registered Tabs
+            for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.original_SortedTabs) {//BuiltInRegistries.CREATIVE_MODE_TAB
+                JsonObject tabObj = new JsonObject();
+                tabObj.addProperty("tab", CreativeTabUtils.getTranslationKey(tab));
+
+                JsonArray itemsArray = new JsonArray();
+                if (CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab) != null) {
+                    CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab).forEach(stack -> {
+                        // Get the registry name or standard string representation of the item
+                        itemsArray.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+                    });
+                }
+
+
+                tabObj.add("names", itemsArray);
+                tabsArray.add(tabObj);
+            }
+            // 3. Assemble and Write
+            root.add("tabs", tabsArray);
+            gson.toJson(root, writer);
+
+            NeutronTools.LOGGER.info("Saved item list to: {}", saveFile.getAbsolutePath());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            NeutronTools.LOGGER.warn("Failed to save item list: {}", e.getMessage());
+        }
+        return false;
     }
 
 
@@ -148,6 +265,7 @@ public class ListAllCommand {
         }
         return false;
     }
+
 
     private static boolean listItemsToFile(File saveFile) {
         NeutronTools.LOGGER.info("Saving item list to {}", saveFile.getAbsolutePath());

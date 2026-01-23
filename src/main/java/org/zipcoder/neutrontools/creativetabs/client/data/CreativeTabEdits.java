@@ -19,7 +19,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.ibm.icu.util.LocalePriorityList.add;
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.*;
@@ -31,19 +30,40 @@ public class CreativeTabEdits {
     public static final CreativeTabEdits INSTANCE = new CreativeTabEdits();
     protected final Gson GSON = new Gson();
 
+    public final static List<CreativeModeTab> mandatoryTabs = new ArrayList<>();
+    static {
+        mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()));
+        mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getHotbarTab()));
+        mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getInventoryTab()));
+    }
+
     private final List<CreativeModeTab> vanillaTabs = new ArrayList<>();
     public final LinkedList<CreativeModeTab> sortedTabs = new LinkedList<>();
     private final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
 
+    public final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
     public final HashMap<CreativeModeTab, List<ItemStack>> tabAdditions = new HashMap<>();
     public final HashMap<CreativeModeTab, Set<Item>> tabRemovals = new HashMap<>();
-
     public final Set<String> disabledTabs = new HashSet<>();
     private final Set<Item> hiddenItems = new HashSet<>();
+    private boolean enabled = true;
+    private boolean wasReloadedFirstTime = false;
+    private boolean wasReloaded = false;
+
+    //For caching the original state of the creative tabs
+    public List<CreativeModeTab> original_SortedTabs;
+    public final HashMap<CreativeModeTab, List<ItemStack>> original_tabDisplayItems = new HashMap<>();
 
 
-    public final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
-
+    public void setWasReloaded(boolean b) {
+        wasReloaded = b;
+    }
+    public boolean isWasReloaded() {
+        return wasReloaded;
+    }
+    public boolean isWasReloadedFirstTime() {
+        return wasReloadedFirstTime;
+    }
 
     /**
      * Clear all cached data for reloading
@@ -51,6 +71,7 @@ public class CreativeTabEdits {
     public void clearTabs() {
         NeutronTools.LOGGER.debug("Clearing tab Data");
         wasReloaded = true;
+        wasReloadedFirstTime = true;
 
         newTabs.clear();
         hiddenItems.clear();
@@ -97,7 +118,6 @@ public class CreativeTabEdits {
                                 }
 
                             });
-                    System.out.println("HIDDEN ITEMS: " + hiddenItems);
                 } catch (Exception e) {
                     NeutronTools.LOGGER.warn("Failed to process items in creative tab", e);
                 }
@@ -117,6 +137,14 @@ public class CreativeTabEdits {
         return hiddenItems;
     }
 
+    public boolean isEnabled() {
+        return enabled && wasReloadedFirstTime;
+    }
+
+    public void setEnabled(boolean newState) {
+        enabled = newState;
+    }
+
 
     public enum TabNameMode {
         NORMAL, TRANSLATION_KEY, RESOURCE_ID
@@ -130,18 +158,6 @@ public class CreativeTabEdits {
 
     public TabNameMode getTabNameMode() {
         return tabNameMode;
-    }
-
-
-    //    @Setter
-    private boolean wasReloaded = false;
-
-    public void setWasReloaded(boolean b) {
-        wasReloaded = b;
-    }
-
-    public boolean isWasReloaded() {
-        return wasReloaded;
     }
 
 
@@ -282,20 +298,18 @@ public class CreativeTabEdits {
                         return false;
                     })
                     .findFirst()
-                    .ifPresent(pTab -> addTabToFilteredList(pTab, filteredTabs));
+                    .ifPresent(pTab -> addTabToFilteredListIfNotDisabled(pTab, filteredTabs));
         }
 
         // 2. Process "existing" (catch-all for tabs not mentioned in tabOrder)
         if (addRemaining || tabOrder.isEmpty()) {
             for (CreativeModeTab tab : allTabs) {
-                addTabToFilteredList(tab, filteredTabs);
+                addTabToFilteredListIfNotDisabled(tab, filteredTabs);
             }
         }
 
         // 3. Final safety for mandatory tabs (only adds if not already present)
-        filteredTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()));
-        filteredTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getHotbarTab()));
-        filteredTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getInventoryTab()));
+        filteredTabs.addAll(mandatoryTabs);
 
         // 4. Update the final list
         sortedTabs.clear();
@@ -304,16 +318,13 @@ public class CreativeTabEdits {
 //        sortedTabs.forEach(tab -> NeutronTools.LOGGER.debug("\tORDERED Tab: {}", tab.getDisplayName().getString()));
     }
 
-    private void addTabToFilteredList(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
+
+    private void addTabToFilteredListIfNotDisabled(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
         //If our tab is not in the disabled tabs list, it makes it into the filtered list
         if (!disabledTabs.contains(getTranslationKey(tab)) &&
                 !disabledTabs.contains(getRegistryID(tab))) {
             filteredTabs.add(tab);
         }
-    }
-
-    public List<CreativeModeTab> sortedTabs() {
-        return this.sortedTabs;
     }
 
     public void setVanillaTabs(List<CreativeModeTab> tabs) {

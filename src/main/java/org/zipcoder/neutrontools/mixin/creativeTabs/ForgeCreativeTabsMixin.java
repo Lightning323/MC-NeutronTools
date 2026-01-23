@@ -29,11 +29,13 @@ public abstract class ForgeCreativeTabsMixin {
         return null;
     }
 
-    @Shadow @Nullable private static CreativeModeTab.ItemDisplayParameters CACHED_PARAMETERS;
+    @Shadow
+    @Nullable
+    private static CreativeModeTab.ItemDisplayParameters CACHED_PARAMETERS;
 
     @Inject(method = "streamAllTabs", at = @At("RETURN"), cancellable = true)
     private static void injectCustomTabs(CallbackInfoReturnable<Stream<CreativeModeTab>> cir) {
-        cir.setReturnValue(CreativeTabEdits.INSTANCE.sortedTabs().stream());
+        if (CreativeTabEdits.INSTANCE.isEnabled()) cir.setReturnValue(CreativeTabEdits.INSTANCE.sortedTabs.stream());
     }
 
     // Supplementaries crashes the game with our tabs, since they are not registered (they are fake tabs)
@@ -49,7 +51,7 @@ public abstract class ForgeCreativeTabsMixin {
 
     @Inject(method = "getDefaultTab", at = @At("RETURN"), cancellable = true)
     private static void injectDefaultTab(CallbackInfoReturnable<CreativeModeTab> cir) {
-        cir.setReturnValue(allTabs().get(0));
+        if (CreativeTabEdits.INSTANCE.isEnabled()) cir.setReturnValue(allTabs().get(0));
     }
 
     @Inject(method = "validate", at = @At("HEAD"), cancellable = true)
@@ -58,7 +60,7 @@ public abstract class ForgeCreativeTabsMixin {
         int TABS_PER_PAGE = 10;
         int count = 0;
 
-        for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.sortedTabs()) {
+        for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.sortedTabs) {
 
             ForgeTabData forgeTab = (ForgeTabData) tab;
             if (CreativeModeTabRegistry.getDefaultTabs().contains(tab)) {
@@ -76,10 +78,11 @@ public abstract class ForgeCreativeTabsMixin {
             count++;
         }
 
-        record ItemGroupPosition(CreativeModeTab.Row row, int column, int page) { }
+        record ItemGroupPosition(CreativeModeTab.Row row, int column, int page) {
+        }
         var map = new HashMap<ItemGroupPosition, String>();
 
-        for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.sortedTabs()) {
+        for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.sortedTabs) {
             final ForgeTabData forgeTabData = (ForgeTabData) tab;
             final String displayName = tab.getDisplayName().getString();
             final var position = new ItemGroupPosition(tab.row(), tab.column(), forgeTabData.getPageIndex());
