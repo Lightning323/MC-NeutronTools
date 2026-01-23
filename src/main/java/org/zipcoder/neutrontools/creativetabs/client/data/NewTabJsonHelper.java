@@ -26,10 +26,6 @@ public class NewTabJsonHelper {
     @SerializedName("tab_stack")
     private TabIcon tabIcon;
 
-    public boolean isKeepExisting() {
-        return keepExisting;
-    }
-
 
     @SerializedName("tab_background")
     private String tabBackground;
@@ -41,14 +37,6 @@ public class NewTabJsonHelper {
     @SerializedName("replace_tab")
     public String replaceTab;
 
-
-    //    @Setter
-    private boolean keepExisting;
-
-    public void setKeepExisting(boolean b) {
-        keepExisting = b;
-    }
-
     @SerializedName("tab_items")
     private ArrayList<TabItem> tabItems;
 
@@ -57,6 +45,16 @@ public class NewTabJsonHelper {
 
     public ArrayList<TabItem> getTabItems() {
         return tabItems;
+    }
+
+    boolean keepExisting = false;
+
+    public boolean isShouldKeepExisting() {
+        return keepExisting;
+    }
+
+    public void setKeepExisting(boolean b) {
+        keepExisting = b;
     }
 
     //    @AllArgsConstructor

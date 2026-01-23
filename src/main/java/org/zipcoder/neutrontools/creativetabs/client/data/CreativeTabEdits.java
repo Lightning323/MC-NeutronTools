@@ -42,7 +42,7 @@ public class CreativeTabEdits {
     private final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
 
     public final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
-    public final HashMap<CreativeModeTab, List<ItemStack>> tabAdditions = new HashMap<>();
+    public final HashMap<CreativeModeTab, ItemAdditionList> tabAdditions = new HashMap<>();
     public final HashMap<CreativeModeTab, Set<Item>> tabRemovals = new HashMap<>();
     public final Set<String> disabledTabs = new HashSet<>();
     private final Set<Item> hiddenItems = new HashSet<>();
@@ -103,13 +103,13 @@ public class CreativeTabEdits {
 
                                 if (tab != null) {
                                     //Add new tab entries if they don't exist
-                                    tabAdditions.computeIfAbsent(tab, k -> new ArrayList<>());
+                                    tabAdditions.computeIfAbsent(tab, k -> new ItemAdditionList());
                                     tabRemovals.computeIfAbsent(tab, k -> new HashSet<>());
 
-                                    List<ItemStack> thisTabAdditions = tabAdditions.get(tab);
+                                    ItemAdditionList thisTabAdditions = tabAdditions.get(tab);
                                     for (int i = 0; i < json.itemsAdd.length; i++) {
                                         TabItem tabItem = json.itemsAdd[i];
-                                        thisTabAdditions.addAll(tabItem.makeStacksForAdditions());
+                                        tabItem.populateAdditions(thisTabAdditions);
                                     }
                                     Set<Item> thisTabDeletions = tabRemovals.get(tab);
                                     for (int i = 0; i < json.itemsRemove.length; i++) {
@@ -127,12 +127,17 @@ public class CreativeTabEdits {
         }
     }
 
-
-    private final HashMap<String, Pair<NewTabJsonHelper, List<ItemStack>>> replacedTabs = new HashMap<>();
-
-    public HashMap<String, Pair<NewTabJsonHelper, List<ItemStack>>> getReplacedTabs() {
-        return replacedTabs;
+    public Pair<NewTabJsonHelper, ItemAdditionList> getReplacementTab(CreativeModeTab tab) {
+        Pair<NewTabJsonHelper, ItemAdditionList> newTabJsonHelperListPair = replacedTabs.get(getTranslationKey(tab));
+        if (newTabJsonHelperListPair != null) {
+            return newTabJsonHelperListPair;
+        }
+        newTabJsonHelperListPair = replacedTabs.get(getRegistryID(tab));
+        return newTabJsonHelperListPair;
     }
+
+
+    public final HashMap<String, Pair<NewTabJsonHelper, ItemAdditionList>> replacedTabs = new HashMap<>();
 
 
     public Set<Item> getHiddenItems() {
@@ -166,7 +171,7 @@ public class CreativeTabEdits {
 
             try (InputStream stream = resource.open()) {
                 NewTabJsonHelper json = GSON.fromJson(new InputStreamReader(stream), NewTabJsonHelper.class);
-                ArrayList<ItemStack> stacks = new ArrayList<>();
+                ItemAdditionList additionList = new ItemAdditionList();
 
                 if (!json.isTabEnabled())
                     continue;
@@ -175,13 +180,13 @@ public class CreativeTabEdits {
                     if (item.name != null && item.name.equalsIgnoreCase("existing"))
                         json.setKeepExisting(true);
 
-                    stacks.addAll(item.makeStacksForAdditions());
+                    item.populateAdditions(additionList);
                 }
 
 
                 if (json.replaceTab != null && !json.replaceTab.isBlank()) {
                     NeutronTools.LOGGER.info("Replaced Tab {} with {}", json.getTabName(), json.replaceTab);
-                    replacedTabs.put(json.replaceTab, Pair.of(json, stacks));
+                    replacedTabs.put(json.replaceTab, Pair.of(json, additionList));
                 } else {
                     CreativeModeTab.Builder builder = new CreativeModeTab.Builder(null, -1);
 
@@ -193,7 +198,8 @@ public class CreativeTabEdits {
 
                     CreativeModeTab tab = builder.build();
                     newTabs.add(tab);
-                    tabAdditions.put(tab, stacks);
+                    System.out.println("LOAD ADDITION LIST FOR TAB "+CreativeTabUtils.getTranslationKey(tab)+" _____________ "+additionList.size());
+                    tabAdditions.put(tab, additionList);
                 }
             } catch (Exception e) {
                 NeutronTools.LOGGER.warn("Failed to process creative tab", e);

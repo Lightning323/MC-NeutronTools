@@ -79,7 +79,7 @@ public class CreativeTabs {
             itemsFromUnregisteredTabs.clear();
             for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.newTabs) {  //Do Unregistered tabs first!
                 if (CreativeTabEdits.INSTANCE.tabAdditions.get(tab) != null)
-                    itemsFromUnregisteredTabs.addAll(CreativeTabEdits.INSTANCE.tabAdditions.get(tab));
+                    itemsFromUnregisteredTabs.addAll(CreativeTabEdits.INSTANCE.tabAdditions.get(tab).getAllItemStacks());
                 CreativeModeTabMixin_I mixinTab = (CreativeModeTabMixin_I) tab;
                 mixinTab.resetCache();
             }

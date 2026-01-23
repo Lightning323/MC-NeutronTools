@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 
 public class TabItem {
-    @SerializedName("index") //TODO: Add support for this
+    @SerializedName("index")
     public int index = -1;
 
     @SerializedName("name")
@@ -85,10 +85,7 @@ public class TabItem {
      *
      * @return
      */
-    public List<ItemStack> makeStacksForAdditions() {
-        List<ItemStack> items = new ArrayList<>();
-
-        //Add NBT
+    public void populateAdditions(ItemAdditionList additionList) {
         CompoundTag tagt = null;
         if (nbt != null) {
             if (!nbt.isEmpty()) {
@@ -102,41 +99,34 @@ public class TabItem {
         final CompoundTag tag = tagt; //Our NBT data
 
         if (isMatch()) {
-
             if (match_tab != null && !match_tab.isEmpty()) {
                 CreativeModeTab tab = CreativeTabUtils.getTabFromString(match_tab);
                 if (tab == null) {
                     NeutronTools.LOGGER.warn("Failed to find tab for {}", match_tab);
                 } else {
-                    List<ItemStack> itemStacks = CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab);
+                    List<ItemStack> itemStacks = new ArrayList<>(CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab));
                     if (itemStacks != null) {
-                        itemStacks.forEach((stack) -> {//We dont want to reintroduce hidden items
-                            if (!CreativeTabEdits.INSTANCE.getHiddenItems().contains(stack.getItem())) items.add(stack);
-                        });
+                        itemStacks.removeIf((stack) -> CreativeTabEdits.INSTANCE.getHiddenItems().contains(stack.getItem()));
                     }
+                    additionList.addStacks(index, itemStacks);
                 }
-                return items;
             }
 
             List<Item> itemsForMatch = getItemsForMatch();
+            List<ItemStack> stacks = new ArrayList<>();
             itemsForMatch.forEach(i -> {//We dont want to reintroduce hidden items
-                if (!CreativeTabEdits.INSTANCE.getHiddenItems().contains(i)) items.add(makeStack(i, tag));
+                if (!CreativeTabEdits.INSTANCE.getHiddenItems().contains(i)) stacks.add(makeStack(i, tag));
             });
-            return items;
+            additionList.addStacks(index, stacks);
+
         } else if (names != null && names.length > 0) {
+            List<ItemStack> stacks = new ArrayList<>();
             for (String name : names) {
-                ItemStack stack = makeStack(name, tag);
-                if (!stack.isEmpty()) {
-                    items.add(stack);
-                }
+                stacks.add(makeStack(name, tag));
             }
-            return items;
+            additionList.addStacks(index, stacks);
         } else {//If this is just a normal item
-            ItemStack stack = makeStack(name, tag);
-            if (!stack.isEmpty()) {
-                items.add(stack);
-            }
-            return items;
+            additionList.addStack(index, makeStack(name, tag));
         }
     }
 

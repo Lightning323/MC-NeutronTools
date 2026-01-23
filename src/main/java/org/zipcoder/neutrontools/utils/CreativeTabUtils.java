@@ -1,6 +1,5 @@
 package org.zipcoder.neutrontools.utils;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.world.item.CreativeModeTab;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 import org.zipcoder.neutrontools.creativetabs.client.data.NewTabJsonHelper;
@@ -16,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 import org.zipcoder.neutrontools.NeutronTools;
 import net.minecraft.world.item.Items;
-import org.zipcoder.neutrontools.creativetabs.client.data.TabItem;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
 import net.minecraft.tags.TagKey;
@@ -152,15 +150,7 @@ public class CreativeTabUtils {
     }
 
 
-    public static Pair<NewTabJsonHelper, List<ItemStack>> getReplacementTab(CreativeModeTab tab) {
-        Pair<NewTabJsonHelper, List<ItemStack>> newTabJsonHelperListPair = CreativeTabEdits.INSTANCE.getReplacedTabs().get(getTranslationKey(tab));
-        if (newTabJsonHelperListPair != null) {
-            return newTabJsonHelperListPair;
-        }
 
-        newTabJsonHelperListPair = CreativeTabEdits.INSTANCE.getReplacedTabs().get(getRegistryID(tab));
-        return newTabJsonHelperListPair;
-    }
 
 
     /**
