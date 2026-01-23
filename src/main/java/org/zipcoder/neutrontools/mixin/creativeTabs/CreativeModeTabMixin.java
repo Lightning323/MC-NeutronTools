@@ -66,10 +66,10 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Unique
     private Collection<ItemStack> cached_filteredSearchTab = null;
 
-    //
-//    /**
-//     * Resets the cache for this tab
-//     */
+
+    /**
+     * Resets the cache for this tab
+     */
     @Override
     public void resetCache() {
         isCachedCustomIcon = false;
@@ -227,6 +227,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
                         && TagEventHandler.isTagsReady()
                         && !CreativeTabEdits.INSTANCE.isWasReloadedFirstTime()
                         && FMLEnvironment.dist == Dist.CLIENT) {
+                    //IT IS CRUCIAL that we dont reload tabs before this point in order to properly index the original state of the tabs
                     NeutronTools.LOGGER.info("All tabs are indexed and tags are ready. Reloading tabs");
                     CreativeTabs.reloadTabs();
                 }

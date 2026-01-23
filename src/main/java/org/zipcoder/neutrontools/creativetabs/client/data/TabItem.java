@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
 
 
 public class TabItem {
+    @SerializedName("index") //TODO: Add support for this
+    public int index = -1;
+
     @SerializedName("name")
     public String name;
 

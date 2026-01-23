@@ -30,19 +30,19 @@ public class ClientCommands {
                 .then(Commands.literal("creativetabs")
                         .requires(source -> source.hasPermission(2))
 
-                        // New "enabled" command section
-                        .then(Commands.literal("enable").executes(context -> {
-                            CreativeTabEdits.INSTANCE.setEnabled(true);
-                            CreativeTabs.reloadTabs();
-                            context.getSource().sendSuccess(() -> Component.literal("Creative tab customization enabled"), true);
-                            return 1;
-                        }))
-                        .then(Commands.literal("disable").executes(context -> {
-                            CreativeTabEdits.INSTANCE.setEnabled(false);
-                            CreativeTabs.reloadTabs();
-                            context.getSource().sendSuccess(() -> Component.literal("Creative tab customization disabled"), true);
-                            return 1;
-                        }))
+//                        // New "enabled" command section
+//                        .then(Commands.literal("enable").executes(context -> {
+//                            CreativeTabEdits.INSTANCE.setEnabled(true);
+//                            CreativeTabs.reloadTabs();
+//                            context.getSource().sendSuccess(() -> Component.literal("Creative tab customization enabled"), true);
+//                            return 1;
+//                        }))
+//                        .then(Commands.literal("disable").executes(context -> {
+//                            CreativeTabEdits.INSTANCE.setEnabled(false);
+//                            CreativeTabs.reloadTabs();
+//                            context.getSource().sendSuccess(() -> Component.literal("Creative tab customization disabled"), true);
+//                            return 1;
+//                        }))
 
                         .then(Commands.literal("nameMode")
 

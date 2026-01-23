@@ -46,7 +46,7 @@ public class CreativeTabEdits {
     public final HashMap<CreativeModeTab, Set<Item>> tabRemovals = new HashMap<>();
     public final Set<String> disabledTabs = new HashSet<>();
     private final Set<Item> hiddenItems = new HashSet<>();
-    private boolean enabled = true;
+//    private boolean enabled = true; //TODO: I dont want to allow this feature until I feel it is free from potential crashes
     private boolean wasReloadedFirstTime = false;
     private boolean wasReloaded = false;
 
@@ -54,7 +54,9 @@ public class CreativeTabEdits {
     public List<CreativeModeTab> original_SortedTabs;
     public final HashMap<CreativeModeTab, List<ItemStack>> original_tabDisplayItems = new HashMap<>();
 
-
+    public boolean isEnabled() {
+        return wasReloadedFirstTime;
+    }
     public void setWasReloaded(boolean b) {
         wasReloaded = b;
     }
@@ -135,14 +137,6 @@ public class CreativeTabEdits {
 
     public Set<Item> getHiddenItems() {
         return hiddenItems;
-    }
-
-    public boolean isEnabled() {
-        return enabled && wasReloadedFirstTime;
-    }
-
-    public void setEnabled(boolean newState) {
-        enabled = newState;
     }
 
 
