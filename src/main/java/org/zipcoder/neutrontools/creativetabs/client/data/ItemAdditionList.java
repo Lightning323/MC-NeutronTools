@@ -5,6 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ItemAdditionList {
@@ -85,6 +86,19 @@ public class ItemAdditionList {
         return itemMap.values().stream()
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Searches through all ID lists and removes any ItemStack that matches the target.
+     * @param filter The ItemStack to find and remove.
+     */
+    public void removeStacksIf(Predicate<ItemStack> filter) {
+        itemMap.values().forEach(list -> {
+            // Using removeIf with ItemStack.matches ensures we compare
+            // the item type and NBT data correctly.
+            list.removeIf(filter);
+        });
+        itemMap.entrySet().removeIf(entry -> entry.getValue().isEmpty());
     }
 
     /**

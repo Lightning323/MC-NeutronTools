@@ -31,6 +31,7 @@ public class CreativeTabEdits {
     protected final Gson GSON = new Gson();
 
     public final static List<CreativeModeTab> mandatoryTabs = new ArrayList<>();
+
     static {
         mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()));
         mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getHotbarTab()));
@@ -45,8 +46,9 @@ public class CreativeTabEdits {
     public final HashMap<CreativeModeTab, ItemAdditionList> tabAdditions = new HashMap<>();
     public final HashMap<CreativeModeTab, Set<Item>> tabRemovals = new HashMap<>();
     public final Set<String> disabledTabs = new HashSet<>();
-    private final Set<Item> hiddenItems = new HashSet<>();
-//    private boolean enabled = true; //TODO: I dont want to allow this feature until I feel it is free from potential crashes
+    public final Set<Item> hiddenItems = new HashSet<>();
+    public final Set<Item> priorityHiddenItems = new HashSet<>();
+    //    private boolean enabled = true; //TODO: I dont want to allow this feature until I feel it is free from potential crashes
     private boolean wasReloadedFirstTime = false;
     private boolean wasReloaded = false;
 
@@ -107,14 +109,18 @@ public class CreativeTabEdits {
                                     tabRemovals.computeIfAbsent(tab, k -> new HashSet<>());
 
                                     ItemAdditionList thisTabAdditions = tabAdditions.get(tab);
-                                    for (int i = 0; i < json.itemsAdd.length; i++) {
-                                        TabItem tabItem = json.itemsAdd[i];
-                                        tabItem.populateAdditions(thisTabAdditions);
+                                    if (thisTabAdditions != null) {
+                                        for (int i = 0; i < json.itemsAdd.length; i++) {
+                                            TabItem tabItem = json.itemsAdd[i];
+                                            tabItem.populateAdditions(thisTabAdditions);
+                                        }
                                     }
                                     Set<Item> thisTabDeletions = tabRemovals.get(tab);
-                                    for (int i = 0; i < json.itemsRemove.length; i++) {
-                                        TabItem tabItem = json.itemsRemove[i];
-                                        thisTabDeletions.addAll(tabItem.makeItemsForRemoval());
+                                    if (thisTabDeletions != null) {
+                                        for (int i = 0; i < json.itemsRemove.length; i++) {
+                                            TabItem tabItem = json.itemsRemove[i];
+                                            thisTabDeletions.addAll(tabItem.makeItemsForRemoval());
+                                        }
                                     }
 
                                 }
@@ -138,11 +144,6 @@ public class CreativeTabEdits {
 
 
     public final HashMap<String, Pair<NewTabJsonHelper, ItemAdditionList>> replacedTabs = new HashMap<>();
-
-
-    public Set<Item> getHiddenItems() {
-        return hiddenItems;
-    }
 
 
     public enum TabNameMode {
@@ -176,12 +177,18 @@ public class CreativeTabEdits {
                 if (!json.isTabEnabled())
                     continue;
 
-                for (TabItem item : json.getTabItems()) {
+
+                for (TabItem item : json.itemsToAdd) {
                     if (item.name != null && item.name.equalsIgnoreCase("existing")) {
                         json.setKeepExisting(item.index);
                     }
-
                     item.populateAdditions(additionList);
+                }
+                if (json.itemsToRemove != null) {
+                    for (TabItem item : json.itemsToRemove) {
+                        Set<Item> removeItems = item.makeItemsForRemoval();
+                        additionList.removeStacksIf((stack) -> removeItems.contains(stack.getItem()));
+                    }
                 }
 
 
@@ -231,7 +238,9 @@ public class CreativeTabEdits {
                     DisabledItemsJsonHelper json = new Gson().fromJson(new InputStreamReader(stream), DisabledItemsJsonHelper.class);
 
                     json.getDisabledItems().forEach(e -> {
-                        hiddenItems.add(makeItemStack(e).getItem());
+                        Item i = makeItemStack(e).getItem();
+                        hiddenItems.add(i);
+                        priorityHiddenItems.add(i);
                     });
 
                 } catch (Exception e) {
@@ -247,7 +256,9 @@ public class CreativeTabEdits {
                 try {
                     Files.readAllLines(jeiBlacklist.toPath()).forEach(line -> {
                         if (!line.isBlank()) {
-                            hiddenItems.add(makeItemStack(line.strip()).getItem());
+                            Item i = makeItemStack(line.strip()).getItem();
+                            hiddenItems.add(i);
+                            priorityHiddenItems.add(i);
                         }
                     });
                 } catch (IOException e) {
@@ -271,7 +282,7 @@ public class CreativeTabEdits {
         }
     }
 
-    public void reorderTabs() {
+    public void reorderTabs_indexSortedTabs() {
         List<CreativeModeTab> allTabs = new ArrayList<>();
         allTabs.addAll(vanillaTabs);
         allTabs.addAll(newTabs);

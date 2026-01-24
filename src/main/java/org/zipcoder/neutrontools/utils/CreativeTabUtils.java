@@ -111,13 +111,12 @@ public class CreativeTabUtils {
         return found.get();
     }
 
-    record StackFingerprint(Item item, Object components) {
+    public record StackFingerprint(Item item, Object components) {
     }
 
     public static List<ItemStack> getUniqueNbtOrderedStacks(Collection<ItemStack> input) {
         // A record to serve as a unique fingerprint for the stack
         // It ignores 'count' but respects Item type and NBT data
-
 
         Set<StackFingerprint> seen = new HashSet<>();
         List<ItemStack> result = new ArrayList<>();

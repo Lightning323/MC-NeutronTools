@@ -111,7 +111,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
         //Get the items to remove
         Set<Item> itemsToRemove = new HashSet<>();
-        itemsToRemove.addAll(CreativeTabEdits.INSTANCE.getHiddenItems());
+        itemsToRemove.addAll(CreativeTabEdits.INSTANCE.hiddenItems);
 
         Set<Item> tabRemovals = CreativeTabEdits.INSTANCE.tabRemovals.get(self);
         if (tabRemovals != null && !tabRemovals.isEmpty()) {
@@ -133,7 +133,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
             List<ItemStack> list = new ArrayList<>();
             replacementTabAdditions.apply(list);
-            return addAndReturn(list, isSearchItems);
+            return addFilterAndReturn(list, isSearchItems);
         }
 
         Collection<ItemStack> filteredStacks = new ArrayList<>();
@@ -145,21 +145,37 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             });
 
             if (!filteredStacks.isEmpty()) {
-                return addAndReturn(filteredStacks, isSearchItems); //Add items right before returning it
+                return addFilterAndReturn(filteredStacks, isSearchItems); //Add items right before returning it
             }
         }
 
-        return addAndReturn(inputStacks, isSearchItems); //Add items right before returning it
+        return addFilterAndReturn(inputStacks, isSearchItems); //Add items right before returning it
     }
 
-    private List<ItemStack> addAndReturn(Collection<ItemStack> inputStacks, boolean isSearchItems) {
+    private List<ItemStack> addFilterAndReturn(Collection<ItemStack> inputStacks, boolean isSearchItems) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
         ItemAdditionList itemsToAdd = CreativeTabEdits.INSTANCE.tabAdditions.get(self);
 
         //We need to add the items from unregistered tabs to the search tab otherwise they will not show up in the search tab
         if (isSearchItems) inputStacks.addAll(CreativeTabs.getItemsFromUnregisteredTabs());
         if (itemsToAdd != null) itemsToAdd.apply(inputStacks);
-        return CreativeTabUtils.getUniqueNbtOrderedStacks(inputStacks);
+
+        //Keep only unique items and Make sure priority hidden items are removed from list
+        Set<CreativeTabUtils.StackFingerprint> seen = new HashSet<>();
+        List<ItemStack> uniqueFilteredResult = new ArrayList<>();
+        for (ItemStack stack : inputStacks) {
+            // For 1.12 - 1.20.4: use stack.getTag()
+            // For 1.20.5+: use stack.getComponents()
+            if ( //TODO: If the item is not added to the JEI blacklist, it might still not be hidden from search
+                    seen.add(new CreativeTabUtils.StackFingerprint(stack.getItem(), stack.getTag()))
+                            && !CreativeTabEdits.INSTANCE.priorityHiddenItems.contains(stack.getItem())
+            ) {
+//                System.out.println("tab: "+CreativeTabUtils.getTranslationKey(self)
+//                        +" Adding stack: "+stack.getItem().toString());
+                uniqueFilteredResult.add(stack);
+            }
+        }
+        return uniqueFilteredResult;
     }
 
 

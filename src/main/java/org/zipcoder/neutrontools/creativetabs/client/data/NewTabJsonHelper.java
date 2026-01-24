@@ -38,14 +38,10 @@ public class NewTabJsonHelper {
     public String replaceTab;
 
     @SerializedName("tab_items")
-    private ArrayList<TabItem> tabItems;
+    public ArrayList<TabItem> itemsToAdd;
 
-    @SerializedName("hide_matches_from_other_tabs")
-    public boolean hideMatchesFromOtherTabs;
-
-    public ArrayList<TabItem> getTabItems() {
-        return tabItems;
-    }
+    @SerializedName("items_to_remove")
+    public ArrayList<TabItem> itemsToRemove;
 
     int existingTabIndex = Integer.MIN_VALUE;
 

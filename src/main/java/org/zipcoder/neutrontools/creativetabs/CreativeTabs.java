@@ -1,7 +1,6 @@
 package org.zipcoder.neutrontools.creativetabs;
 
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
@@ -71,7 +70,7 @@ public class CreativeTabs {
                 CreativeTabEdits.INSTANCE.loadItemsForTabs(itemsJson);
             }
             //Update creative tabs after all information has been loaded
-            CreativeTabEdits.INSTANCE.reorderTabs();
+            CreativeTabEdits.INSTANCE.reorderTabs_indexSortedTabs();
 
             CreativeModeTabs.validate();
 

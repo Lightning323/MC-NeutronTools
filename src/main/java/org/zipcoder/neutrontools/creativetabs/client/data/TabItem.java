@@ -55,7 +55,7 @@ public class TabItem {
 
 
     private ItemStack makeStack(Item item, CompoundTag tag) {
-        if (hideFromOtherTabs) CreativeTabEdits.INSTANCE.getHiddenItems().add(item);
+        if (hideFromOtherTabs) CreativeTabEdits.INSTANCE.hiddenItems.add(item);
 
         ItemStack stack = new ItemStack(item, 1);
         if (tag != null) {
@@ -68,7 +68,7 @@ public class TabItem {
 
     private ItemStack makeStack(String name, CompoundTag tag) {
         ItemStack stack = CreativeTabUtils.makeItemStack(name);
-        if (hideFromOtherTabs) CreativeTabEdits.INSTANCE.getHiddenItems().add(stack.getItem());
+        if (hideFromOtherTabs) CreativeTabEdits.INSTANCE.hiddenItems.add(stack.getItem());
 
         if (tag != null) {
             stack.setTag(tag);
@@ -106,7 +106,7 @@ public class TabItem {
                 } else {
                     List<ItemStack> itemStacks = new ArrayList<>(CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab));
                     if (itemStacks != null) {
-                        itemStacks.removeIf((stack) -> CreativeTabEdits.INSTANCE.getHiddenItems().contains(stack.getItem()));
+                        itemStacks.removeIf((stack) -> CreativeTabEdits.INSTANCE.hiddenItems.contains(stack.getItem()));
                     }
                     additionList.addStacks(index, itemStacks);
                 }
@@ -115,7 +115,7 @@ public class TabItem {
             List<Item> itemsForMatch = getItemsForMatch();
             List<ItemStack> stacks = new ArrayList<>();
             itemsForMatch.forEach(i -> {//We dont want to reintroduce hidden items
-                if (!CreativeTabEdits.INSTANCE.getHiddenItems().contains(i)) stacks.add(makeStack(i, tag));
+                if (!CreativeTabEdits.INSTANCE.hiddenItems.contains(i)) stacks.add(makeStack(i, tag));
             });
             additionList.addStacks(index, stacks);
 
