@@ -40,6 +40,7 @@ public class PreInitConfig {
     public boolean crashCommands = false;
     public float hungerMultiplier = 1.0f;//Casting from double to float
     public boolean hideCreativeTabItemsFromJEIBlacklist = true;
+    public boolean disableExperementalSettings = true;
     //--------------------------------------------------------------------
 
     /**
@@ -51,6 +52,7 @@ public class PreInitConfig {
         config.set("common.crash_commands", crashCommands);
         config.set("common.portal_wait_time", portalWaitTime);
         config.set("common.hunger_multiplier", (double) hungerMultiplier);
+        config.set("common.disable_experemental_settings_popup", disableExperementalSettings);
         //client
         config.set("client.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
         //--------------------------------------------------------------------
@@ -71,6 +73,7 @@ public class PreInitConfig {
         hungerMultiplier = MathUtils.clamp((float) hungerMultiplier_double, 0, 1000);
 
         hideCreativeTabItemsFromJEIBlacklist = config.getOrElse("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
+        disableExperementalSettings = config.getOrElse("common.disable_experemental_settings_popup", disableExperementalSettings);
         //--------------------------------------------------------------------
     }
 }
