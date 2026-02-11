@@ -32,6 +32,8 @@ public class CreativeTabEdits {
 
     public final static List<CreativeModeTab> mandatoryTabs = new ArrayList<>();
 
+
+    private final CreativeModeTab OP_TAB = BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getOpBlockTab());
     static {
         mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()));
         mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getHotbarTab()));
@@ -109,14 +111,14 @@ public class CreativeTabEdits {
                                     tabRemovals.computeIfAbsent(tab, k -> new HashSet<>());
 
                                     ItemAdditionList thisTabAdditions = tabAdditions.get(tab);
-                                    if (thisTabAdditions != null) {
+                                    if (thisTabAdditions != null && json.itemsAdd != null) {
                                         for (int i = 0; i < json.itemsAdd.length; i++) {
                                             TabItem tabItem = json.itemsAdd[i];
                                             tabItem.populateAdditions(thisTabAdditions);
                                         }
                                     }
                                     Set<Item> thisTabDeletions = tabRemovals.get(tab);
-                                    if (thisTabDeletions != null) {
+                                    if (thisTabDeletions != null && json.itemsRemove != null) {
                                         for (int i = 0; i < json.itemsRemove.length; i++) {
                                             TabItem tabItem = json.itemsRemove[i];
                                             thisTabDeletions.addAll(tabItem.makeItemsForRemoval());
@@ -161,7 +163,6 @@ public class CreativeTabEdits {
     }
 
 
-    private final CreativeModeTab OP_TAB = BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getOpBlockTab());
 
     public void loadNewTabs(Map<ResourceLocation, Resource> entries) {
         for (Map.Entry<ResourceLocation, Resource> entry : entries.entrySet()) {
