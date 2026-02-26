@@ -1,6 +1,9 @@
 ![Logo](https://media.forgecdn.net/attachments/1489/553/icon-png.png)
 # Neutron Tools
 
+[![CurseForge Downloads](https://img.shields.io/curseforge/dt/1232801?logo=curseforge)](https://www.curseforge.com/minecraft/mc-mods/neutron-tools)
+[![Custom Badge](https://img.shields.io/badge/Download-CurseForge-orange?style=for-the-badge&logo=curseforge)](https://www.curseforge.com/minecraft/mc-mods/neutron-tools)
+
 Provides unique utilities and commands not commonly found in other mods. This mod was made with the purpose of enhancing the development and control of your modpack.
 
 
