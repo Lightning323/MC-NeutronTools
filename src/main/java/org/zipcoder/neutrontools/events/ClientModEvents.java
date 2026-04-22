@@ -2,11 +2,12 @@ package org.zipcoder.neutrontools.events;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
@@ -14,8 +15,16 @@ import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-@Mod.EventBusSubscriber(modid = NeutronTools.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
-public class CreativeTabReadyEventHandler {
+@EventBusSubscriber(
+        modid = NeutronTools.MODID,
+        bus = EventBusSubscriber.Bus.MOD,
+        value = net.neoforged.api.distmarker.Dist.CLIENT
+)
+public class ClientModEvents {
+
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+    }
 
     private static boolean tagsReady = false;
     private static AtomicInteger initialIndexedTabs = new AtomicInteger(0);

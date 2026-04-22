@@ -1,5 +1,9 @@
 package org.zipcoder.neutrontools.commands;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -12,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
@@ -23,15 +26,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 
 public class ListAllCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -43,14 +40,14 @@ public class ListAllCommand {
                         .then(Commands.literal("items").executes(context -> {
                             File savePath = new File("items_list.txt");
                             if (listItemsToFile(savePath)) {
-                                Component successMessage = net.minecraft.network.chat.Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
+                                Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> successMessage, true);
                             } else {
-                                Component errorMessage = net.minecraft.network.chat.Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
+                                Component errorMessage = Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> errorMessage, true);
                             }
                             return Command.SINGLE_SUCCESS;
@@ -58,14 +55,14 @@ public class ListAllCommand {
                         .then(Commands.literal("blocks").executes(context -> {
                             File savePath = new File("blocks_list.txt");
                             if (listBlocksToFile(savePath)) {
-                                Component successMessage = net.minecraft.network.chat.Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
+                                Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> successMessage, true);
                             } else {
-                                Component errorMessage = net.minecraft.network.chat.Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
+                                Component errorMessage = Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> errorMessage, true);
                             }
                             return Command.SINGLE_SUCCESS;
@@ -73,14 +70,14 @@ public class ListAllCommand {
                         .then(Commands.literal("entities").executes(context -> {
                             File savePath = new File("entities_list.txt");
                             if (listEntitiesToFile(savePath)) {
-                                Component successMessage = net.minecraft.network.chat.Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
+                                Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> successMessage, true);
                             } else {
-                                Component errorMessage = net.minecraft.network.chat.Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
+                                Component errorMessage = Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> errorMessage, true);
                             }
                             return Command.SINGLE_SUCCESS;
@@ -88,14 +85,14 @@ public class ListAllCommand {
                         .then(Commands.literal("creativetabs").executes(context -> {
                             File savePath = new File("creative_mode_tabs.txt");
                             if (listCreativeModeTabsToFile(savePath)) {
-                                Component successMessage = net.minecraft.network.chat.Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
+                                Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> successMessage, true);
                             } else {
-                                Component errorMessage = net.minecraft.network.chat.Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
+                                Component errorMessage = Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> errorMessage, true);
                             }
                             return Command.SINGLE_SUCCESS;
@@ -103,14 +100,14 @@ public class ListAllCommand {
                         .then(Commands.literal("tab_items").executes(context -> {
                             File savePath = new File("tab_item_list.json");
                             if (listItemsInCreativeTabsToFile(savePath)) {
-                                Component successMessage = net.minecraft.network.chat.Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
+                                Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> successMessage, true);
                             } else {
-                                Component errorMessage = net.minecraft.network.chat.Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
+                                Component errorMessage = Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> errorMessage, true);
                             }
                             return Command.SINGLE_SUCCESS;
@@ -118,14 +115,14 @@ public class ListAllCommand {
                         .then(Commands.literal("original_tab_items").executes(context -> {
                             File savePath = new File("original_tab_item_list.json");
                             if (listOriginalItemsInCreativeTabsToFile(savePath)) {
-                                Component successMessage = net.minecraft.network.chat.Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
+                                Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> successMessage, true);
                             } else {
-                                Component errorMessage = net.minecraft.network.chat.Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
+                                Component errorMessage = Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, net.minecraft.network.chat.Component.literal("Copy to clipboard"))));
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
                                 context.getSource().sendSuccess(() -> errorMessage, true);
                             }
                             return Command.SINGLE_SUCCESS;

@@ -1,16 +1,8 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import net.minecraft.world.item.Item;
-import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
-import org.zipcoder.neutrontools.creativetabs.client.data.ItemAdditionList;
-import org.zipcoder.neutrontools.creativetabs.client.data.NewTabJsonHelper;
-import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
-import org.zipcoder.neutrontools.events.CreativeTabReadyEventHandler;
-import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
@@ -21,12 +13,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
+import org.zipcoder.neutrontools.creativetabs.client.data.ItemAdditionList;
+import org.zipcoder.neutrontools.creativetabs.client.data.NewTabJsonHelper;
+import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
+import org.zipcoder.neutrontools.events.ClientModEvents;
+import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.util.*;
 
+import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getRegistryID;
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
-import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 
 @Mixin(CreativeModeTab.class)
 public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
@@ -231,7 +231,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
                 //We reload for the first time here so we can index the original state of the tabs
                 CreativeTabEdits.INSTANCE.original_tabDisplayItems.put(self, new ArrayList<>());
                 CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(self).addAll(cir.getReturnValue());
-                CreativeTabReadyEventHandler.onCreativeTabReady(self);
+                ClientModEvents.onCreativeTabReady(self);
             }
         }
 

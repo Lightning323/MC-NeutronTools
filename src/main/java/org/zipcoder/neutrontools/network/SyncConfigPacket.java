@@ -1,42 +1,38 @@
 package org.zipcoder.neutrontools.network;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.config.PreInitConfig;
 
-import java.util.function.Supplier;
+public record SyncConfigPacket(float hungerMultiplier) implements CustomPacketPayload {
 
-public class SyncConfigPacket {
-    public  int portalWaitTime;
-    public  float hungerMultiplier;
+    public static final Type<SyncConfigPacket> TYPE =
+            new Type<>(NeutronTools.resource("sync_config"));
+
+    public static final StreamCodec<FriendlyByteBuf, SyncConfigPacket> CODEC =
+            StreamCodec.of(
+                    //Writing
+                    (buf, packet) -> buf.writeFloat(packet.hungerMultiplier),
+                    //Reading
+                    buf -> new SyncConfigPacket(buf.readFloat())
+            );
 
     public SyncConfigPacket(PreInitConfig config) {
-        this.portalWaitTime = config.portalWaitTime;
-        this.hungerMultiplier = config.hungerMultiplier;
+        this(config.hungerMultiplier);
     }
 
-    public SyncConfigPacket() {
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
-    public static void encode(SyncConfigPacket packet, FriendlyByteBuf buf) {
-        buf.writeInt(packet.portalWaitTime);
-        buf.writeFloat(packet.hungerMultiplier);
-    }
-
-    public static SyncConfigPacket decode(FriendlyByteBuf buf) {
-        SyncConfigPacket scp =  new SyncConfigPacket();
-        scp.portalWaitTime = buf.readInt();
-        scp.hungerMultiplier = buf.readFloat();
-        return scp;
-    }
-
-    public static void handle(SyncConfigPacket packet, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            //This is happening on the client
-            NeutronTools.CONFIG.hungerMultiplier = packet.hungerMultiplier;
-            NeutronTools.CONFIG.portalWaitTime = packet.portalWaitTime;
+    public static void handle(SyncConfigPacket packet, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            // Client-side update
+            NeutronTools.CONFIG.hungerMultiplier = packet.hungerMultiplier();
         });
-        ctx.get().setPacketHandled(true);
     }
 }

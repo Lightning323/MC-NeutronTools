@@ -1,25 +1,21 @@
 package org.zipcoder.neutrontools.utils;
 
-import net.minecraft.world.item.CreativeModeTab;
-import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
-import org.zipcoder.neutrontools.creativetabs.client.data.NewTabJsonHelper;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.apache.commons.lang3.tuple.Pair;
-import org.zipcoder.neutrontools.NeutronTools;
 import net.minecraft.world.item.Items;
+import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
+import org.zipcoder.neutrontools.creativetabs.client.data.NewTabJsonHelper;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
-
-import net.minecraft.tags.TagKey;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITag;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;

@@ -1,15 +1,17 @@
 package org.zipcoder.neutrontools.creativetabs.client.data;
 
 import com.google.gson.Gson;
-import net.minecraftforge.fml.loading.FMLPaths;
-import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.lang3.tuple.Pair;
+import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.io.File;
@@ -20,7 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static com.ibm.icu.util.LocalePriorityList.add;
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.*;
 
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)

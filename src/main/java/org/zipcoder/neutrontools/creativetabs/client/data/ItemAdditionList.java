@@ -2,8 +2,6 @@ package org.zipcoder.neutrontools.creativetabs.client.data;
 
 import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;

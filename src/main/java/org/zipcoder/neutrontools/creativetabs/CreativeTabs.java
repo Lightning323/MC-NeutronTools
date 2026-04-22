@@ -1,22 +1,25 @@
 package org.zipcoder.neutrontools.creativetabs;
 
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.ItemStack;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
-import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
+import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author HypherionSA

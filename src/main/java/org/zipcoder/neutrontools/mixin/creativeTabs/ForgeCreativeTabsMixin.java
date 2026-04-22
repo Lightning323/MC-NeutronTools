@@ -1,8 +1,5 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
-import org.zipcoder.neutrontools.creativetabs.client.impl.ForgeTabData;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
-import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.ForceCreativeTabAccessor;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -16,6 +13,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
+import org.zipcoder.neutrontools.creativetabs.client.impl.ForgeTabData;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.ForceCreativeTabAccessor;
 
 import java.util.HashMap;
 import java.util.List;

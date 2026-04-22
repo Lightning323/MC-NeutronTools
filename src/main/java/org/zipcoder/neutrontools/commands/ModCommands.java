@@ -21,16 +21,19 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.zipcoder.neutrontools.NeutronTools;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Mod.EventBusSubscriber(modid = NeutronTools.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(
+        modid = NeutronTools.MODID,
+        bus = EventBusSubscriber.Bus.MOD
+)
 public class ModCommands {
 
     public final static String NAMESPACE = "neutron";
@@ -279,7 +282,7 @@ public class ModCommands {
 
 
     private static void ping(MinecraftServer server, ServerPlayer asking, ServerPlayer user) {
-        int ping = asking.connection.player.latency;
+        int ping = asking.connection.latency();
         ChatFormatting color = ChatFormatting.GREEN;
         if (ping > 200) {
             color = ChatFormatting.RED;

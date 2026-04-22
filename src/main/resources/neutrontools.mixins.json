@@ -2,8 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "org.zipcoder.neutrontools.mixin",
-  "compatibilityLevel": "JAVA_8",
-  "refmap": "neutrontools.refmap.json",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
     "PlayerMixin",
     "PrimaryLevelDataMixinForge"
@@ -21,5 +20,8 @@
   ],
   "injectors": {
     "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
   }
 }

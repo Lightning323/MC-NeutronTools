@@ -2,12 +2,14 @@ package org.zipcoder.neutrontools.config;
 
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraft.util.Mth;
+import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.utils.MathUtils;
 
 import java.io.File;
 import java.nio.file.Path;
-import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
+
+import static net.neoforged.fml.loading.FMLPaths.CONFIGDIR;
 
 public class PreInitConfig {
 
@@ -16,7 +18,7 @@ public class PreInitConfig {
 
     public PreInitConfig() {
         try {
-            Path path = FMLPaths.CONFIGDIR.get();
+            Path path = CONFIGDIR.get();
             File configFile = new File(path.toFile(), "neutron-tools-config.toml");
             try (FileConfig config = FileConfig.builder(configFile, TomlFormat.instance()).build()) {
                 if (configFile.exists()) {
@@ -26,7 +28,7 @@ public class PreInitConfig {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("An error occurred initializing pre-init config!", e);
+            NeutronTools.LOGGER.error("An error occurred initializing pre-init config!", e);
         }
     }
 
@@ -67,10 +69,10 @@ public class PreInitConfig {
         config.load();
         //--------------------------------------------------------------------
         crashCommands = config.getOrElse("common.crash_commands", crashCommands);
-        portalWaitTime = (int) MathUtils.clamp(config.getOrElse("common.portal_wait_time", portalWaitTime), 0, 160);
+        portalWaitTime = (int) Mth.clamp(config.getOrElse("common.portal_wait_time", portalWaitTime), 0, 160);
 
         double hungerMultiplier_double = config.getOrElse("common.hunger_multiplier", (double) hungerMultiplier);
-        hungerMultiplier = MathUtils.clamp((float) hungerMultiplier_double, 0, 1000);
+        hungerMultiplier = Mth.clamp((float) hungerMultiplier_double, 0, 1000);
 
         hideCreativeTabItemsFromJEIBlacklist = config.getOrElse("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
         disableExperementalSettings = config.getOrElse("common.disable_experemental_settings_popup", disableExperementalSettings);
