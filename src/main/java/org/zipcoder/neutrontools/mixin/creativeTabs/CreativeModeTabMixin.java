@@ -36,29 +36,14 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private Collection<ItemStack> displayItems;
     @Shadow
     private Set<ItemStack> displayItemsSearchTab;
+    @Unique
+    private CreativeModeTab.ItemDisplayParameters neutron$cachedParameters;
 
-
-//    @Unique
-//    private CreativeModeTab.ItemDisplayParameters neutron$cachedParameters;
-//
-//    @Inject(method = "buildContents", at = @At("HEAD"))
-//    private void captureParameters(CreativeModeTab.ItemDisplayParameters parameters, CallbackInfo ci) {
-//        // Store the parameters so we can rebuild later
-//        this.neutron$cachedParameters = parameters;
-//    }
 
     public void rebuildSearchTree() {
-//
-//            if (this.neutron$cachedParameters == null) return;
-//
-//            // 1. Re-run the internal logic to populate displayItems and displayItemsSearchTab
-//            ((CreativeModeTab)(Object)this).buildContents(this.neutron$cachedParameters);
-//
-//            // 2. Tell the Minecraft Client to re-index the search bars
-//            if (net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT) {
-//                net.minecraft.client.Minecraft.getInstance().sear
-//            }
-
+        if (this.neutron$cachedParameters == null) return;
+        // 1. Re-run the internal logic to populate displayItems and displayItemsSearchTab
+        ((CreativeModeTab) (Object) this).buildContents(this.neutron$cachedParameters);
     }
 
     @Shadow
@@ -102,6 +87,8 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
     @Inject(method = "buildContents", at = @At("HEAD"), cancellable = true)
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
+        this.neutron$cachedParameters = arg;
+
         CreativeModeTab self = (CreativeModeTab) (Object) this;
 
         //Add new tabs
