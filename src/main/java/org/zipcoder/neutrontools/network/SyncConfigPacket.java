@@ -5,7 +5,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.config.PreInitConfig;
+import org.zipcoder.neutrontools.config.NeutronConfig;
 
 public record SyncConfigPacket(float hungerMultiplier) implements CustomPacketPayload {
 
@@ -20,7 +20,7 @@ public record SyncConfigPacket(float hungerMultiplier) implements CustomPacketPa
                     buf -> new SyncConfigPacket(buf.readFloat())
             );
 
-    public SyncConfigPacket(PreInitConfig config) {
+    public SyncConfigPacket(NeutronConfig config) {
         this(config.hungerMultiplier);
     }
 

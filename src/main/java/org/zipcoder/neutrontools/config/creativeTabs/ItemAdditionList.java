@@ -1,4 +1,4 @@
-package org.zipcoder.neutrontools.creativetabs.client.data;
+package org.zipcoder.neutrontools.config.creativeTabs;
 
 import net.minecraft.world.item.ItemStack;
 

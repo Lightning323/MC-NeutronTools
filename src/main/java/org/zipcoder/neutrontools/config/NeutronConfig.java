@@ -10,15 +10,11 @@ import java.nio.file.Path;
 
 import static net.neoforged.fml.loading.FMLPaths.CONFIGDIR;
 
-public class PreInitConfig {
+public class NeutronConfig {
 
-
-
-
-    public PreInitConfig() {
+    public NeutronConfig() {
         try {
-            Path path = CONFIGDIR.get();
-            File configFile = new File(path.toFile(), "neutron-tools-config.toml");
+            File configFile = new File(NeutronTools.CONFIGDIR, "neutron-tools-config.toml");
             try (FileConfig config = FileConfig.builder(configFile, TomlFormat.instance()).build()) {
                 if (configFile.exists()) {
                     loadConfig(config);

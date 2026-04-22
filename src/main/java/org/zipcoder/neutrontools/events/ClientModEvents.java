@@ -9,8 +9,8 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -46,8 +46,8 @@ public class ClientModEvents {
     }
 
     public static void onCreativeTabReady(CreativeModeTab self) {
-        if (CreativeTabEdits.INSTANCE.original_SortedTabs != null &&
-                CreativeTabEdits.INSTANCE.original_SortedTabs.contains(self)) {
+        if (CreativeTabConfig.INSTANCE.original_SortedTabs != null &&
+                CreativeTabConfig.INSTANCE.original_SortedTabs.contains(self)) {
             initialIndexedTabs.getAndIncrement();
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 reloadIfReady();
@@ -56,13 +56,13 @@ public class ClientModEvents {
     }
 
     private static void reloadIfReady() {
-        if (CreativeTabEdits.INSTANCE.original_SortedTabs != null &&
-                initialIndexedTabs.get() >= CreativeTabEdits.INSTANCE.original_SortedTabs.size()
-                && isTagsReady() && !CreativeTabEdits.INSTANCE.isWasReloadedFirstTime()) {
+        if (CreativeTabConfig.INSTANCE.original_SortedTabs != null &&
+                initialIndexedTabs.get() >= CreativeTabConfig.INSTANCE.original_SortedTabs.size()
+                && isTagsReady()) {
             //IT IS CRUCIAL that we dont reload tabs before this point in order to properly index the original state of the tabs
             NeutronTools.LOGGER.info("Indexed {}/{} original tabs and item tags are ready. Reloading creative tabs!",
                     initialIndexedTabs,
-                    CreativeTabEdits.INSTANCE.original_SortedTabs.size());
+                    CreativeTabConfig.INSTANCE.original_SortedTabs.size());
             CreativeTabs.reloadTabs();
         }
     }

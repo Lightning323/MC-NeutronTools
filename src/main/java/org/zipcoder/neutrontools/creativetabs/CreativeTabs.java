@@ -1,23 +1,15 @@
 package org.zipcoder.neutrontools.creativetabs;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.IExtensionPoint;
-import net.neoforged.fml.ModLoadingContext;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
+import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class CreativeTabs {
@@ -33,56 +25,22 @@ public class CreativeTabs {
      */
     public static void reloadTabs() {
         if (!hasRun) {
-            CreativeTabEdits.INSTANCE.setVanillaTabs(new ArrayList<>(BuiltInRegistries.CREATIVE_MODE_TAB.stream().toList()));
+            //Do this the first time
+            CreativeTabConfig.INSTANCE.setVanillaTabs(new ArrayList<>(BuiltInRegistries.CREATIVE_MODE_TAB.stream().toList()));
             hasRun = true;
         }
-
-        NeutronTools.LOGGER.info("Reloading creative tabs");
-        long startTime = System.currentTimeMillis();
-        CreativeTabEdits.INSTANCE.clearTabs();
-
-        // Use FMLEnvironment to check the side instead of DistExecutor
-        if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
-            load(startTime);
-        }
+        CreativeTabConfig.INSTANCE.load();
     }
 
     private static void load(long startTime) {
-        if (CreativeTabEdits.INSTANCE.isEnabled()) {
-            ResourceManager manager = Minecraft.getInstance().getResourceManager();
-
-            //Find the json file that is under the new_tabs directory
-            Map<ResourceLocation, Resource> customTabs = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith(".json") && path.getPath().contains("new_tabs"));
-            CreativeTabEdits.INSTANCE.loadNewTabs(customTabs);
-
-            Map<ResourceLocation, Resource> disabledItemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith("disabled_items.json"));
-            CreativeTabEdits.INSTANCE.loadDisabledItems(disabledItemsJson);
-
-            Map<ResourceLocation, Resource> disabledTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith("disabled_tabs.json"));
-            CreativeTabEdits.INSTANCE.loadDisabledTabs(disabledTabsJson);
-
-            Map<ResourceLocation, Resource> orderedTabsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith("ordered_tabs.json"));
-            CreativeTabEdits.INSTANCE.loadOrderedTabs(orderedTabsJson);
-
-            Map<ResourceLocation, Resource> itemsJson = manager.listResources(NeutronTools.RESOURCE_ID, path ->
-                    path.getPath().endsWith("tab_items.json")
-                            || (path.getPath().endsWith(".json") && path.getPath().contains("tab_items")));
-            CreativeTabEdits.INSTANCE.loadItemsForTabs(itemsJson);
-        }
-        //Update creative tabs after all information has been loaded
-        CreativeTabEdits.INSTANCE.reorderTabs_indexSortedTabs();
-
+        CreativeTabConfig.INSTANCE.load();
         CreativeModeTabs.validate();
 
         //reset cache for all tabs
         itemsFromUnregisteredTabs.clear();
-        for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.newTabs) {  //Do Unregistered tabs first!
-            if (CreativeTabEdits.INSTANCE.tabAdditions.get(tab) != null)
-                itemsFromUnregisteredTabs.addAll(CreativeTabEdits.INSTANCE.tabAdditions.get(tab).getAllItemStacks());
+        for (CreativeModeTab tab : CreativeTabConfig.INSTANCE.newTabs) {  //Do Unregistered tabs first!
+            if (CreativeTabConfig.INSTANCE.tabAdditions.get(tab) != null)
+                itemsFromUnregisteredTabs.addAll(CreativeTabConfig.INSTANCE.tabAdditions.get(tab).getAllItemStacks());
             CreativeModeTabMixin_I mixinTab = (CreativeModeTabMixin_I) tab;
             mixinTab.resetCache();
         }
@@ -107,16 +65,4 @@ public class CreativeTabs {
         return itemsFromUnregisteredTabs;
     }
 
-    public static void refreshTabs() {
-        if (!hasRun) { //If this is our first time
-            reloadTabs();
-            hasRun = true;
-            return;
-        }
-
-        if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
-            CreativeModeTabs.validate();
-            NeutronTools.LOGGER.info("Creative tabs have been refreshed");
-        }
-    }
 }

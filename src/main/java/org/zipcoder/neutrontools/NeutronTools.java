@@ -8,21 +8,25 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.slf4j.Logger;
-import org.zipcoder.neutrontools.config.PreInitConfig;
+import org.zipcoder.neutrontools.config.NeutronConfig;
 import org.zipcoder.neutrontools.network.SyncConfigPacket;
+
+import java.io.File;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(NeutronTools.MODID)
 public class NeutronTools {
     public static final String MODID = "neutrontools";
     public static final String RESOURCE_ID = "neutron";
+    public static final File CONFIGDIR = new File(FMLPaths.CONFIGDIR.get().toFile(), "/neutron");
     public static final Logger LOGGER = LogUtils.getLogger();
-    public static final PreInitConfig CONFIG = new PreInitConfig();
+    public static final NeutronConfig CONFIG = new NeutronConfig();
 
     public NeutronTools(IEventBus modEventBus, ModContainer modContainer) {
         // Register the commonSetup method for modloading

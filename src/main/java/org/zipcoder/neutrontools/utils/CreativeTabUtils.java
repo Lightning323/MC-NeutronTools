@@ -6,23 +6,20 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
-import org.zipcoder.neutrontools.creativetabs.client.data.NewTabJsonHelper;
+import org.zipcoder.neutrontools.config.creativeTabs.NewTabJsonHelper;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class CreativeTabUtils {
 
@@ -152,7 +149,7 @@ public class CreativeTabUtils {
         }
 
         // 3. Check your custom injected tabs
-        for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.newTabs) {
+        for (CreativeModeTab tab : CreativeTabConfig.INSTANCE.newTabs) {
             if (getTranslationKey(tab).equals(key)) {
                 return tab;
             }

@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
+import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
@@ -143,8 +143,8 @@ public class ListAllCommand {
         try (FileWriter writer = new FileWriter(saveFile)) {
             // 1. Process Registered Tabs
             List<CreativeModeTab> allTabs = new ArrayList<>();
-            allTabs.addAll(CreativeTabEdits.INSTANCE.sortedTabs);
-            allTabs.addAll(CreativeTabEdits.INSTANCE.newTabs);
+            allTabs.addAll(CreativeTabConfig.INSTANCE.sortedTabs);
+            allTabs.addAll(CreativeTabConfig.INSTANCE.newTabs);
 
             for (CreativeModeTab tab : allTabs) {
                 JsonObject tabObj = new JsonObject();
@@ -182,13 +182,13 @@ public class ListAllCommand {
 
         try (FileWriter writer = new FileWriter(saveFile)) {
             // 1. Process Registered Tabs
-            for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.original_SortedTabs) {//BuiltInRegistries.CREATIVE_MODE_TAB
+            for (CreativeModeTab tab : CreativeTabConfig.INSTANCE.original_SortedTabs) {//BuiltInRegistries.CREATIVE_MODE_TAB
                 JsonObject tabObj = new JsonObject();
                 tabObj.addProperty("tab", CreativeTabUtils.getTranslationKey(tab));
 
                 JsonArray itemsArray = new JsonArray();
-                if (CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab) != null) {
-                    CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab).forEach(stack -> {
+                if (CreativeTabConfig.INSTANCE.original_tabDisplayItems.get(tab) != null) {
+                    CreativeTabConfig.INSTANCE.original_tabDisplayItems.get(tab).forEach(stack -> {
                         // Get the registry name or standard string representation of the item
                         itemsArray.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
                     });

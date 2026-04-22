@@ -11,7 +11,6 @@
     "creativeTabs.accessor.CreativeModeTabAccessor",
     "creativeTabs.accessor.CreativeModeTabsAccessor",
     "creativeTabs.CreativeModeTabMixin",
-    "creativeTabs.ForgeCreativeModeInventoryMixin",
     "creativeTabs.ForgeCreateTabMixin",
     "creativeTabs.ForgeCreativeTabRegistryMixin",
     "creativeTabs.ForgeCreativeTabsMixin",

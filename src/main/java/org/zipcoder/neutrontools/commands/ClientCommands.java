@@ -7,11 +7,10 @@ import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
-import org.zipcoder.neutrontools.creativetabs.client.data.CreativeTabEdits;
 
 import java.util.Arrays;
 
@@ -36,7 +35,7 @@ public class ClientCommands {
                                         .then(Commands.argument("mode", StringArgumentType.word())
                                                 .suggests((context, builder) ->
                                                         SharedSuggestionProvider.suggest(
-                                                                Arrays.stream(CreativeTabEdits.TabNameMode.values())
+                                                                Arrays.stream(CreativeTabConfig.TabNameMode.values())
                                                                         .map(Enum::name)
                                                                         .map(String::toLowerCase),
                                                                 builder
@@ -46,10 +45,10 @@ public class ClientCommands {
                                                     String input = StringArgumentType.getString(context, "mode").toUpperCase();
 
                                                     try {
-                                                        CreativeTabEdits.TabNameMode mode =
-                                                                CreativeTabEdits.TabNameMode.valueOf(input);
+                                                        CreativeTabConfig.TabNameMode mode =
+                                                                CreativeTabConfig.TabNameMode.valueOf(input);
 
-                                                        CreativeTabEdits.INSTANCE.setTabNameMode(mode);
+                                                        CreativeTabConfig.INSTANCE.setTabNameMode(mode);
 
                                                         String msg = switch (mode) {
                                                             case NORMAL -> "Showing standard tab names";

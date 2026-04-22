@@ -1,4 +1,4 @@
-package org.zipcoder.neutrontools.creativetabs.client.data;
+package org.zipcoder.neutrontools.config.creativeTabs;
 
 import com.google.gson.annotations.SerializedName;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
 
 
 public class TabItem {
@@ -60,7 +59,7 @@ public class TabItem {
     }
 
     private ItemStack makeStack(Item item, CompoundTag tag) {
-        if (hideFromOtherTabs) CreativeTabEdits.INSTANCE.hiddenItems.add(item);
+        if (hideFromOtherTabs) CreativeTabConfig.INSTANCE.hiddenItems.add(item);
 
         ItemStack stack = new ItemStack(item, 1);
         applyLegacyTag(stack, tag);
@@ -69,7 +68,7 @@ public class TabItem {
 
     private ItemStack makeStack(String name, CompoundTag tag) {
         ItemStack stack = CreativeTabUtils.makeItemStack(name);
-        if (hideFromOtherTabs) CreativeTabEdits.INSTANCE.hiddenItems.add(stack.getItem());
+        if (hideFromOtherTabs) CreativeTabConfig.INSTANCE.hiddenItems.add(stack.getItem());
 
         applyLegacyTag(stack, tag);
         return stack;
@@ -120,9 +119,9 @@ public class TabItem {
                 if (tab == null) {
                     NeutronTools.LOGGER.warn("Failed to find tab for {}", match_tab);
                 } else {
-                    List<ItemStack> itemStacks = new ArrayList<>(CreativeTabEdits.INSTANCE.original_tabDisplayItems.get(tab));
+                    List<ItemStack> itemStacks = new ArrayList<>(CreativeTabConfig.INSTANCE.original_tabDisplayItems.get(tab));
                     if (itemStacks != null) {
-                        itemStacks.removeIf((stack) -> CreativeTabEdits.INSTANCE.hiddenItems.contains(stack.getItem()));
+                        itemStacks.removeIf((stack) -> CreativeTabConfig.INSTANCE.hiddenItems.contains(stack.getItem()));
                     }
                     additionList.addStacks(index, itemStacks);
                 }
@@ -131,7 +130,7 @@ public class TabItem {
             List<Item> itemsForMatch = getItemsForMatch();
             List<ItemStack> stacks = new ArrayList<>();
             itemsForMatch.forEach(i -> {//We dont want to reintroduce hidden items
-                if (!CreativeTabEdits.INSTANCE.hiddenItems.contains(i)) stacks.add(makeStack(i, tag));
+                if (!CreativeTabConfig.INSTANCE.hiddenItems.contains(i)) stacks.add(makeStack(i, tag));
             });
             additionList.addStacks(index, stacks);
 
