@@ -33,30 +33,33 @@ public class CreativeTabUtils {
      * @return the item stack for the tab icon
      */
     public static Supplier<ItemStack> makeTabIcon(NewTabJsonHelper json) {
-        AtomicReference<ItemStack> icon = new AtomicReference<>(ItemStack.EMPTY);//Our default value
-        NewTabJsonHelper.TabIcon tabIcon = new NewTabJsonHelper.TabIcon();
-
-        if (json.getTabIcon() != null) {
-            tabIcon = json.getTabIcon();
-        }
+        AtomicReference<ItemStack> icon = new AtomicReference<>(ItemStack.EMPTY);
+        NewTabJsonHelper.TabIcon tabIcon = json.getTabIcon() != null ? json.getTabIcon() : new NewTabJsonHelper.TabIcon();
 
         /* Resolve the Icon from the Item Registry */
-        NewTabJsonHelper.TabIcon finalTabIcon = tabIcon;
         ItemStack stack = makeItemStack(tabIcon.getName());
 
         if (!stack.isEmpty()) {
-            if (finalTabIcon.getNbt() != null && !finalTabIcon.getNbt().isEmpty()) { // Apply the Stack NBT
-                //TODO: Understand why this fails with some of the new item groups
+            String nbtString = tabIcon.getNbt();
+            if (nbtString != null && !nbtString.isEmpty()) {
                 try {
-                    CompoundTag tag = TagParser.parseTag(finalTabIcon.getNbt());
-                    stack.setTag(tag);
+                    // 1. Parse the string into a CompoundTag (this still works)
+                    CompoundTag tag = TagParser.parseTag(nbtString);
+
+                    // 2. Use .set() with the CUSTOM_DATA component
+                    // CustomData.of(tag) wraps the NBT for the new component system
+                    stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+                            net.minecraft.world.item.component.CustomData.of(tag));
+
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to Process NBT for Item Tag: \"{}\";\t Tab Name: \"{}\";\t NBT data: \"{}\"", finalTabIcon.getName(), json.getTabName(), finalTabIcon.getNbt(), e);
+                    NeutronTools.LOGGER.error("Failed to Process NBT for Item: {}; Tab: {}; NBT: {}",
+                            tabIcon.getName(), json.getTabName(), nbtString, e);
                 }
             }
             icon.set(stack);
             icon.get().setCount(1);
         }
+
         if (icon.get().isEmpty()) icon.set(new ItemStack(Items.GRASS_BLOCK, 1));
         return icon::get;
     }
@@ -64,7 +67,7 @@ public class CreativeTabUtils {
 
     public static ItemStack makeItemStack(String itemId) {
         if (itemId == null) return ItemStack.EMPTY;
-        Optional<Item> itemOptional = BuiltInRegistries.ITEM.getOptional(new ResourceLocation(itemId));
+        Optional<Item> itemOptional = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(itemId));
         return itemOptional.map(Item::getDefaultInstance).orElse(ItemStack.EMPTY);
     }
 
@@ -110,24 +113,7 @@ public class CreativeTabUtils {
     public record StackFingerprint(Item item, Object components) {
     }
 
-    public static List<ItemStack> getUniqueNbtOrderedStacks(Collection<ItemStack> input) {
-        // A record to serve as a unique fingerprint for the stack
-        // It ignores 'count' but respects Item type and NBT data
 
-        Set<StackFingerprint> seen = new HashSet<>();
-        List<ItemStack> result = new ArrayList<>();
-
-        for (ItemStack stack : input) {
-            // For 1.12 - 1.20.4: use stack.getTag()
-            // For 1.20.5+: use stack.getComponents()
-            StackFingerprint fingerprint = new StackFingerprint(stack.getItem(), stack.getTag());
-
-            if (seen.add(fingerprint)) {
-                result.add(stack);
-            }
-        }
-        return result;
-    }
 
     public static List<ItemStack> getUniqueOrderedStacks(Collection<ItemStack> input) {
         // This set tracks the singleton Item instances we've already processed
@@ -146,70 +132,50 @@ public class CreativeTabUtils {
 
 
 
-
-
     /**
      * Gets the tab from registry ID or translation key
-     *
-     * @param key
-     * @return
      */
     public static CreativeModeTab getTabFromString(String key) {
-        if (ResourceLocation.isValidResourceLocation(key)) {
-            ResourceLocation r = new ResourceLocation(key);
-            CreativeModeTab creativeModeTab = BuiltInRegistries.CREATIVE_MODE_TAB.get(r);
-            if (creativeModeTab != null) return creativeModeTab;
+        // 1. Use tryParse to handle the ID lookup safely
+        ResourceLocation r = ResourceLocation.tryParse(key);
+        if (r != null) {
+            CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(r);
+            // BuiltInRegistries.get() returns null if not found in 1.21.1
+            if (tab != null) return tab;
         }
+
+        // 2. Fallback to checking translation keys for Vanilla/Registered tabs
         for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
             if (getTranslationKey(tab).equals(key)) {
                 return tab;
             }
         }
+
+        // 3. Check your custom injected tabs
         for (CreativeModeTab tab : CreativeTabEdits.INSTANCE.newTabs) {
             if (getTranslationKey(tab).equals(key)) {
                 return tab;
             }
         }
+
         return null;
     }
 
 
-    public static Set<Item> getItemsByTags(List<ResourceLocation> tagLocations) {
-        Set<Item> allItems = new HashSet<>();
-        var tagManager = ForgeRegistries.ITEMS.tags();
-
-        for (ResourceLocation location : tagLocations) {
-            // 1. Create the TagKey
-            TagKey<Item> tagKey = tagManager.createTagKey(location);
-
-            // 2. Access the Tag Manager for this specific key
-            ITag<Item> tagContents = tagManager.getTag(tagKey);
-
-            // 3. Add all items from this tag to our master set
-            if (!tagContents.isEmpty()) {
-                tagContents.stream().forEach(allItems::add);
-            }
-        }
-
-        return allItems;
-    }
-
-    public static List<Item> getItemsByRegex(String regex) {
-        Pattern pattern = Pattern.compile(regex);
-
-        return ForgeRegistries.ITEMS.getValues().stream().filter(item -> {
-            // Get the registry name (e.g., "minecraft:iron_ore")
-            String registryName = ForgeRegistries.ITEMS.getKey(item).toString();
-            return pattern.matcher(registryName).matches();
-        }).collect(Collectors.toList());
-    }
-
     public static Item getItemByName(String name) {
-        if (ResourceLocation.isValidResourceLocation(name)) {
-            ResourceLocation location = new ResourceLocation(name);
-            return ForgeRegistries.ITEMS.getValue(location);
+        // 1. ResourceLocation constructor is now private.
+        // Use .parse() or .tryParse()
+        ResourceLocation location = ResourceLocation.tryParse(name);
 
+        if (location != null) {
+            // 2. Use BuiltInRegistries.ITEM to get the value.
+            // It returns Items.AIR (which is the modern "null") if not found.
+            Item item = BuiltInRegistries.ITEM.get(location);
+
+            // Optional: If you strictly want null instead of Air for your logic
+            return item == Items.AIR ? null : item;
         }
+
         return null;
     }
 

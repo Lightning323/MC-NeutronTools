@@ -37,7 +37,7 @@ public class NeutronTools {
     }
 
     public static ResourceLocation resource(String path) {
-        return new ResourceLocation(MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

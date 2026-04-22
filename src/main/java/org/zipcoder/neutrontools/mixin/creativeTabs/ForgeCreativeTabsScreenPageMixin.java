@@ -1,7 +1,7 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraftforge.client.gui.CreativeTabsScreenPage;
+import net.neoforged.neoforge.client.gui.CreativeTabsScreenPage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

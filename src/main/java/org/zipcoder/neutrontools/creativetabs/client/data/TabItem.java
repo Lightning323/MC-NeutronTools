@@ -2,6 +2,9 @@ package org.zipcoder.neutrontools.creativetabs.client.data;
 
 import com.google.gson.annotations.SerializedName;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
@@ -10,6 +13,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
@@ -18,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 
@@ -54,16 +59,11 @@ public class TabItem {
                 (match_tab != null && !match_tab.isBlank());
     }
 
-
     private ItemStack makeStack(Item item, CompoundTag tag) {
         if (hideFromOtherTabs) CreativeTabEdits.INSTANCE.hiddenItems.add(item);
 
         ItemStack stack = new ItemStack(item, 1);
-        if (tag != null) {
-            stack.setTag(tag);
-            if (tag.contains("customName"))
-                stack.setHoverName(Component.literal(tag.getString("customName")));
-        }
+        applyLegacyTag(stack, tag);
         return stack;
     }
 
@@ -71,14 +71,29 @@ public class TabItem {
         ItemStack stack = CreativeTabUtils.makeItemStack(name);
         if (hideFromOtherTabs) CreativeTabEdits.INSTANCE.hiddenItems.add(stack.getItem());
 
-        if (tag != null) {
-            stack.setTag(tag);
-            if (tag.contains("customName"))
-                stack.setHoverName(Component.literal(tag.getString("customName")));
-        }
+        applyLegacyTag(stack, tag);
         return stack;
     }
 
+    /**
+     * Helper to bridge the gap between legacy NBT and 1.21 Data Components
+     */
+    private void applyLegacyTag(ItemStack stack, CompoundTag tag) {
+        if (tag == null) return;
+
+        // 1. Handle Custom Name (Specialized Component)
+        if (tag.contains("customName")) {
+            stack.set(DataComponents.CUSTOM_NAME, Component.literal(tag.getString("customName")));
+            // Remove from tag so it doesn't duplicate into the custom_data component
+            tag.remove("customName");
+        }
+
+        // 2. Handle all other NBT data
+        // In 1.21, arbitrary NBT is stored in the "custom_data" component
+        if (!tag.isEmpty()) {
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        }
+    }
     /**
      * Returns a list of items that match the given item match
      * The match is based on if ALL conditions are met
@@ -163,13 +178,24 @@ public class TabItem {
 
     private static List<Item> addByNameRegex(TabItem match, List<Item> allItems) {
         if (match.nameRegex != null && !match.nameRegex.isEmpty()) {
-            Pattern pattern = Pattern.compile(match.nameRegex);
+            try {
+                Pattern pattern = Pattern.compile(match.nameRegex);
+                var registry = BuiltInRegistries.ITEM;
 
-            allItems.addAll(ForgeRegistries.ITEMS.getValues().stream().filter(item -> {
-                // Get the registry name (e.g., "minecraft:iron_ore")
-                String registryName = ForgeRegistries.ITEMS.getKey(item).toString();
-                return pattern.matcher(registryName).matches();
-            }).collect(Collectors.toList()));
+                // Stream through the registry entries
+                List<Item> matchedItems = registry.entrySet().stream()
+                        .filter(entry -> {
+                            // entry.getKey().location() returns the ResourceLocation
+                            String registryName = entry.getKey().location().toString();
+                            return pattern.matcher(registryName).find(); // Use .find() or .matches() depending on intent
+                        })
+                        .map(java.util.Map.Entry::getValue)
+                        .toList();
+
+                allItems.addAll(matchedItems);
+            } catch (PatternSyntaxException e) {
+                NeutronTools.LOGGER.error("Invalid regex pattern in config: {}", match.nameRegex);
+            }
         }
         return allItems;
     }
@@ -179,21 +205,28 @@ public class TabItem {
             return allItems;
         }
 
-        var tagManager = ForgeRegistries.ITEMS.tags();
+        // In 1.21.1, we use BuiltInRegistries for standard access
+        var registry = BuiltInRegistries.ITEM;
 
         for (String tag : match.match_tags) {
-            if (ResourceLocation.isValidResourceLocation(tag)) {
-                ResourceLocation location = new ResourceLocation(tag);
-                TagKey<Item> tagKey = tagManager.createTagKey(location);
-                ITag<Item> tagContents = tagManager.getTag(tagKey);
+            // ResourceLocation constructor is deprecated/removed; use parse or tryParse
+            ResourceLocation location = ResourceLocation.tryParse(tag);
 
-                if (!tagManager.isKnownTagName(tagKey)) {
+            if (location != null) {
+                // Create the TagKey using the Item Registry Key
+                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, location);
+
+                // Fetch the tag holder from the registry
+                var tagOptional = registry.getTag(tagKey);
+
+                if (tagOptional.isPresent()) {
+                    // Stream the contents of the tag into the list
+                    tagOptional.get().forEach(holder -> allItems.add(holder.value()));
+                } else {
                     NeutronTools.LOGGER.warn("No known tag name found for: {}", tagKey);
-                    continue;
                 }
-                allItems.addAll(tagContents.stream().collect(Collectors.toSet()));
             } else {
-                NeutronTools.LOGGER.warn("Invalid tag: {}", tag);
+                NeutronTools.LOGGER.warn("Invalid tag format: {}", tag);
             }
         }
         return allItems;

@@ -46,7 +46,8 @@ public class ClientModEvents {
     }
 
     public static void onCreativeTabReady(CreativeModeTab self) {
-        if (CreativeTabEdits.INSTANCE.original_SortedTabs.contains(self)) {
+        if (CreativeTabEdits.INSTANCE.original_SortedTabs != null &&
+                CreativeTabEdits.INSTANCE.original_SortedTabs.contains(self)) {
             initialIndexedTabs.getAndIncrement();
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 reloadIfReady();
@@ -55,7 +56,9 @@ public class ClientModEvents {
     }
 
     private static void reloadIfReady() {
-        if (initialIndexedTabs.get() >= CreativeTabEdits.INSTANCE.original_SortedTabs.size() && isTagsReady() && !CreativeTabEdits.INSTANCE.isWasReloadedFirstTime()) {
+        if (CreativeTabEdits.INSTANCE.original_SortedTabs != null &&
+                initialIndexedTabs.get() >= CreativeTabEdits.INSTANCE.original_SortedTabs.size()
+                && isTagsReady() && !CreativeTabEdits.INSTANCE.isWasReloadedFirstTime()) {
             //IT IS CRUCIAL that we dont reload tabs before this point in order to properly index the original state of the tabs
             NeutronTools.LOGGER.info("Indexed {}/{} original tabs and item tags are ready. Reloading creative tabs!",
                     initialIndexedTabs,

@@ -4,7 +4,6 @@ import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import net.minecraft.util.Mth;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.utils.MathUtils;
 
 import java.io.File;
 import java.nio.file.Path;

@@ -37,15 +37,4 @@ public class PlayerMixin {
 //        cir.setReturnValue(base * SPEED_MULTIPLIER);
 //    }
 
-    @Shadow
-    @Final
-    private Abilities abilities;
-
-    @Inject(method = "getPortalWaitTime", at = @At("HEAD"), cancellable = true)
-    public void getPortalWaitTime(CallbackInfoReturnable<Integer> cir) {
-        int time = abilities.invulnerable ? 1 : NeutronTools.CONFIG.portalWaitTime;
-//        System.out.println("Portal Wait time: "+time);
-        cir.setReturnValue(time);
-    }
-
 }

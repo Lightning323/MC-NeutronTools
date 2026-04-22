@@ -1,5 +1,6 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -36,8 +37,29 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Shadow
     private Set<ItemStack> displayItemsSearchTab;
 
-    @Shadow
-    public abstract void rebuildSearchTree();
+
+//    @Unique
+//    private CreativeModeTab.ItemDisplayParameters neutron$cachedParameters;
+//
+//    @Inject(method = "buildContents", at = @At("HEAD"))
+//    private void captureParameters(CreativeModeTab.ItemDisplayParameters parameters, CallbackInfo ci) {
+//        // Store the parameters so we can rebuild later
+//        this.neutron$cachedParameters = parameters;
+//    }
+
+    public void rebuildSearchTree() {
+//
+//            if (this.neutron$cachedParameters == null) return;
+//
+//            // 1. Re-run the internal logic to populate displayItems and displayItemsSearchTab
+//            ((CreativeModeTab)(Object)this).buildContents(this.neutron$cachedParameters);
+//
+//            // 2. Tell the Minecraft Client to re-index the search bars
+//            if (net.neoforged.fml.loading.FMLEnvironment.dist == net.neoforged.api.distmarker.Dist.CLIENT) {
+//                net.minecraft.client.Minecraft.getInstance().sear
+//            }
+
+    }
 
     @Shadow
     @Final
@@ -167,7 +189,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             // For 1.12 - 1.20.4: use stack.getTag()
             // For 1.20.5+: use stack.getComponents()
             if ( //TODO: If the item is not added to the JEI blacklist, it might still not be hidden from search
-                    seen.add(new CreativeTabUtils.StackFingerprint(stack.getItem(), stack.getTag()))
+                    seen.add(new CreativeTabUtils.StackFingerprint(stack.getItem(), stack.getComponents()))
                             && !CreativeTabEdits.INSTANCE.priorityHiddenItems.contains(stack.getItem())
             ) {
 //                System.out.println("tab: "+CreativeTabUtils.getTranslationKey(self)

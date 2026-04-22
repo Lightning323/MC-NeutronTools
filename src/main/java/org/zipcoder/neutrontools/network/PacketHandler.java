@@ -14,8 +14,7 @@ public class PacketHandler {
         // "1" is your protocol version
         final PayloadRegistrar registrar = event.registrar("1");
 
-        // Register ToggleNoClip (Assumed simple payload)
-        registrar.playToServer(
+        registrar.playToClient(
                 SyncConfigPacket.TYPE,
                 SyncConfigPacket.CODEC,
                 SyncConfigPacket::handle

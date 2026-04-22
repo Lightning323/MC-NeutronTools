@@ -8,7 +8,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.FMLPaths;
 import org.apache.commons.lang3.tuple.Pair;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
@@ -163,22 +163,18 @@ public class CreativeTabEdits {
         return tabNameMode;
     }
 
-
-
     public void loadNewTabs(Map<ResourceLocation, Resource> entries) {
         for (Map.Entry<ResourceLocation, Resource> entry : entries.entrySet()) {
             ResourceLocation location = entry.getKey();
             Resource resource = entry.getValue();
 
-            NeutronTools.LOGGER.info("Processing tab data {}", location.toString());
+            NeutronTools.LOGGER.info("Processing tab data {}", location);
 
             try (InputStream stream = resource.open()) {
                 NewTabJsonHelper json = GSON.fromJson(new InputStreamReader(stream), NewTabJsonHelper.class);
                 ItemAdditionList additionList = new ItemAdditionList();
 
-                if (!json.isTabEnabled())
-                    continue;
-
+                if (!json.isTabEnabled()) continue;
 
                 for (TabItem item : json.itemsToAdd) {
                     if (item.name != null && item.name.equalsIgnoreCase("existing")) {
@@ -186,6 +182,7 @@ public class CreativeTabEdits {
                     }
                     item.populateAdditions(additionList);
                 }
+
                 if (json.itemsToRemove != null) {
                     for (TabItem item : json.itemsToRemove) {
                         Set<Item> removeItems = item.makeItemsForRemoval();
@@ -193,18 +190,22 @@ public class CreativeTabEdits {
                     }
                 }
 
-
                 if (json.replaceTab != null && !json.replaceTab.isBlank()) {
                     NeutronTools.LOGGER.info("Replaced Tab {} with {}", json.getTabName(), json.replaceTab);
                     replacedTabs.put(json.replaceTab, Pair.of(json, additionList));
                 } else {
-                    CreativeModeTab.Builder builder = new CreativeModeTab.Builder(null, -1);
+                    // 1. Use the static builder method
+                    CreativeModeTab.Builder builder = CreativeModeTab.builder();
 
                     builder.title(Component.translatable(prefix(json.getTabName())));
                     builder.icon(makeTabIcon(json));
 
-                    if (json.getTabBackground() != null && !json.getTabBackground().isEmpty())
-                        builder.backgroundSuffix(json.getTabBackground());
+                    // 2. Handle the background change
+                    if (json.getTabBackground() != null && !json.getTabBackground().isEmpty()) {
+                        // backgroundSuffix used to turn "items.png" into "textures/gui/container/creative_inventory/tab_items.png"
+                        // In 1.21.1, we use the helper method createTextureLocation
+                        builder.backgroundTexture(CreativeModeTab.createTextureLocation(json.getTabBackground()));
+                    }
 
                     CreativeModeTab tab = builder.build();
                     newTabs.add(tab);
