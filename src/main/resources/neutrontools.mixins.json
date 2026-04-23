@@ -12,9 +12,9 @@
     "creativeTabs.accessor.CreativeModeTabsAccessor",
     "creativeTabs.CreativeModeTabMixin",
     "creativeTabs.ForgeCreateTabMixin",
-    "creativeTabs.ForgeCreativeTabRegistryMixin",
-    "creativeTabs.ForgeCreativeTabsMixin",
-    "creativeTabs.ForgeCreativeTabsScreenPageMixin",
+    "creativeTabs.CreativeModeTabRegistryMixin",
+    "creativeTabs.CreativeModeTabsMixin",
+    "creativeTabs.CreativeTabsScreenPageMixin",
     "creativeTabs.accessor.ForceCreativeTabAccessor"
   ],
   "injectors": {

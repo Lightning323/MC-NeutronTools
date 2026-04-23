@@ -13,12 +13,10 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
-import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.io.File;
@@ -82,7 +80,7 @@ public class ListAllCommand {
                         }))
                         .then(Commands.literal("tab_items").executes(context -> {
                             File savePath = new File("tab_items.json");
-                            if (listCreativeTabItems(savePath, CreativeTabs.cached_creativeTabs)) {
+                            if (listCreativeTabItems(savePath, NeutronCreativeTabs.cached_creativeTabs)) {
                                 Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
                                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
@@ -97,7 +95,7 @@ public class ListAllCommand {
                         }))
                         .then(Commands.literal("original_tab_items").executes(context -> {
                             File savePath = new File("original_tab_items.json");
-                            if (listCreativeTabItems(savePath, CreativeTabs.cached_originalCreativeTabs)) {
+                            if (listCreativeTabItems(savePath, NeutronCreativeTabs.cached_originalCreativeTabs)) {
                                 Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
                                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
@@ -122,12 +120,14 @@ public class ListAllCommand {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonObject root = new JsonObject();
         JsonArray tabsArray = new JsonArray();
+        JsonArray orderedTabs = new JsonArray();
 
         try (FileWriter writer = new FileWriter(saveFile)) {
             // 1. Process Registered Tabs
             list.forEach((tabName, items) -> {
                 JsonObject tabJson = new JsonObject();
                 tabJson.addProperty("tab", tabName);
+                orderedTabs.add(tabName);
 
                 JsonArray itemsArray = new JsonArray();
                 for (ItemStack item : items) {
@@ -136,6 +136,7 @@ public class ListAllCommand {
                 tabJson.add("names", itemsArray);
                 tabsArray.add(tabJson);
             });
+            root.add("allTabs", orderedTabs);
             root.add("tabs", tabsArray);
             gson.toJson(root, writer);
 

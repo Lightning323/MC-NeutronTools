@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -11,10 +12,13 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
-import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.config.creativeTabs.NewTabJsonHelper;
+import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.zipcoder.neutrontools.config.creativeTabs.ItemAdditionList;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
+import org.zipcoder.neutrontools.events.ClientModEvents;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.util.*;
@@ -79,8 +83,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     }
 
 
-
-
     /**
      *
      * @param displayItems
@@ -101,7 +103,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         }
 
         //Add the items from unregistered tabs to the search tab otherwise they will not show up in the search tab
-        if (isSearchItems) displayItems.addAll(CreativeTabs.getItemsFromUnregisteredTabs());
+        if (isSearchItems) displayItems.addAll(NeutronCreativeTabs.getItemsFromUnregisteredTabs());
 
         //Add items from tab addition list
         if (itemsToAdd != null) itemsToAdd.addItemsInto(displayItems);
@@ -134,13 +136,15 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
         this.neutron$cachedParameters = arg;
         CreativeModeTab self = (CreativeModeTab) (Object) this;
-        LOGGER.debug("Building contents for tab: {}", self.getDisplayName().getString());
+        LOGGER.debug("Building contents for tab: {}; Tags ready: {}",
+                self.getDisplayName().getString(),
+                ClientModEvents.isTagsReady());
+
 
         //Add original tab items to the config first
-        CreativeTabs.cached_originalCreativeTabs.put(CreativeTabUtils.getRegistryID(self), new ArrayList<>(displayItems));
+        NeutronCreativeTabs.cached_originalCreativeTabs.put(CreativeTabUtils.getRegistryID(self), new ArrayList<>(displayItems));
 
         if (CreativeTabConfig.INSTANCE.isTabDisabled(self)) {
-            LOGGER.debug("\tDisabling tab: {}", self.getDisplayName().getString());
             displayItems.clear();
             displayItemsSearchTab.clear();
             return;
@@ -150,103 +154,52 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         }
 
         if (!displayItems.isEmpty()) {
-            CreativeTabs.cached_creativeTabs.put(CreativeTabUtils.getRegistryID(self), displayItems);
+            NeutronCreativeTabs.cached_creativeTabs.put(CreativeTabUtils.getRegistryID(self), displayItems);
         }
     }
-//    @Inject(method = "hasAnyItems", at = @At("RETURN"), cancellable = true)
-//    private void injectHasAnyItems(CallbackInfoReturnable<Boolean> cir) {
-//
-//        CreativeModeTab self = (CreativeModeTab) ((Object) this);
-//
-//        if (CreativeTabConfig.INSTANCE.newTabs.contains(self)
-//                && CreativeTabConfig.INSTANCE.tabAdditions.containsKey(self)) {
-//            cir.setReturnValue(true);
-//        }
-//
-//    }
-//
-//    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
-//    private void injectDisplayName(CallbackInfoReturnable<Component> cir) {
-//
-//        CreativeModeTab self = (CreativeModeTab) ((Object) this);
-//
-//        if (cached_displayName == null) {
-//            Pair<NewTabJsonHelper, ItemAdditionList> replaceTab = CreativeTabConfig.INSTANCE.getReplacementTab(self);
-//            if (replaceTab == null) {
-//                cached_displayName = this.displayName;
-//            } else {
-//                cached_displayName = Component.translatable(CreativeTabUtils.prefix(replaceTab.getLeft().getTabName()));
-//                isCachedCustomDisplayName = true;
-//            }
-//        }
-//
-//        if (CreativeTabConfig.INSTANCE.getTabNameMode() == CreativeTabConfig.TabNameMode.RESOURCE_ID) {
-//            cir.setReturnValue(Component.literal(getRegistryID(self)));
-//        } else if (CreativeTabConfig.INSTANCE.getTabNameMode() == CreativeTabConfig.TabNameMode.TRANSLATION_KEY) {
-//            cir.setReturnValue(Component.literal(getTranslationKey(cached_displayName)));
-//        } else cir.setReturnValue(cached_displayName);
-//
-//    }
-//
-//    @Inject(method = "contains", at = @At("RETURN"), cancellable = true)
-//    private void injectContains(ItemStack arg, CallbackInfoReturnable<Boolean> cir) {
-//        cir.setReturnValue(getDisplayItems().contains(arg));
-//    }
-//
-//
-//    @Inject(method = "getDisplayItems", at = @At("RETURN"), cancellable = true)
-//    private void injectDisplayItemsFilter(CallbackInfoReturnable<Collection<ItemStack>> cir) {
-//        //First time caching of our original creative tabs
-//        if (cached_FilteredDisplayItems == null) {
-//            CreativeModeTab self = (CreativeModeTab) ((Object) this);
-//            if (CreativeTabConfig.INSTANCE.original_tabDisplayItems.get(self) == null) {
-//                //We reload for the first time here so we can index the original state of the tabs
-//                CreativeTabConfig.INSTANCE.original_tabDisplayItems.put(self, new ArrayList<>());
-//                CreativeTabConfig.INSTANCE.original_tabDisplayItems.get(self).addAll(cir.getReturnValue());
-//                ClientModEvents.onCreativeTabReady(self);
-//            }
-//        }
-//
-//
-//        if (cached_FilteredDisplayItems == null && !cir.getReturnValue().isEmpty()) { //Cache the display items
-//            LOGGER.debug("tab {}: \tCaching display items...", this.displayName.getString());
-//            cached_FilteredDisplayItems = editItemStacks(cir.getReturnValue(), false);
-//        }
-//        if (cached_FilteredDisplayItems != null) cir.setReturnValue(cached_FilteredDisplayItems);
-//
-//    }
-//
-//    @Inject(method = "getSearchTabDisplayItems", at = @At("RETURN"), cancellable = true)
-//    private void injectSearchItemsFilter(CallbackInfoReturnable<Collection<ItemStack>> cir) {
-//
-//        if (cached_filteredSearchTab == null && !cir.getReturnValue().isEmpty()) { //Cache the search tab
-//            LOGGER.debug("tab {}: \tCaching search tab display items...", this.displayName.getString());
-//            cached_filteredSearchTab = editItemStacks(cir.getReturnValue(), true);
-//        }
-//        if (cached_filteredSearchTab != null) cir.setReturnValue(cached_filteredSearchTab);
-//
-//    }
-//
-//
-//    //TODO: Make sure things like this arent happening anywhere else
-//    //This method was called EVERY time the icon is requested, so we need to cache it
-//    @Inject(method = "getIconItem", at = @At("RETURN"), cancellable = true)
-//    private void injectIcon(CallbackInfoReturnable<ItemStack> cir) {
-//
-//            CreativeModeTab self = (CreativeModeTab) ((Object) this);
-//            if (!isCachedCustomIcon) {
-//                Pair<NewTabJsonHelper, ItemAdditionList> replacementTab = CreativeTabConfig.INSTANCE.getReplacementTab(self);
-//                if (replacementTab != null) {
-//                    LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
-//                    cached_TabIcon = CreativeTabUtils.makeTabIcon(replacementTab.getLeft()).get();
-//                }
-//                isCachedCustomIcon = true;
-//            }
-//
-//            if (cached_TabIcon != null && !cached_TabIcon.isEmpty())
-//                cir.setReturnValue(cached_TabIcon);
-//
-//    }
+
+    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
+    private void injectDisplayName(CallbackInfoReturnable<Component> cir) {
+
+        CreativeModeTab self = (CreativeModeTab) ((Object) this);
+
+        if (cached_displayName == null) {
+            Pair<NewTabJsonHelper, ItemAdditionList> replaceTab = CreativeTabConfig.INSTANCE.getReplacementTab(self);
+            if (replaceTab == null) {
+                cached_displayName = this.displayName;
+            } else {
+                cached_displayName = Component.translatable(CreativeTabUtils.prefix(replaceTab.getLeft().getTabName()));
+                isCachedCustomDisplayName = true;
+            }
+        }
+
+        if (CreativeTabConfig.INSTANCE.getTabNameMode() == CreativeTabConfig.TabNameMode.RESOURCE_ID) {
+            cir.setReturnValue(Component.literal(CreativeTabUtils.getRegistryID(self)));
+        } else if (CreativeTabConfig.INSTANCE.getTabNameMode() == CreativeTabConfig.TabNameMode.TRANSLATION_KEY) {
+            cir.setReturnValue(Component.literal(getTranslationKey(cached_displayName)));
+        } else cir.setReturnValue(cached_displayName);
+
+    }
+
+    //TODO: Make sure things like this arent happening anywhere else
+    //This method was called EVERY time the icon is requested, so we need to cache it
+    @Inject(method = "getIconItem", at = @At("RETURN"), cancellable = true)
+    private void injectIcon(CallbackInfoReturnable<ItemStack> cir) {
+
+            CreativeModeTab self = (CreativeModeTab) ((Object) this);
+            if (!isCachedCustomIcon) {
+                Pair<NewTabJsonHelper, ItemAdditionList> replacementTab = CreativeTabConfig.INSTANCE.getReplacementTab(self);
+                if (replacementTab != null) {
+                    LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
+                    cached_TabIcon = CreativeTabUtils.makeTabIcon(replacementTab.getLeft()).get();
+                }
+                isCachedCustomIcon = true;
+            }
+
+            if (cached_TabIcon != null && !cached_TabIcon.isEmpty())
+                cir.setReturnValue(cached_TabIcon);
+
+    }
 
 
 }

@@ -10,7 +10,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
-import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 
 import java.util.Arrays;
 
@@ -65,17 +65,6 @@ public class ClientCommands {
                                                     }
                                                 })
                                         )
-                                )
-
-                                .then(Commands.literal("reloadTabs")
-                                        .executes(context -> {
-                                            CreativeTabs.reloadTabs();
-                                            context.getSource().sendSuccess(
-                                                    () -> Component.literal("Reloaded Custom Tabs"),
-                                                    false
-                                            );
-                                            return 1;
-                                        })
                                 )
                         )
         );

@@ -1,15 +1,29 @@
 package org.zipcoder.neutrontools.mixin.creativeTabs;
 
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
+import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
+import org.zipcoder.neutrontools.creativetabs.client.impl.ForgeTabData;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.ForceCreativeTabAccessor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Mixin(value = CreativeModeTabs.class, priority = 0)
-public abstract class ForgeCreativeTabsMixin {
+public abstract class CreativeModeTabsMixin {
 
     @Shadow
     public static List<CreativeModeTab> allTabs() {
@@ -27,7 +41,7 @@ public abstract class ForgeCreativeTabsMixin {
 
 //    @Inject(method = "streamAllTabs", at = @At("RETURN"), cancellable = true)
 //    private static void injectCustomTabs(CallbackInfoReturnable<Stream<CreativeModeTab>> cir) {
-//        cir.setReturnValue(CreativeTabConfig.INSTANCE.sortedTabs.stream());
+//        cir.setReturnValue(NeutronCreativeTabs.sortedTabs.stream());
 //    }
 //
 //    // Supplementaries crashes the game with our tabs, since they are not registered (they are fake tabs)
@@ -53,8 +67,14 @@ public abstract class ForgeCreativeTabsMixin {
 //        int TABS_PER_PAGE = 10;
 //        int count = 0;
 //
-//        for (CreativeModeTab tab : CreativeTabConfig.INSTANCE.sortedTabs) {
+//        record ItemGroupPosition(CreativeModeTab.Row row, int column, int page) {
+//        }
+//        var map = new HashMap<ItemGroupPosition, String>();
 //
+//        //Populate sorted tabs list
+//        NeutronCreativeTabs.populateSortedTabsList(allTabs());
+//
+//        for (CreativeModeTab tab : NeutronCreativeTabs.sortedTabs) {
 //            ForgeTabData forgeTab = (ForgeTabData) tab;
 //            if (CreativeModeTabRegistry.getDefaultTabs().contains(tab)) {
 //                forgeTab.setPageIndex(0);
@@ -70,12 +90,7 @@ public abstract class ForgeCreativeTabsMixin {
 //
 //            count++;
 //        }
-//
-//        record ItemGroupPosition(CreativeModeTab.Row row, int column, int page) {
-//        }
-//        var map = new HashMap<ItemGroupPosition, String>();
-//
-//        for (CreativeModeTab tab : CreativeTabConfig.INSTANCE.sortedTabs) {
+//        for (CreativeModeTab tab : NeutronCreativeTabs.sortedTabs) {
 //            final ForgeTabData forgeTabData = (ForgeTabData) tab;
 //            final String displayName = tab.getDisplayName().getString();
 //            final var position = new ItemGroupPosition(tab.row(), tab.column(), forgeTabData.getPageIndex());
@@ -85,6 +100,7 @@ public abstract class ForgeCreativeTabsMixin {
 //                throw new IllegalArgumentException("Duplicate position: (%s) for item groups %s vs %s".formatted(position, displayName, existingName));
 //            }
 //        }
+//
 //    }
 //
 //    @Inject(method = "tryRebuildTabContents", at = @At("HEAD"))

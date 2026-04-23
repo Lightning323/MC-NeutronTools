@@ -9,7 +9,8 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
+import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,6 +40,7 @@ public class ClientModEvents {
         if (event.getRegistryAccess().registry(Registries.ITEM).isPresent()) {
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 tagsReady = true;
+                CreativeTabConfig.INSTANCE.load();
                 //WE ARE READY! ============================================================
             }
         }
@@ -46,6 +48,6 @@ public class ClientModEvents {
 
     @SubscribeEvent
     public static void onClientLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        CreativeTabs.playerLoggedIn();
+        NeutronCreativeTabs.playerLoggedIn();
     }
 }

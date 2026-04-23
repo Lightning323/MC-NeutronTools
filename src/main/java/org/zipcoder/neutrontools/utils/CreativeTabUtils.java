@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
-import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
+import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.zipcoder.neutrontools.config.creativeTabs.NewTabJsonHelper;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
@@ -99,7 +99,7 @@ public class CreativeTabUtils {
                 }
             });
         }
-        CreativeTabs.getItemsFromUnregisteredTabs().forEach(stack -> {
+        NeutronCreativeTabs.getItemsFromUnregisteredTabs().forEach(stack -> {
             if (stack.getItem() == item) {
                 found.set(true);
             }

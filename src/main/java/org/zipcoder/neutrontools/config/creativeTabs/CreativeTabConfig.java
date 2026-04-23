@@ -5,7 +5,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.loading.FMLPaths;
 import org.apache.commons.lang3.tuple.Pair;
 import org.zipcoder.neutrontools.NeutronTools;
@@ -38,9 +37,7 @@ public class CreativeTabConfig {
 
     //Our config parameters
     public final List<CreativeModeTab> mandatoryTabs = new ArrayList<>();
-    private final List<CreativeModeTab> vanillaTabs = new ArrayList<>();
-    public final LinkedList<CreativeModeTab> sortedTabs = new LinkedList<>();
-    private final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
+    public final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
     public final LinkedHashSet<CreativeModeTab> newTabs = new LinkedHashSet<>();
     public final HashMap<CreativeModeTab, ItemAdditionList> tabAdditions = new HashMap<>();
     public final HashMap<CreativeModeTab, Set<Item>> tabRemovals = new HashMap<>();
@@ -58,16 +55,15 @@ public class CreativeTabConfig {
         disabledTabs.clear();
         tabAdditions.clear();
         tabOrder.clear();
-        sortedTabs.clear();
         replacedTabs.clear();
         tabRemovals.clear();
 
-        loadItemsForTabs(new File(CONFIGDIR, "tab_items.json"));
+        loadCustomTabItems(new File(CONFIGDIR, "tab_items.json"));
         File[] subfiles = new File(CONFIGDIR, "tab_items").listFiles();
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
                 if (tabEditFile.getName().endsWith(".json")) {
-                    loadItemsForTabs(tabEditFile);
+                    loadCustomTabItems(tabEditFile);
                 }
             }
         }
@@ -94,10 +90,14 @@ public class CreativeTabConfig {
             }
         }
 
-//        reorderTabs_indexSortedTabs();
 
         LOGGER.debug("Creative Tab Config loaded");
         LOGGER.debug("Disabled tabs: {}", disabledTabs);
+        LOGGER.debug("Ordered tabs: {}", tabOrder);
+//        LOGGER.debug("New tabs: {}", newTabs);
+//        LOGGER.debug("Tab additions: {}", tabAdditions);
+//        LOGGER.debug("Tab removals: {}", tabRemovals);
+//        LOGGER.debug("Replaced tabs: {}", replacedTabs);
     }
 
 
@@ -140,7 +140,7 @@ public class CreativeTabConfig {
         return tabNameMode;
     }
 
-    public void loadItemsForTabs(File file) {
+    public void loadCustomTabItems(File file) {
         if (!Files.exists(file.toPath())) {
             return;
         }
@@ -159,8 +159,8 @@ public class CreativeTabConfig {
                     String tabName = tabJson.get("tab_name").getAsString();
                     CreativeModeTab tab = CreativeTabUtils.getTabFromString(tabName);
 
-                    JsonArray itemsAdd = tabJson.get("items_add").getAsJsonArray();
-                    JsonArray itemsRemove = tabJson.get("items_remove").getAsJsonArray();
+                    JsonArray itemsAdd = tabJson.get("items_to_add").getAsJsonArray();
+                    JsonArray itemsRemove = tabJson.get("items_to_remove").getAsJsonArray();
 
                     if (tab != null) {
                         itemsRemove.forEach(item -> {
@@ -181,14 +181,15 @@ public class CreativeTabConfig {
                                 }
                             }
 
-//                            // Process Additions
-//                            ItemAdditionList thisTabAdditions = tabAdditions.get(tab);
-//                            if (thisTabAdditions != null && itemsAdd != null) {
-//                                for (JsonElement tabItem : itemsAdd) {
-//
-//                                    tabItem.populateAdditions(thisTabAdditions);
-//                                }
-//                            }
+                            // Process Additions
+                            ItemAdditionList thisTabAdditions = tabAdditions.get(tab);
+                            if (thisTabAdditions != null && itemsAdd != null) {
+                                for (JsonElement tabItemJson : itemsAdd) {
+                                    // 1. Deserialize the JsonElement into your TabItem class
+                                    TabItem tabItem = GSON.fromJson(tabItemJson, TabItem.class);
+                                    tabItem.populateAdditions(thisTabAdditions);
+                                }
+                            }
                         });
                     }
                 } catch (Exception e) {
@@ -296,63 +297,8 @@ public class CreativeTabConfig {
     }
 
 
-    public void reorderTabs_indexSortedTabs() {
-        List<CreativeModeTab> allTabs = new ArrayList<>();
-        allTabs.addAll(vanillaTabs);
-        allTabs.addAll(newTabs);
-
-        LinkedHashSet<CreativeModeTab> filteredTabs = new LinkedHashSet<>();
-        boolean addRemaining = false;
-
-        // 1. Process specific ordering
-        for (String orderedTab : tabOrder) {
-            if (orderedTab.equalsIgnoreCase("existing")) {
-                addRemaining = true;
-                continue;
-            }
-
-            allTabs.stream()
-                    .filter(tab -> {
-                        String key = getTranslationKey(tab);
-                        if (key.equalsIgnoreCase(orderedTab)
-                                || key.replace("itemGroup.", "").equalsIgnoreCase(orderedTab))
-                            return true;
-
-                        if (CreativeTabUtils.getRegistryID(tab).equalsIgnoreCase(orderedTab)) return true;
-
-                        return false;
-                    })
-                    .findFirst()
-                    .ifPresent(pTab -> addTabToFilteredListIfNotDisabled(pTab, filteredTabs));
-        }
-
-        // 2. Process "existing" (catch-all for tabs not mentioned in tabOrder)
-        if (addRemaining || tabOrder.isEmpty()) {
-            for (CreativeModeTab tab : allTabs) {
-                addTabToFilteredListIfNotDisabled(tab, filteredTabs);
-            }
-        }
-
-        // 3. Final safety for mandatory tabs (only adds if not already present)
-        filteredTabs.addAll(mandatoryTabs);
-
-        // 4. Update the final list
-        sortedTabs.clear();
-        sortedTabs.addAll(filteredTabs);
-    }
 
 
-    private void addTabToFilteredListIfNotDisabled(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
-        //If our tab is not in the disabled tabs list, it makes it into the filtered list
-        if (!disabledTabs.contains(getTranslationKey(tab)) &&
-                !disabledTabs.contains(getRegistryID(tab))) {
-            filteredTabs.add(tab);
-        }
-    }
 
-    public void setVanillaTabs(List<CreativeModeTab> tabs) {
-        this.vanillaTabs.clear();
-        this.vanillaTabs.addAll(tabs);
-    }
 
 }

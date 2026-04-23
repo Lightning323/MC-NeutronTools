@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(CreativeTabsScreenPage.class)
-public class ForgeCreativeTabsScreenPageMixin {
+public class CreativeTabsScreenPageMixin {
 
     /////////////////////////////////////////////
     /// Injections =========================== //
