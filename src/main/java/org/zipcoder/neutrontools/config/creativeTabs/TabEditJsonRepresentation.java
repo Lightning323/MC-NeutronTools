@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
- class TabEditJsonRepresentation {
+class TabEditJsonRepresentation {
     public TabIcon tab_icon;
     public String tab_name_key;
     public ArrayList<ItemAdditionEntry> items_to_add;
@@ -17,7 +17,7 @@ import java.util.Map;
 
     public static void load(File jsonFile, HashMap<String, TabEditJsonRepresentation> tabMap) {
         Gson gson = new Gson();
-
+        if (!jsonFile.exists()) return;
         try {
             // 1. Read JSON string as a JsonObject
             JsonObject rootObject = JsonParser.parseString(Files.readString(jsonFile.toPath())).getAsJsonObject();
@@ -49,16 +49,51 @@ import java.util.Map;
         public ArrayList<String> match_tags;
         public String match_tab;
         public String nbt;
+
+
+        @Override
+        public String toString() {
+            return "ItemAdditionEntry{" +
+                    "index=" + index +
+                    ", names=" + names +
+                    ", match_name='" + match_name + '\'' +
+                    ", match_tags=" + match_tags +
+                    ", match_tab='" + match_tab + '\'' +
+                    ", nbt='" + nbt + '\'' +
+                    '}';
+        }
     }
 
     public static class ItemRemovalEntry {
         public ArrayList<String> names;
         public String match_name;
         public ArrayList<String> match_tags;
+        public String match_tab;
+
+
+        @Override
+        public String toString() {
+            return "ItemRemovalEntry{" +
+                    "names=" + names +
+                    ", match_name='" + match_name + '\'' +
+                    ", match_tags=" + match_tags +
+                    '}';
+        }
     }
 
     public static class TabIcon {
         public String name;
         public String nbt;
+    }
+
+
+    @Override
+    public String toString() {
+        return "TabEditJsonRepresentation{" +
+                "\ntab_icon=" + tab_icon +
+                ",\n tab_name_key='" + tab_name_key + '\'' +
+                ",\n items_to_add=" + items_to_add +
+                ",\n items_to_remove=" + items_to_remove +
+                '}';
     }
 }

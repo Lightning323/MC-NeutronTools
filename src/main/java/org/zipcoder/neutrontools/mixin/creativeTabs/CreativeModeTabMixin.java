@@ -14,8 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
-import org.zipcoder.neutrontools.config.creativeTabs.ItemAdditionList;
-import org.zipcoder.neutrontools.config.creativeTabs.TabConfig;
+import org.zipcoder.neutrontools.config.creativeTabs.TabEditConfig;
 import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 import org.zipcoder.neutrontools.events.ClientModEvents;
@@ -66,48 +65,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         cached_displayName = null;
     }
 
-
-    /**
-     *
-     * @param displayItems
-     * @param isSearchItems
-     * @return a unique list of filtered items (so we can add them to search tab)
-     */
-    @Unique
-    private void modifyDisplayItems(Collection<ItemStack> displayItems, boolean isSearchItems) {
-        CreativeModeTab self = (CreativeModeTab) ((Object) this);
-        TabConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
-
-        Set<Item> itemsToRemove = CreativeTabConfig.INSTANCE.disabledItems;
-
-        if (tabEditConfig != null) {
-            ItemAdditionList itemsToAdd = tabEditConfig.itemsAdd;
-            if (itemsToAdd != null) itemsToAdd.addItemsInto(displayItems);
-
-            itemsToRemove.addAll(tabEditConfig.itemsRemove);
-        }
-        //Add the items from unregistered tabs to the search tab otherwise they will not show up in the search tab
-        if (isSearchItems) displayItems.addAll(NeutronCreativeTabs.getItemsFromUnregisteredTabs());
-
-        //Keep only unique items and Make sure disabled items are removed from list
-        Set<CreativeTabUtils.StackFingerprint> seen = new HashSet<>();
-        List<ItemStack> uniqueFilteredResult = new ArrayList<>();
-        for (ItemStack stack : displayItems) {
-            // For 1.12 - 1.20.4: use stack.getTag()
-            // For 1.20.5+: use stack.getComponents()
-            if ( //TODO: If the item is not added to the JEI blacklist, it might still not be hidden from search
-                    seen.add(
-                            new CreativeTabUtils.StackFingerprint(stack.getItem(), stack.getComponents()))
-                            && !itemsToRemove.contains(stack.getItem())
-            ) {
-                uniqueFilteredResult.add(stack);
-            }
-        }
-        displayItems.clear();
-        displayItems.addAll(uniqueFilteredResult);
-    }
-
-
     /// //////////////////////////////////////////
     /// Injections =========================== //
     /// //////////////////////////////////////////
@@ -136,13 +93,19 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             displayItems.clear();
             displayItemsSearchTab.clear();
         } else {
-            modifyDisplayItems(displayItems, false);
-            modifyDisplayItems(displayItemsSearchTab, true);
+            TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(tab);
+            if (tabEditConfig != null) {
+                tabEditConfig.modifyDisplayItems(displayItems, displayItemsSearchTab);
+            }
+            //Add the items from unregistered tabs to the search tab otherwise they will not show up in the search tab
+            displayItemsSearchTab.addAll(NeutronCreativeTabs.getItemsFromUnregisteredTabs());
         }
     }
 
+    @Unique
     private void onAllTabsFinishedBuilding() {
         LOGGER.info("Modifying items for all tabs; Tags ready: {}", ClientModEvents.isTagsReady());
+        CreativeTabConfig.INSTANCE.load();
         for (CreativeModeTab tab : NeutronCreativeTabs.cached_originalCreativeTabs) {
             ((CreativeModeTabMixin_I) tab).modifyItems();
         }
@@ -154,11 +117,12 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
 
         if (cached_displayName == null) {
-            TabConfig tabEditConfig = new TabConfig();
-            if (tabEditConfig == null || tabEditConfig.tabNameKey == null) {
+            TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
+            if (tabEditConfig == null || tabEditConfig.tab_name_key == null) {
                 cached_displayName = this.displayName;
             } else{
-                cached_displayName = Component.translatable(CreativeTabUtils.prefix(tabEditConfig.tabNameKey));
+                cached_displayName = Component.translatable(CreativeTabUtils.prefix(tabEditConfig.tab_name_key)); //translatable (needs lang file)
+//                cached_displayName = Component.literal(CreativeTabUtils.prefix(tabEditConfig.tab_name_key)); //Literal (no need for translation)
                 isCachedCustomDisplayName = true;
             }
         }
@@ -171,25 +135,25 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
     }
 
-    //TODO: Make sure things like this arent happening anywhere else
-    //This method was called EVERY time the icon is requested, so we need to cache it
-    @Inject(method = "getIconItem", at = @At("RETURN"), cancellable = true)
-    private void injectIcon(CallbackInfoReturnable<ItemStack> cir) {
-
-        CreativeModeTab self = (CreativeModeTab) ((Object) this);
-        if (!isCachedCustomIcon) {
-            TabConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
-            if (tabEditConfig != null && tabEditConfig.tabIcon != null) {
-                LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
-                cached_TabIcon = CreativeTabUtils.makeTabIcon(tabEditConfig.tabIcon).get();
-            }
-            isCachedCustomIcon = true;
-        }
-
-        if (cached_TabIcon != null && !cached_TabIcon.isEmpty())
-            cir.setReturnValue(cached_TabIcon);
-
-    }
+//    //TODO: Make sure things like this arent happening anywhere else
+//    //This method was called EVERY time the icon is requested, so we need to cache it
+//    @Inject(method = "getIconItem", at = @At("RETURN"), cancellable = true)
+//    private void injectIcon(CallbackInfoReturnable<ItemStack> cir) {
+//
+//        CreativeModeTab self = (CreativeModeTab) ((Object) this);
+//        if (!isCachedCustomIcon) {
+//            TabConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
+//            if (tabEditConfig != null && tabEditConfig.tabIcon != null) {
+//                LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
+//                cached_TabIcon = CreativeTabUtils.makeTabIcon(tabEditConfig.tabIcon).get();
+//            }
+//            isCachedCustomIcon = true;
+//        }
+//
+//        if (cached_TabIcon != null && !cached_TabIcon.isEmpty())
+//            cir.setReturnValue(cached_TabIcon);
+//
+//    }
 
 
 }

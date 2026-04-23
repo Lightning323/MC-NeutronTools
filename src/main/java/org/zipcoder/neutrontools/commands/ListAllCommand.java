@@ -78,23 +78,8 @@ public class ListAllCommand {
                             }
                             return Command.SINGLE_SUCCESS;
                         }))
-                        .then(Commands.literal("tab_items").executes(context -> {
-                            File savePath = new File("tab_items.json");
-                            if (listCreativeTabItems(savePath, NeutronCreativeTabs.cached_creativeTabs)) {
-                                Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
-                                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
-                                context.getSource().sendSuccess(() -> successMessage, true);
-                            } else {
-                                Component errorMessage = Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
-                                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
-                                context.getSource().sendSuccess(() -> errorMessage, true);
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        }))
-                        .then(Commands.literal("original_tab_items").executes(context -> {
-                            File savePath = new File("original_tab_items.json");
+                        .then(Commands.literal("original_tabs").executes(context -> {
+                            File savePath = new File("original_tabs.json");
                             if (listCreativeTabItems(savePath, NeutronCreativeTabs.cached_originalCreativeTabItems)) {
                                 Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))

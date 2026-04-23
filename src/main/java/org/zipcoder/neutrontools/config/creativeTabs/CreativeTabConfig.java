@@ -129,8 +129,8 @@ public class CreativeTabConfig {
         //Load tab edits
         //-------------------------------------------------------
         HashMap<String, TabEditJsonRepresentation> jsonTabEdits = new HashMap<>();
-        TabEditJsonRepresentation.load(new File(CONFIG_PATH, "tab_items.json"), jsonTabEdits);
-        File[] subfiles = new File(CONFIG_PATH, "tab_items").listFiles();
+        TabEditJsonRepresentation.load(new File(CONFIG_PATH, "tab_edits.json"), jsonTabEdits);
+        File[] subfiles = new File(CONFIG_PATH, "tab_edits").listFiles();
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
                 if (tabEditFile.getName().endsWith(".json")) {
@@ -138,6 +138,8 @@ public class CreativeTabConfig {
                 }
             }
         }
+
+        LOGGER.debug("Tab Edits JSON: {}", jsonTabEdits);
 
         tabEdits.clear();
         jsonTabEdits.forEach((s, tab) -> {

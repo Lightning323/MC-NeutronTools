@@ -1,23 +1,27 @@
 package org.zipcoder.neutrontools.utils;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class CreativeTabUtils {
@@ -41,14 +45,7 @@ public class CreativeTabUtils {
         if (!stack.isEmpty()) {
             if (nbtString != null && !nbtString.isEmpty()) {
                 try {
-                    // 1. Parse the string into a CompoundTag (this still works)
-                    CompoundTag tag = TagParser.parseTag(nbtString);
-
-                    // 2. Use .set() with the CUSTOM_DATA component
-                    // CustomData.of(tag) wraps the NBT for the new component system
-                    stack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
-                            net.minecraft.world.item.component.CustomData.of(tag));
-
+                    applyNBT(stack, nbtString);
                 } catch (Exception e) {
                     NeutronTools.LOGGER.error("Failed to Process NBT for Item: {}; NBT: {}",
                             name, nbtString, e);
@@ -56,6 +53,35 @@ public class CreativeTabUtils {
             }
         }
         return stack;
+    }
+
+    public static void applyNBT(ItemStack stack, String nbtString) throws CommandSyntaxException {
+        //TODO: Make this more efficient, use the syntax loading in the give command to parse the nbt
+        CompoundTag tag = TagParser.parseTag(nbtString);
+
+        // 2. Check if the tag contains 'display.Name' (Old Format)
+        // OR if you just passed a tag like {customName: "..."}
+        if (tag.contains("customName")) {
+            String nameJson = tag.getString("customName");
+            // Convert the JSON string to a Component and set the specific component
+            stack.set(DataComponents.CUSTOM_NAME, Component.literal(nameJson));
+
+            // Remove it so it doesn't clutter CUSTOM_DATA
+            tag.remove("customName");
+        }
+        if (tag.contains("potion")) {
+            String potionType = tag.getString("potion"); // e.g., "minecraft:swiftness"
+            // Create the PotionContents record and set the component
+            stack.set(DataComponents.POTION_CONTENTS, new PotionContents(
+                    Optional.of(BuiltInRegistries.POTION.getHolderOrThrow(
+                            ResourceKey.create(Registries.POTION, ResourceLocation.parse(potionType)))),
+                    Optional.empty(), List.of()));
+            tag.remove("potion");
+        }
+        // 3. Apply everything else to CUSTOM_DATA
+        if (!tag.isEmpty()) {
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        }
     }
 
 
@@ -142,14 +168,6 @@ public class CreativeTabUtils {
                 return tab;
             }
         }
-
-        // 3. Check your custom injected tabs
-        for (CreativeModeTab tab : CreativeTabConfig.INSTANCE.newTabs) {
-            if (getTranslationKey(tab).equals(key)) {
-                return tab;
-            }
-        }
-
         return null;
     }
 
