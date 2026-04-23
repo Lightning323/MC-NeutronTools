@@ -48,11 +48,11 @@ public class CreativeTabConfig {
     public static void plantStarterFiles() {
         try {
             Files.writeString(new File(CONFIG_PATH, "disabled_tabs.json").toPath(),
-                    "{'disabled_tabs':[]}");
+                    "{\n\"disabled_tabs\":[]\n}");
             Files.writeString(new File(CONFIG_PATH, "disabled_items.json").toPath(),
-                    "{'disabled_items':[]}");
+                    "{\n\"disabled_items\":[]\n}");
             Files.writeString(new File(CONFIG_PATH, "ordered_tabs.json").toPath(),
-                    "{'ordered_tabs':[]}");
+                    "{\n\"ordered_tabs\":[]\n}");
             new File(CONFIG_PATH, "new_tabs").mkdirs();
             new File(CONFIG_PATH, "tab_items").mkdirs();
         } catch (Exception e) {
@@ -310,10 +310,6 @@ public class CreativeTabConfig {
             }
         }
     }
-
-
-
-
 
 
 }
