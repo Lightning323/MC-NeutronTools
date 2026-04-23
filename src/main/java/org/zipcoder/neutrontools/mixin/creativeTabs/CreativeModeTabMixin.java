@@ -120,7 +120,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
             if (tabEditConfig == null || tabEditConfig.tab_name_key == null) {
                 cached_displayName = this.displayName;
-            } else{
+            } else {
                 cached_displayName = Component.translatable(CreativeTabUtils.prefix(tabEditConfig.tab_name_key)); //translatable (needs lang file)
 //                cached_displayName = Component.literal(CreativeTabUtils.prefix(tabEditConfig.tab_name_key)); //Literal (no need for translation)
                 isCachedCustomDisplayName = true;
@@ -135,25 +135,27 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
     }
 
-//    //TODO: Make sure things like this arent happening anywhere else
-//    //This method was called EVERY time the icon is requested, so we need to cache it
-//    @Inject(method = "getIconItem", at = @At("RETURN"), cancellable = true)
-//    private void injectIcon(CallbackInfoReturnable<ItemStack> cir) {
-//
-//        CreativeModeTab self = (CreativeModeTab) ((Object) this);
-//        if (!isCachedCustomIcon) {
-//            TabConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
-//            if (tabEditConfig != null && tabEditConfig.tabIcon != null) {
-//                LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
-//                cached_TabIcon = CreativeTabUtils.makeTabIcon(tabEditConfig.tabIcon).get();
-//            }
-//            isCachedCustomIcon = true;
-//        }
-//
-//        if (cached_TabIcon != null && !cached_TabIcon.isEmpty())
-//            cir.setReturnValue(cached_TabIcon);
-//
-//    }
+    //TODO: Make sure things like this arent happening anywhere else
+    //This method was called EVERY time the icon is requested, so we need to cache it
+    @Inject(method = "getIconItem", at = @At("RETURN"), cancellable = true)
+    private void injectIcon(CallbackInfoReturnable<ItemStack> cir) {
+
+        CreativeModeTab self = (CreativeModeTab) ((Object) this);
+        if (!isCachedCustomIcon) {
+            TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
+            if (tabEditConfig != null
+                    && tabEditConfig.tab_icon != null
+                    && tabEditConfig.tab_icon.get() != ItemStack.EMPTY) {
+                LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
+                cached_TabIcon = tabEditConfig.tab_icon.get();
+            }
+            isCachedCustomIcon = true;
+        }
+
+        if (cached_TabIcon != null && !cached_TabIcon.isEmpty())
+            cir.setReturnValue(cached_TabIcon);
+
+    }
 
 
 }
