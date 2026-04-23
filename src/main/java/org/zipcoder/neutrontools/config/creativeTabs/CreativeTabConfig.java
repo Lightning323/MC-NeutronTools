@@ -31,7 +31,6 @@ public class CreativeTabConfig {
     }
 
     public static final CreativeTabConfig INSTANCE = new CreativeTabConfig();
-    protected final Gson GSON = new Gson();
 
     public final Set<String> disabledTabs = new HashSet<>();
     public final Set<Item> disabledItems = new HashSet<>();
