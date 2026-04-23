@@ -13,7 +13,6 @@ import net.minecraft.world.item.Items;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
-import org.zipcoder.neutrontools.config.creativeTabs.NewTabJsonHelper;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
 import java.util.*;
@@ -23,21 +22,17 @@ import java.util.function.Supplier;
 
 public class CreativeTabUtils {
 
-    /**
-     * Provides the item stack for the tab icon, given the json helper object
-     *
-     * @param json the json helper
-     * @return the item stack for the tab icon
-     */
-    public static Supplier<ItemStack> makeTabIcon(NewTabJsonHelper json) {
-        AtomicReference<ItemStack> icon = new AtomicReference<>(ItemStack.EMPTY);
-        NewTabJsonHelper.TabIcon tabIcon = json.getTabIcon() != null ? json.getTabIcon() : new NewTabJsonHelper.TabIcon();
 
-        /* Resolve the Icon from the Item Registry */
-        ItemStack stack = makeItemStack(tabIcon.getName());
+    public static Supplier<ItemStack> makeTabIcon(String name, String nbtString) {
+        ItemStack stack = makeItemStack(name, nbtString);
+        if (stack.isEmpty()) return () -> new ItemStack(Items.GRASS_BLOCK, 1);
+        return () -> stack;
+    }
+
+    public static ItemStack makeItemStack(String name, String nbtString) {
+        ItemStack stack = makeItemStack(name);
 
         if (!stack.isEmpty()) {
-            String nbtString = tabIcon.getNbt();
             if (nbtString != null && !nbtString.isEmpty()) {
                 try {
                     // 1. Parse the string into a CompoundTag (this still works)
@@ -49,16 +44,12 @@ public class CreativeTabUtils {
                             net.minecraft.world.item.component.CustomData.of(tag));
 
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to Process NBT for Item: {}; Tab: {}; NBT: {}",
-                            tabIcon.getName(), json.getTabName(), nbtString, e);
+                    NeutronTools.LOGGER.error("Failed to Process NBT for Item: {}; NBT: {}",
+                            name, nbtString, e);
                 }
             }
-            icon.set(stack);
-            icon.get().setCount(1);
         }
-
-        if (icon.get().isEmpty()) icon.set(new ItemStack(Items.GRASS_BLOCK, 1));
-        return icon::get;
+        return stack;
     }
 
 
@@ -111,7 +102,6 @@ public class CreativeTabUtils {
     }
 
 
-
     public static List<ItemStack> getUniqueOrderedStacks(Collection<ItemStack> input) {
         // This set tracks the singleton Item instances we've already processed
         Set<Item> seenItems = new LinkedHashSet<>();
@@ -126,7 +116,6 @@ public class CreativeTabUtils {
         }
         return result;
     }
-
 
 
     /**

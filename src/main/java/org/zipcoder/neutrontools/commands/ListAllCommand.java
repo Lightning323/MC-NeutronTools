@@ -95,7 +95,7 @@ public class ListAllCommand {
                         }))
                         .then(Commands.literal("original_tab_items").executes(context -> {
                             File savePath = new File("original_tab_items.json");
-                            if (listCreativeTabItems(savePath, NeutronCreativeTabs.cached_originalCreativeTabs)) {
+                            if (listCreativeTabItems(savePath, NeutronCreativeTabs.cached_originalCreativeTabItems)) {
                                 Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
                                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
