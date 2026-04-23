@@ -7,18 +7,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ItemAdditionList {
+    //We make a list of index (position in our tab) and list of items to add
     private final Map<Integer, List<ItemStack>> itemMap;
 
     public ItemAdditionList() {
         this.itemMap = new HashMap<>();
-    }
-
-    public ItemAdditionList(ItemAdditionList itemAdditionList) {
-        //make deep copy
-        this.itemMap = new HashMap<>();
-        itemAdditionList.itemMap.forEach((key, value) -> {
-            this.itemMap.put(key, new ArrayList<>(value));
-        });
     }
 
 
@@ -48,36 +41,6 @@ public class ItemAdditionList {
     }
 
     /**
-     * Retrieves the list of items for a specific ID.
-     * Returns an empty list instead of null to prevent NullPointerExceptions.
-     */
-    public List<ItemStack> getStacks(int id) {
-        return itemMap.getOrDefault(id, Collections.emptyList());
-    }
-
-    /**
-     * Gets all mapped IDs.
-     */
-    public Set<Integer> getAllIds() {
-        return itemMap.keySet();
-    }
-
-    /**
-     * Returns a flat list of all ItemStacks, ordered by their map index.
-     * If index 1 has [Iron] and index 5 has [Gold], Iron will appear before Gold.
-     */
-    public List<ItemStack> getAllItemsOrdered() {
-        return itemMap.entrySet().stream()
-                // Sort by the index (the key)
-                .sorted(Map.Entry.comparingByKey())
-                // Get the list of items for each index
-                .map(Map.Entry::getValue)
-                // Flatten the lists into a single stream
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Gets a unique set of all ItemStacks currently stored.
      */
     public Set<ItemStack> getAllItemStacks() {
@@ -103,7 +66,7 @@ public class ItemAdditionList {
      * Inserts the stored items into the provided collection at their
      * respective index positions.
      */
-    public void apply(Collection<ItemStack> inputStacks) {
+    public void addItemsInto(Collection<ItemStack> inputStacks) {
         if (inputStacks == null || itemMap.isEmpty()) return;
 
         // If the collection is a List, we can use positional access

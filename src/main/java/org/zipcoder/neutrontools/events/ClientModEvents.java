@@ -1,15 +1,14 @@
 package org.zipcoder.neutrontools.events;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,30 +39,13 @@ public class ClientModEvents {
         if (event.getRegistryAccess().registry(Registries.ITEM).isPresent()) {
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 tagsReady = true;
-                reloadIfReady();
+                //WE ARE READY! ============================================================
             }
         }
     }
 
-    public static void onCreativeTabReady(CreativeModeTab self) {
-        if (CreativeTabConfig.INSTANCE.original_SortedTabs != null &&
-                CreativeTabConfig.INSTANCE.original_SortedTabs.contains(self)) {
-            initialIndexedTabs.getAndIncrement();
-            if (FMLEnvironment.dist == Dist.CLIENT) {
-                reloadIfReady();
-            }
-        }
-    }
-
-    private static void reloadIfReady() {
-        if (CreativeTabConfig.INSTANCE.original_SortedTabs != null &&
-                initialIndexedTabs.get() >= CreativeTabConfig.INSTANCE.original_SortedTabs.size()
-                && isTagsReady()) {
-            //IT IS CRUCIAL that we dont reload tabs before this point in order to properly index the original state of the tabs
-            NeutronTools.LOGGER.info("Indexed {}/{} original tabs and item tags are ready. Reloading creative tabs!",
-                    initialIndexedTabs,
-                    CreativeTabConfig.INSTANCE.original_SortedTabs.size());
-            CreativeTabs.reloadTabs();
-        }
+    @SubscribeEvent
+    public static void onClientLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        CreativeTabs.playerLoggedIn();
     }
 }

@@ -14,8 +14,6 @@ import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 
 import java.util.Arrays;
 
-import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
-
 @EventBusSubscriber(
         modid = NeutronTools.MODID,
         bus = EventBusSubscriber.Bus.MOD,
@@ -27,7 +25,7 @@ public class ClientCommands {
     public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
 
         event.getDispatcher().register(
-                Commands.literal(NAMESPACE)
+                Commands.literal(NeutronTools.MODID)
                         .then(Commands.literal("creativetabs")
                                 .requires(source -> source.hasPermission(2))
 

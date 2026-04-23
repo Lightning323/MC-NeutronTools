@@ -8,9 +8,7 @@ import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class CreativeTabs {
 
@@ -59,10 +57,17 @@ public class CreativeTabs {
 
     //We need to add the items from unregistered tabs to the search tab otherwise they will not show up in the search
     final static Set<ItemStack> itemsFromUnregisteredTabs = new HashSet<>();
-
+    public static final HashMap<String, Collection<ItemStack>> cached_creativeTabs = new HashMap<>();
+    public static final HashMap<String,Collection<ItemStack>> cached_originalCreativeTabs = new HashMap<>();
 
     public static Set<ItemStack> getItemsFromUnregisteredTabs() {
         return itemsFromUnregisteredTabs;
     }
 
+    public static void playerLoggedIn() {
+
+        itemsFromUnregisteredTabs.clear();
+        cached_creativeTabs.clear();
+        cached_originalCreativeTabs.clear();
+    }
 }

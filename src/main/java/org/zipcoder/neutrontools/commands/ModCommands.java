@@ -30,13 +30,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static net.neoforged.neoforge.internal.versions.neoforge.NeoForgeVersion.MOD_ID;
+
 @EventBusSubscriber(
         modid = NeutronTools.MODID,
         bus = EventBusSubscriber.Bus.MOD
 )
 public class ModCommands {
 
-    public final static String NAMESPACE = "neutron";
 
     public static int executeParsedCommandOP(CommandSourceStack originalSource, String command, boolean redirectOutput) {
         MinecraftServer server = originalSource.getServer();
@@ -117,44 +118,8 @@ public class ModCommands {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
         // === Create ONE clean namespace root ===
-        root = Commands.literal(NAMESPACE);
+        root = Commands.literal(NeutronTools.MODID);
 
-        // === /neutron pointcompass <x> <y> <z> (OP only) ===
-//        root.then(Commands.literal("pointcompass")
-//                .requires(source -> source.hasPermission(2))  // Requires OP level 2
-//                .then(Commands.argument("x", IntegerArgumentType.integer())
-//                        .then(Commands.argument("y", IntegerArgumentType.integer())
-//                                .then(Commands.argument("z", IntegerArgumentType.integer())
-//                                        .executes(context -> {
-//                                            // Get the command source and coordinates
-//                                            CommandSourceStack source = context.getSource();
-//                                            int x = IntegerArgumentType.getInteger(context, "x");
-//                                            int y = IntegerArgumentType.getInteger(context, "y");
-//                                            int z = IntegerArgumentType.getInteger(context, "z");
-//
-//                                            if (!(source.getEntity() instanceof Player player)) {
-//                                                source.sendFailure(Component.literal("This command can only be used by players!"));
-//                                                return 0;
-//                                            }
-//
-//                                            // Update the compass
-//                                            boolean success = CompassUtils.updateHeldCompass(
-//                                                    player,
-//                                                    new BlockPos(x, y, z),
-//                                                    source.getLevel()
-//                                            );
-//
-//                                            if (!success) {
-//                                                source.sendFailure(Component.literal("You must be holding a compass!"));
-//                                                return 0;
-//                                            }
-//
-//                                            return 1;
-//                                        })
-//                                )
-//                        )
-//                )
-//        );
 
         // === /neutron kill near  (OP only) ===
         root.then(

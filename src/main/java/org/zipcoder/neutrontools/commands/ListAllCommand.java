@@ -15,25 +15,23 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
-import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-import static org.zipcoder.neutrontools.commands.ModCommands.NAMESPACE;
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 
 public class ListAllCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
-        dispatcher.register(Commands.literal(NAMESPACE)
+        dispatcher.register(Commands.literal(NeutronTools.MODID)
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("listall")
                         .requires(source -> source.hasPermission(2))
@@ -82,24 +80,9 @@ public class ListAllCommand {
                             }
                             return Command.SINGLE_SUCCESS;
                         }))
-                        .then(Commands.literal("creativetabs").executes(context -> {
-                            File savePath = new File("creative_mode_tabs.txt");
-                            if (listCreativeModeTabsToFile(savePath)) {
-                                Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
-                                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
-                                context.getSource().sendSuccess(() -> successMessage, true);
-                            } else {
-                                Component errorMessage = Component.literal("Failed to save list (path: " + savePath.getAbsolutePath() + ")!")
-                                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
-                                context.getSource().sendSuccess(() -> errorMessage, true);
-                            }
-                            return Command.SINGLE_SUCCESS;
-                        }))
                         .then(Commands.literal("tab_items").executes(context -> {
-                            File savePath = new File("tab_item_list.json");
-                            if (listItemsInCreativeTabsToFile(savePath)) {
+                            File savePath = new File("tab_items.json");
+                            if (listCreativeTabItems(savePath, CreativeTabs.cached_creativeTabs)) {
                                 Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
                                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
@@ -113,8 +96,8 @@ public class ListAllCommand {
                             return Command.SINGLE_SUCCESS;
                         }))
                         .then(Commands.literal("original_tab_items").executes(context -> {
-                            File savePath = new File("original_tab_item_list.json");
-                            if (listOriginalItemsInCreativeTabsToFile(savePath)) {
+                            File savePath = new File("original_tab_items.json");
+                            if (listCreativeTabItems(savePath, CreativeTabs.cached_originalCreativeTabs)) {
                                 Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
                                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
@@ -132,8 +115,8 @@ public class ListAllCommand {
     }
 
 
-    private static boolean listItemsInCreativeTabsToFile(File saveFile) {
-        NeutronTools.LOGGER.info("Saving item creative tab list to {}", saveFile.getAbsolutePath());
+    private static boolean listCreativeTabItems(File saveFile, HashMap<String, Collection<ItemStack>> list) {
+        NeutronTools.LOGGER.info("Saving original creative tab list to {}", saveFile.getAbsolutePath());
 
         // Use Gson for clean JSON formatting
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -142,63 +125,17 @@ public class ListAllCommand {
 
         try (FileWriter writer = new FileWriter(saveFile)) {
             // 1. Process Registered Tabs
-            List<CreativeModeTab> allTabs = new ArrayList<>();
-            allTabs.addAll(CreativeTabConfig.INSTANCE.sortedTabs);
-            allTabs.addAll(CreativeTabConfig.INSTANCE.newTabs);
-
-            for (CreativeModeTab tab : allTabs) {
-                JsonObject tabObj = new JsonObject();
-                tabObj.addProperty("tab", CreativeTabUtils.getTranslationKey(tab));
+            list.forEach((tabName, items) -> {
+                JsonObject tabJson = new JsonObject();
+                tabJson.addProperty("tab", tabName);
 
                 JsonArray itemsArray = new JsonArray();
-                tab.getDisplayItems().forEach(stack -> {
-                    // Get the registry name or standard string representation of the item
-                    itemsArray.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
-                });
-                tabObj.add("names", itemsArray);
-                tabsArray.add(tabObj);
-            }
-
-            // 3. Assemble and Write
-            root.add("tabs", tabsArray);
-            gson.toJson(root, writer);
-
-            NeutronTools.LOGGER.info("Saved item list to: {}", saveFile.getAbsolutePath());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            NeutronTools.LOGGER.warn("Failed to save item list: {}", e.getMessage());
-        }
-        return false;
-    }
-
-    private static boolean listOriginalItemsInCreativeTabsToFile(File saveFile) {
-        NeutronTools.LOGGER.info("Saving item creative tab list to {}", saveFile.getAbsolutePath());
-
-        // Use Gson for clean JSON formatting
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonObject root = new JsonObject();
-        JsonArray tabsArray = new JsonArray();
-
-        try (FileWriter writer = new FileWriter(saveFile)) {
-            // 1. Process Registered Tabs
-            for (CreativeModeTab tab : CreativeTabConfig.INSTANCE.original_SortedTabs) {//BuiltInRegistries.CREATIVE_MODE_TAB
-                JsonObject tabObj = new JsonObject();
-                tabObj.addProperty("tab", CreativeTabUtils.getTranslationKey(tab));
-
-                JsonArray itemsArray = new JsonArray();
-                if (CreativeTabConfig.INSTANCE.original_tabDisplayItems.get(tab) != null) {
-                    CreativeTabConfig.INSTANCE.original_tabDisplayItems.get(tab).forEach(stack -> {
-                        // Get the registry name or standard string representation of the item
-                        itemsArray.add(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
-                    });
+                for (ItemStack item : items) {
+                    itemsArray.add(BuiltInRegistries.ITEM.getKey(item.getItem()).toString());
                 }
-
-
-                tabObj.add("names", itemsArray);
-                tabsArray.add(tabObj);
-            }
-            // 3. Assemble and Write
+                tabJson.add("names", itemsArray);
+                tabsArray.add(tabJson);
+            });
             root.add("tabs", tabsArray);
             gson.toJson(root, writer);
 
@@ -226,27 +163,7 @@ public class ListAllCommand {
         return false;
     }
 
-    private static boolean listCreativeModeTabsToFile(File saveFile) {
-        NeutronTools.LOGGER.info("Saving creative mode tab list to {}", saveFile.getAbsolutePath());
-        try (FileWriter writer = new FileWriter(saveFile)) {
-            // Header with columns: Tab name (40 chars) | Tab Mod-ID (30 chars)
-            writer.write(String.format("%-40s   %-30s%n", "REGISTRY ID", "TRANSLATION KEY"));
-            writer.write(String.join("", Collections.nCopies(75, "-")) + "\n");
 
-            // Data rows
-            for (ResourceLocation id : BuiltInRegistries.CREATIVE_MODE_TAB.keySet()) {
-                CreativeModeTab tab = BuiltInRegistries.CREATIVE_MODE_TAB.get(id);
-                String tabInternalName = getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
-                // Left-justified name (40 chars) | Left-justified mod ID (30 chars)
-                writer.write(String.format("%-40s   %-30s%n", id.toString(), tabInternalName));
-            }
-            NeutronTools.LOGGER.info("Saved creative mode tab list to: {}", saveFile.getAbsolutePath());
-            return true;
-        } catch (IOException e) {
-            NeutronTools.LOGGER.error("Failed to save creative mode tab list", e);
-        }
-        return false;
-    }
 
 
     private static boolean listEntitiesToFile(File saveFile) {

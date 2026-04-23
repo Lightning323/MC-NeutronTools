@@ -4,7 +4,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,11 +11,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.creativetabs.CreativeTabs;
 import org.zipcoder.neutrontools.config.creativeTabs.ItemAdditionList;
-import org.zipcoder.neutrontools.config.creativeTabs.NewTabJsonHelper;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
@@ -82,85 +79,49 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     }
 
 
+
+
+    /**
+     *
+     * @param displayItems
+     * @param isSearchItems
+     * @return a unique list of filtered items (so we can add them to search tab)
+     */
     @Unique
-    private Collection<ItemStack> editItemStacks(Collection<ItemStack> inputStacks, boolean isSearchItems) {
+    private void modifyDisplayItems(Collection<ItemStack> displayItems, boolean isSearchItems) {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
-        //If this is a new tab or the search tab, return the input stacks
-        if (CreativeTabConfig.INSTANCE.newTabs.contains(self) || self.getType() == CreativeModeTab.Type.SEARCH)
-            return inputStacks;
 
-        //Get the original stacks
-        Collection<ItemStack> originalStacks = this.displayItems;
-        if (isSearchItems) originalStacks = this.displayItemsSearchTab;
+        //First get a list of all items to add and remove
+        ItemAdditionList itemsToAdd = CreativeTabConfig.INSTANCE.tabAdditions.get(self);
 
-        //Get the items to remove
-        Set<Item> itemsToRemove = new HashSet<>();
-        itemsToRemove.addAll(CreativeTabConfig.INSTANCE.hiddenItems);
-
+        Set<Item> itemsToRemove = CreativeTabConfig.INSTANCE.disabledItems;
         Set<Item> tabRemovals = CreativeTabConfig.INSTANCE.tabRemovals.get(self);
         if (tabRemovals != null && !tabRemovals.isEmpty()) {
             itemsToRemove.addAll(tabRemovals);
         }
 
+        //Add the items from unregistered tabs to the search tab otherwise they will not show up in the search tab
+        if (isSearchItems) displayItems.addAll(CreativeTabs.getItemsFromUnregisteredTabs());
 
-        //Add items of replacement tab
-        Pair<NewTabJsonHelper, ItemAdditionList> replacementTab = CreativeTabConfig.INSTANCE.getReplacementTab(self);
-        if (replacementTab != null) {
-            ItemAdditionList replacementTabAdditions = replacementTab.getRight();
-            if (replacementTab.getLeft().isShouldKeepExisting()) {
-                List<ItemStack> existing = new ArrayList<>();
-                originalStacks.stream()
-                        .filter(i -> !itemsToRemove.contains(i.getItem()))
-                        .forEach(existing::add);
-                replacementTabAdditions.addStacks(replacementTab.getLeft().getExistingIndex(), existing);
-            }
+        //Add items from tab addition list
+        if (itemsToAdd != null) itemsToAdd.addItemsInto(displayItems);
 
-            List<ItemStack> list = new ArrayList<>();
-            replacementTabAdditions.apply(list);
-            return addFilterAndReturn(list, isSearchItems);
-        }
-
-        Collection<ItemStack> filteredStacks = new ArrayList<>();
-        if (originalStacks != null && !originalStacks.isEmpty()) {
-            originalStacks.forEach(i -> {
-                if (!itemsToRemove.contains(i.getItem())) {
-                    filteredStacks.add(i);
-                }
-            });
-
-            if (!filteredStacks.isEmpty()) {
-                return addFilterAndReturn(filteredStacks, isSearchItems); //Add items right before returning it
-            }
-        }
-
-        return addFilterAndReturn(inputStacks, isSearchItems); //Add items right before returning it
-    }
-
-    @Unique
-    private List<ItemStack> addFilterAndReturn(Collection<ItemStack> inputStacks, boolean isSearchItems) {
-        CreativeModeTab self = (CreativeModeTab) ((Object) this);
-        ItemAdditionList itemsToAdd = CreativeTabConfig.INSTANCE.tabAdditions.get(self);
-
-        //We need to add the items from unregistered tabs to the search tab otherwise they will not show up in the search tab
-        if (isSearchItems) inputStacks.addAll(CreativeTabs.getItemsFromUnregisteredTabs());
-        if (itemsToAdd != null) itemsToAdd.apply(inputStacks);
-
-        //Keep only unique items and Make sure priority hidden items are removed from list
+        //Keep only unique items and Make sure disabled items are removed from list
         Set<CreativeTabUtils.StackFingerprint> seen = new HashSet<>();
         List<ItemStack> uniqueFilteredResult = new ArrayList<>();
-        for (ItemStack stack : inputStacks) {
+        for (ItemStack stack : displayItems) {
             // For 1.12 - 1.20.4: use stack.getTag()
             // For 1.20.5+: use stack.getComponents()
             if ( //TODO: If the item is not added to the JEI blacklist, it might still not be hidden from search
-                    seen.add(new CreativeTabUtils.StackFingerprint(stack.getItem(), stack.getComponents()))
-                            && !CreativeTabConfig.INSTANCE.priorityHiddenItems.contains(stack.getItem())
+                    seen.add(
+                            new CreativeTabUtils.StackFingerprint(stack.getItem(), stack.getComponents()))
+                            && !itemsToRemove.contains(stack.getItem())
             ) {
-//                System.out.println("tab: "+CreativeTabUtils.getTranslationKey(self)
-//                        +" Adding stack: "+stack.getItem().toString());
                 uniqueFilteredResult.add(stack);
             }
         }
-        return uniqueFilteredResult;
+        displayItems.clear();
+        displayItems.addAll(uniqueFilteredResult);
     }
 
 
@@ -175,21 +136,21 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         CreativeModeTab self = (CreativeModeTab) (Object) this;
         LOGGER.debug("Building contents for tab: {}", self.getDisplayName().getString());
 
+        //Add original tab items to the config first
+        CreativeTabs.cached_originalCreativeTabs.put(CreativeTabUtils.getRegistryID(self), new ArrayList<>(displayItems));
+
         if (CreativeTabConfig.INSTANCE.isTabDisabled(self)) {
             LOGGER.debug("\tDisabling tab: {}", self.getDisplayName().getString());
             displayItems.clear();
             displayItemsSearchTab.clear();
-        } else if (CreativeTabConfig.INSTANCE.newTabs.contains(self)
-                && CreativeTabConfig.INSTANCE.tabAdditions.containsKey(self)) {
+            return;
+        } else {
+            modifyDisplayItems(displayItems, false);
+            modifyDisplayItems(displayItemsSearchTab, true);
+        }
 
-            NeutronTools.LOGGER.debug("\tAdding contents of new tab: {}", self.getDisplayName().getString());
-            ci.cancel(); //clear tab
-            displayItems.clear();
-            displayItemsSearchTab.clear();
-            ItemAdditionList stacks = CreativeTabConfig.INSTANCE.tabAdditions.get(self);
-            stacks.apply(displayItems);
-            stacks.apply(displayItemsSearchTab);
-            rebuildSearchTree();
+        if (!displayItems.isEmpty()) {
+            CreativeTabs.cached_creativeTabs.put(CreativeTabUtils.getRegistryID(self), displayItems);
         }
     }
 //    @Inject(method = "hasAnyItems", at = @At("RETURN"), cancellable = true)

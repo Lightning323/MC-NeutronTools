@@ -1,9 +1,6 @@
 package org.zipcoder.neutrontools.config.creativeTabs;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -28,6 +25,7 @@ import static org.zipcoder.neutrontools.utils.CreativeTabUtils.*;
 //@Getter
 public class CreativeTabConfig {
 
+
     public CreativeTabConfig() {
         load();
         mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()));
@@ -47,13 +45,8 @@ public class CreativeTabConfig {
     public final HashMap<CreativeModeTab, ItemAdditionList> tabAdditions = new HashMap<>();
     public final HashMap<CreativeModeTab, Set<Item>> tabRemovals = new HashMap<>();
     public final Set<String> disabledTabs = new HashSet<>();
-    public final Set<Item> hiddenItems = new HashSet<>();
-    public final Set<Item> priorityHiddenItems = new HashSet<>();
+    public final Set<Item> disabledItems = new HashSet<>();
     private boolean wasReloaded = false;
-
-    //For caching the original state of the creative tabs
-    public List<CreativeModeTab> original_SortedTabs;
-    public final HashMap<CreativeModeTab, List<ItemStack>> original_tabDisplayItems = new HashMap<>();
 
 
     public void load() {
@@ -61,7 +54,7 @@ public class CreativeTabConfig {
         //Reset everything first
         wasReloaded = true;
         newTabs.clear();
-        hiddenItems.clear();
+        disabledItems.clear();
         disabledTabs.clear();
         tabAdditions.clear();
         tabOrder.clear();
@@ -69,8 +62,16 @@ public class CreativeTabConfig {
         replacedTabs.clear();
         tabRemovals.clear();
 
-        //CreativeTabConfig.INSTANCE.loadNewTabs(customTabs);
-        //CreativeTabConfig.INSTANCE.loadItemsForTabs(itemsJson);
+        loadItemsForTabs(new File(CONFIGDIR, "tab_items.json"));
+        File[] subfiles = new File(CONFIGDIR, "tab_items").listFiles();
+        if (subfiles != null) {
+            for (File tabEditFile : subfiles) {
+                if (tabEditFile.getName().endsWith(".json")) {
+                    loadItemsForTabs(tabEditFile);
+                }
+            }
+        }
+
         loadSimpleJsonLists(new File(CONFIGDIR, "disabled_tabs.json"));
         loadSimpleJsonLists(new File(CONFIGDIR, "disabled_items.json"));
         loadSimpleJsonLists(new File(CONFIGDIR, "ordered_tabs.json"));
@@ -84,8 +85,7 @@ public class CreativeTabConfig {
                     Files.readAllLines(jeiBlacklist.toPath()).forEach(line -> {
                         if (!line.isBlank()) {
                             Item i = makeItemStack(line.strip()).getItem();
-                            hiddenItems.add(i);
-                            priorityHiddenItems.add(i);
+                            disabledItems.add(i);
                         }
                     });
                 } catch (IOException e) {
@@ -99,7 +99,6 @@ public class CreativeTabConfig {
         LOGGER.debug("Creative Tab Config loaded");
         LOGGER.debug("Disabled tabs: {}", disabledTabs);
     }
-
 
 
     public void setWasReloaded(boolean b) {
@@ -141,49 +140,60 @@ public class CreativeTabConfig {
         return tabNameMode;
     }
 
-    public void loadItemsForTabs(JsonObject itemsJson) {
-        if (itemsJson == null || itemsJson.size() == 0) return;
+    public void loadItemsForTabs(File file) {
+        if (!Files.exists(file.toPath())) {
+            return;
+        }
+        JsonObject jsonObject;
+        try (Reader reader = Files.newBufferedReader(file.toPath())) {
+            jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (Exception e) {
+            NeutronTools.LOGGER.warn("Failed to parse config file: {}", file);
+            return;
+        }
 
-        // Iterate over each member in the root JsonObject
-        for (Map.Entry<String, JsonElement> entry : itemsJson.entrySet()) {
-            String entryKey = entry.getKey();
-            JsonElement element = entry.getValue();
+        if (jsonObject.has("tabs")) {
+            for (JsonElement t : jsonObject.getAsJsonArray("tabs")) {
+                try {
+                    JsonObject tabJson = t.getAsJsonObject();
+                    String tabName = tabJson.get("tab_name").getAsString();
+                    CreativeModeTab tab = CreativeTabUtils.getTabFromString(tabName);
 
-            NeutronTools.LOGGER.info("Processing tab item data for key: {}", entryKey);
-
-            try {
-                // Directly parse the JsonElement into your helper class using GSON
-                TabItemsJsonHelper helper = GSON.fromJson(element, TabItemsJsonHelper.class);
-
-                if (helper.getTabs() == null) continue;
-
-                helper.getTabs().forEach(json -> {
-                    CreativeModeTab tab = CreativeTabUtils.getTabFromString(json.tabName);
+                    JsonArray itemsAdd = tabJson.get("items_add").getAsJsonArray();
+                    JsonArray itemsRemove = tabJson.get("items_remove").getAsJsonArray();
 
                     if (tab != null) {
-                        // Initialize maps if they don't exist
-                        tabAdditions.computeIfAbsent(tab, k -> new ItemAdditionList());
-                        tabRemovals.computeIfAbsent(tab, k -> new HashSet<>());
+                        itemsRemove.forEach(item -> {
+                            tabRemovals.computeIfAbsent(tab, k -> new HashSet<>()).add(makeItemStack(item.getAsString()).getItem());
+                        });
+                        itemsAdd.forEach(json -> {
 
-                        // Process Additions
-                        ItemAdditionList thisTabAdditions = tabAdditions.get(tab);
-                        if (thisTabAdditions != null && json.itemsAdd != null) {
-                            for (TabItem tabItem : json.itemsAdd) {
-                                tabItem.populateAdditions(thisTabAdditions);
-                            }
-                        }
+                            // Initialize maps if they don't exist
+                            tabAdditions.computeIfAbsent(tab, k -> new ItemAdditionList());
+                            tabRemovals.computeIfAbsent(tab, k -> new HashSet<>());
 
-                        // Process Deletions
-                        Set<Item> thisTabDeletions = tabRemovals.get(tab);
-                        if (thisTabDeletions != null && json.itemsRemove != null) {
-                            for (TabItem tabItem : json.itemsRemove) {
-                                thisTabDeletions.addAll(tabItem.makeItemsForRemoval());
+                            // Process Deletions
+                            Set<Item> thisTabDeletions = tabRemovals.get(tab);
+                            if (thisTabDeletions != null && itemsRemove != null) {
+                                for (JsonElement tabItem : itemsRemove) {
+                                    Item itemToDelete = CreativeTabUtils.getItemByName(tabItem.getAsString());
+                                    if (itemToDelete != null) thisTabDeletions.add(itemToDelete);
+                                }
                             }
-                        }
+
+//                            // Process Additions
+//                            ItemAdditionList thisTabAdditions = tabAdditions.get(tab);
+//                            if (thisTabAdditions != null && itemsAdd != null) {
+//                                for (JsonElement tabItem : itemsAdd) {
+//
+//                                    tabItem.populateAdditions(thisTabAdditions);
+//                                }
+//                            }
+                        });
                     }
-                });
-            } catch (Exception e) {
-                NeutronTools.LOGGER.warn("Failed to process items in creative tab entry: " + entryKey, e);
+                } catch (Exception e) {
+                    NeutronTools.LOGGER.warn("Failed to process items in creative tab entry", e);
+                }
             }
         }
     }
@@ -254,7 +264,7 @@ public class CreativeTabConfig {
     }
 
     public void loadSimpleJsonLists(File file) {
-        if (!Files.exists(file.toPath())){
+        if (!Files.exists(file.toPath())) {
             return;
         }
         JsonObject jsonObject;
@@ -279,8 +289,7 @@ public class CreativeTabConfig {
             if (jsonObject.has("disabled_items")) {
                 jsonObject.getAsJsonArray("disabled_items").forEach(e -> {
                     Item i = makeItemStack(e.getAsString()).getItem();
-                    hiddenItems.add(i);
-                    priorityHiddenItems.add(i);
+                    disabledItems.add(i);
                 });
             }
         }

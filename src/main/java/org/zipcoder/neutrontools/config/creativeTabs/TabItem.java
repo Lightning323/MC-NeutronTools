@@ -59,7 +59,7 @@ public class TabItem {
     }
 
     private ItemStack makeStack(Item item, CompoundTag tag) {
-        if (hideFromOtherTabs) CreativeTabConfig.INSTANCE.hiddenItems.add(item);
+        if (hideFromOtherTabs) CreativeTabConfig.INSTANCE.disabledItems.add(item);
 
         ItemStack stack = new ItemStack(item, 1);
         applyLegacyTag(stack, tag);
@@ -68,7 +68,7 @@ public class TabItem {
 
     private ItemStack makeStack(String name, CompoundTag tag) {
         ItemStack stack = CreativeTabUtils.makeItemStack(name);
-        if (hideFromOtherTabs) CreativeTabConfig.INSTANCE.hiddenItems.add(stack.getItem());
+        if (hideFromOtherTabs) CreativeTabConfig.INSTANCE.disabledItems.add(stack.getItem());
 
         applyLegacyTag(stack, tag);
         return stack;
@@ -119,18 +119,18 @@ public class TabItem {
                 if (tab == null) {
                     NeutronTools.LOGGER.warn("Failed to find tab for {}", match_tab);
                 } else {
-                    List<ItemStack> itemStacks = new ArrayList<>(CreativeTabConfig.INSTANCE.original_tabDisplayItems.get(tab));
-                    if (itemStacks != null) {
-                        itemStacks.removeIf((stack) -> CreativeTabConfig.INSTANCE.hiddenItems.contains(stack.getItem()));
-                    }
-                    additionList.addStacks(index, itemStacks);
+//                    List<ItemStack> itemStacks = new ArrayList<>(CreativeTabConfig.INSTANCE.original_tabDisplayItems.get(tab));
+//                    if (itemStacks != null) {
+//                        itemStacks.removeIf((stack) -> CreativeTabConfig.INSTANCE.hiddenItems.contains(stack.getItem()));
+//                    }
+//                    additionList.addStacks(index, itemStacks);
                 }
             }
 
             List<Item> itemsForMatch = getItemsForMatch();
             List<ItemStack> stacks = new ArrayList<>();
             itemsForMatch.forEach(i -> {//We dont want to reintroduce hidden items
-                if (!CreativeTabConfig.INSTANCE.hiddenItems.contains(i)) stacks.add(makeStack(i, tag));
+                if (!CreativeTabConfig.INSTANCE.disabledItems.contains(i)) stacks.add(makeStack(i, tag));
             });
             additionList.addStacks(index, stacks);
 
