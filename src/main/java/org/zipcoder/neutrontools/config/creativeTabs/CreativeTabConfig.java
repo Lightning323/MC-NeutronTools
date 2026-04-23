@@ -1,48 +1,46 @@
 package org.zipcoder.neutrontools.config.creativeTabs;
 
-import com.google.gson.*;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.neoforged.fml.loading.FMLPaths;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static org.zipcoder.neutrontools.NeutronTools.CONFIG_PATH;
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.*;
+import static org.zipcoder.neutrontools.utils.CreativeTabUtils.makeItemStack;
 
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)
 //@Getter
 public class CreativeTabConfig {
-
-
     public CreativeTabConfig() {
         load();
-        mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()));
-        mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getHotbarTab()));
-        mandatoryTabs.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getInventoryTab()));
     }
 
     public static final CreativeTabConfig INSTANCE = new CreativeTabConfig();
     protected final Gson GSON = new Gson();
 
-    //Our config parameters
-    public final List<CreativeModeTab> mandatoryTabs = new ArrayList<>();
+    public final Set<String> disabledTabs = new HashSet<>();
+    public final Set<Item> disabledItems = new HashSet<>();
+
     public final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
 
     public HashMap<CreativeModeTab, TabEditConfig> newTabs = new HashMap<>();
     public HashMap<CreativeModeTab, TabEditConfig> tabEdits = new HashMap<>();
 
-    public final Set<String> disabledTabs = new HashSet<>();
-    public final Set<Item> disabledItems = new HashSet<>();
     private boolean wasReloaded = false;
 
     public static void plantStarterFiles() {
@@ -60,44 +58,23 @@ public class CreativeTabConfig {
         }
     }
 
-
     public void load() {
         NeutronTools.LOGGER.debug("Loading Creative Tab Config");
-        //Reset everything first
         wasReloaded = true;
-        newTabs.clear();
+
+        //-------------------------------------------------------
+        //Load simple lists
+        //-------------------------------------------------------
         disabledItems.clear();
         disabledTabs.clear();
-        tabEdits.clear();
         tabOrder.clear();
-
-        //Load tab edits
-        tabEdits.loadJson(new File(CONFIG_PATH, "tab_items.json"));
-        File[] subfiles = new File(CONFIG_PATH, "tab_items").listFiles();
-        if (subfiles != null) {
-            for (File tabEditFile : subfiles) {
-                if (tabEditFile.getName().endsWith(".json")) {
-                    tabEdits.loadJson(tabEditFile);
-                }
-            }
-        }
-
-        //Load new tabs
-        newTabs.loadJson(new File(CONFIG_PATH, "new_tabs.json"));
-        subfiles = new File(CONFIG_PATH, "new_tabs").listFiles();
-        if (subfiles != null) {
-            for (File tabEditFile : subfiles) {
-                if (tabEditFile.getName().endsWith(".json")) {
-                    newTabs.loadJson(tabEditFile);
-                }
-            }
-        }
-
         loadSimpleJsonLists(new File(CONFIG_PATH, "disabled_tabs.json"));
         loadSimpleJsonLists(new File(CONFIG_PATH, "disabled_items.json"));
         loadSimpleJsonLists(new File(CONFIG_PATH, "ordered_tabs.json"));
 
+        //-------------------------------------------------------
         //Add disabled items from JEI
+        //-------------------------------------------------------
         if (NeutronTools.CONFIG.hideCreativeTabItemsFromJEIBlacklist) {
             Path configDir = FMLPaths.CONFIGDIR.get();
             File jeiBlacklist = new File(configDir.toFile(), "jei/blacklist.cfg");
@@ -114,15 +91,53 @@ public class CreativeTabConfig {
                 }
             }
         }
-
-
-        LOGGER.debug("Creative Tab Config loaded");
         LOGGER.debug("Disabled tabs: {}", disabledTabs);
         LOGGER.debug("Ordered tabs: {}", tabOrder);
+
+        //-------------------------------------------------------
+        //Load tab edits
+        //-------------------------------------------------------
+        HashMap<String, TabEditJsonRepresentation> jsonTabEdits = new HashMap<>();
+        TabEditJsonRepresentation.load(new File(CONFIG_PATH, "tab_items.json"), jsonTabEdits);
+        File[] subfiles = new File(CONFIG_PATH, "tab_items").listFiles();
+        if (subfiles != null) {
+            for (File tabEditFile : subfiles) {
+                if (tabEditFile.getName().endsWith(".json")) {
+                    TabEditJsonRepresentation.load(tabEditFile, jsonTabEdits);
+                }
+            }
+        }
+
+        tabEdits.clear();
+        jsonTabEdits.forEach((s, tab) -> {
+            CreativeModeTab tabKey = CreativeTabUtils.getTabFromString(s);
+            tabEdits.put(tabKey, new TabEditConfig(tab));
+        });
+        LOGGER.debug("Tab Edits: {}", tabEdits);
+
+        //-------------------------------------------------------
+        //Load new tabs
+        //-------------------------------------------------------
+//        HashMap<String, TabEditJsonRepresentation> jsonNewTabs = new HashMap<>();
+//        TabEditJsonRepresentation.load(new File(CONFIG_PATH, "new_tabs.json"), jsonNewTabs);
+//        subfiles = new File(CONFIG_PATH, "new_tabs").listFiles();
+//        if (subfiles != null) {
+//            for (File tabEditFile : subfiles) {
+//                if (tabEditFile.getName().endsWith(".json")) {
+//                    TabEditJsonRepresentation.load(tabEditFile, jsonNewTabs);
+//                }
+//            }
+//        }
+//
+//        newTabs.clear();
+//        jsonNewTabs.forEach((s, tab) -> {
+//            TabEditConfig tabData = new TabEditConfig(tab);
+//            CreativeModeTab newTab = CreativeTabUtils.makeNewTab(s, tabData.tab_icon);
+//            newTabs.put(newTab, tabData);
+//        });
 //        LOGGER.debug("New tabs: {}", newTabs);
-//        LOGGER.debug("Tab additions: {}", tabAdditions);
-//        LOGGER.debug("Tab removals: {}", tabRemovals);
-//        LOGGER.debug("Replaced tabs: {}", replacedTabs);
+
+
     }
 
 
@@ -154,13 +169,6 @@ public class CreativeTabConfig {
         return tabNameMode;
     }
 
-
-    private CreativeModeTab makeNewTab(String titleKey, ItemConfig icon) {
-        CreativeModeTab.Builder builder = CreativeModeTab.builder();
-        builder.title(Component.translatable(prefix(titleKey)));
-        builder.icon(makeTabIcon(icon));
-        return builder.build();
-    }
 
     public void loadSimpleJsonLists(File file) {
         if (!Files.exists(file.toPath())) {

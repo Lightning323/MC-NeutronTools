@@ -3,6 +3,8 @@ package org.zipcoder.neutrontools.config.creativeTabs;
 import com.google.gson.*;
 import org.zipcoder.neutrontools.NeutronTools;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +15,12 @@ import java.util.Map;
     public ArrayList<ItemAdditionEntry> items_to_add;
     public ArrayList<ItemRemovalEntry> items_to_remove;
 
-    public static void load(String jsonString, HashMap<String, TabEditJsonRepresentation> tabMap) {
+    public static void load(File jsonFile, HashMap<String, TabEditJsonRepresentation> tabMap) {
         Gson gson = new Gson();
 
         try {
             // 1. Read JSON string as a JsonObject
-            JsonObject rootObject = JsonParser.parseString(jsonString).getAsJsonObject();
+            JsonObject rootObject = JsonParser.parseString(Files.readString(jsonFile.toPath())).getAsJsonObject();
 
             // 2. Get each element of the root object
             for (Map.Entry<String, JsonElement> entry : rootObject.entrySet()) {

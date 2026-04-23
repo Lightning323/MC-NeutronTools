@@ -1,8 +1,10 @@
 package org.zipcoder.neutrontools.creativetabs;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
+import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.util.*;
@@ -19,9 +21,14 @@ public class NeutronCreativeTabs {
     public static final HashMap<String, Collection<ItemStack>> cached_originalCreativeTabItems = new HashMap<>();
     public static List<CreativeModeTab> cached_originalCreativeTabs = new ArrayList<>();
 
+    public static final List<CreativeModeTab> MANDATORY_TABS = new ArrayList<>();
     public static final LinkedList<CreativeModeTab> sortedTabs = new LinkedList<>();
 
-
+    static {
+        MANDATORY_TABS.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()));
+        MANDATORY_TABS.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getHotbarTab()));
+        MANDATORY_TABS.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getInventoryTab()));
+    }
 
     public static Set<ItemStack> getItemsFromUnregisteredTabs() {
         return itemsFromUnregisteredTabs;
@@ -71,7 +78,7 @@ public class NeutronCreativeTabs {
         }
 
         // 3. Final safety for mandatory tabs (only adds if not already present)
-        filteredTabs.addAll(CreativeTabConfig.INSTANCE.mandatoryTabs);
+        filteredTabs.addAll(MANDATORY_TABS);
 
         // 4. Update the final list
         sortedTabs.clear();
