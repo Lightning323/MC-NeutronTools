@@ -51,7 +51,39 @@ public class CreativeTabConfig {
             Files.writeString(new File(CONFIG_PATH, "ordered_tabs.json").toPath(),
                     "{\n\"ordered_tabs\":[]\n}");
             new File(CONFIG_PATH, "new_tabs").mkdirs();
-            new File(CONFIG_PATH, "tab_items").mkdirs();
+            new File(CONFIG_PATH, "tab_edits").mkdirs();
+
+            String tabEditsJson =
+                    """
+                                {
+                                "minecraft:functional_blocks": {
+                                    "tab_icon": {
+                                      "name": "minecraft:apple",
+                                      "nbt": ""
+                                    },
+                                    "tab_name_key": "Functional Blocks",
+                                    "items_to_add": [
+                                      {
+                                        "index": 0,
+                                        "names": ["minecraft:apple", "minecraft:bamboo"],
+                                        "match_name": "regex",
+                                        "match_tags": ["tag"],
+                                        "match_tab": "tab_id",
+                                        "nbt": ""
+                                      }
+                                    ],
+                                    "items_to_remove": [
+                                      {
+                                        "names": ["minecraft:apple","minecraft:bamboo"],
+                                        "match_name": "regex",
+                                        "match_tags": ["tag"],
+                                      }
+                                    ]
+                                }
+                            }
+                            """;
+
+            Files.writeString(new File(CONFIG_PATH, "tab_edits/custom_tab_edits.json").toPath(), tabEditsJson);
         } catch (Exception e) {
             NeutronTools.LOGGER.error("Failed to plant starter files", e);
         }
