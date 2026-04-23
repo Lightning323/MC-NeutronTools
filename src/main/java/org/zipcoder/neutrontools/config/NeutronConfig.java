@@ -4,17 +4,21 @@ import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import net.minecraft.util.Mth;
 import org.zipcoder.neutrontools.NeutronTools;
+import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 
 import java.io.File;
-import java.nio.file.Path;
-
-import static net.neoforged.fml.loading.FMLPaths.CONFIGDIR;
 
 public class NeutronConfig {
 
     public NeutronConfig() {
         try {
-            File configFile = new File(NeutronTools.CONFIGDIR, "neutron-tools-config.toml");
+            if (!NeutronTools.CONFIG_PATH.exists()) {
+                NeutronTools.LOGGER.info("Config Dir: {}", NeutronTools.CONFIG_PATH);
+                NeutronTools.CONFIG_PATH.mkdirs();
+                CreativeTabConfig.plantStarterFiles();
+            }
+
+            File configFile = new File(NeutronTools.CONFIG_PATH, "neutron-tools-config.toml");
             try (FileConfig config = FileConfig.builder(configFile, TomlFormat.instance()).build()) {
                 if (configFile.exists()) {
                     loadConfig(config);

@@ -16,7 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static org.zipcoder.neutrontools.NeutronTools.CONFIGDIR;
+import static org.zipcoder.neutrontools.NeutronTools.CONFIG_PATH;
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.*;
 
@@ -45,6 +45,21 @@ public class CreativeTabConfig {
     public final Set<Item> disabledItems = new HashSet<>();
     private boolean wasReloaded = false;
 
+    public static void plantStarterFiles() {
+        try {
+            Files.writeString(new File(CONFIG_PATH, "disabled_tabs.json").toPath(),
+                    "{'disabled_tabs':[]}");
+            Files.writeString(new File(CONFIG_PATH, "disabled_items.json").toPath(),
+                    "{'disabled_items':[]}");
+            Files.writeString(new File(CONFIG_PATH, "ordered_tabs.json").toPath(),
+                    "{'ordered_tabs':[]}");
+            new File(CONFIG_PATH, "new_tabs").mkdirs();
+            new File(CONFIG_PATH, "tab_items").mkdirs();
+        } catch (Exception e) {
+            NeutronTools.LOGGER.error("Failed to plant starter files", e);
+        }
+    }
+
 
     public void load() {
         NeutronTools.LOGGER.debug("Loading Creative Tab Config");
@@ -58,8 +73,8 @@ public class CreativeTabConfig {
         replacedTabs.clear();
         tabRemovals.clear();
 
-        loadCustomTabItems(new File(CONFIGDIR, "tab_items.json"));
-        File[] subfiles = new File(CONFIGDIR, "tab_items").listFiles();
+        loadCustomTabItems(new File(CONFIG_PATH, "tab_items.json"));
+        File[] subfiles = new File(CONFIG_PATH, "tab_items").listFiles();
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
                 if (tabEditFile.getName().endsWith(".json")) {
@@ -68,9 +83,9 @@ public class CreativeTabConfig {
             }
         }
 
-        loadSimpleJsonLists(new File(CONFIGDIR, "disabled_tabs.json"));
-        loadSimpleJsonLists(new File(CONFIGDIR, "disabled_items.json"));
-        loadSimpleJsonLists(new File(CONFIGDIR, "ordered_tabs.json"));
+        loadSimpleJsonLists(new File(CONFIG_PATH, "disabled_tabs.json"));
+        loadSimpleJsonLists(new File(CONFIG_PATH, "disabled_items.json"));
+        loadSimpleJsonLists(new File(CONFIG_PATH, "ordered_tabs.json"));
 
         //Add disabled items from JEI
         if (NeutronTools.CONFIG.hideCreativeTabItemsFromJEIBlacklist) {

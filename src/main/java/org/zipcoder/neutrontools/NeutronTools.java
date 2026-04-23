@@ -24,7 +24,8 @@ import java.io.File;
 public class NeutronTools {
     public static final String MODID = "neutrontools";
     public static final String RESOURCE_ID = "neutron";
-    public static final File CONFIGDIR = new File(FMLPaths.CONFIGDIR.get().toFile(), "/neutron");
+    public static final File CONFIG_PATH = new File(FMLPaths.CONFIGDIR.get().toFile(), "/neutron");
+
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final NeutronConfig CONFIG = new NeutronConfig();
 
