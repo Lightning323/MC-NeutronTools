@@ -7,8 +7,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(CreativeModeTabRegistry.class)
@@ -27,8 +29,8 @@ public abstract class CreativeModeTabRegistryMixin {
     @Inject(method = "getSortedCreativeModeTabs", at = @At("RETURN"), cancellable = true, remap = false)
     private static void injectCustomTabs(CallbackInfoReturnable<List<CreativeModeTab>> cir) {
         //First time caching of our original creative tabs
-        List<CreativeModeTab> returnValue = cir.getReturnValue();
-        NeutronCreativeTabs.populateSortedTabsList(returnValue);
+        List<CreativeModeTab> allTabs = cir.getReturnValue();
+        NeutronCreativeTabs.populateSortedTabsList(allTabs);
 
         //This is the mixin where we exclude disabled tabs
         List<CreativeModeTab> list = NeutronCreativeTabs.sortedTabs.stream()

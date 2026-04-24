@@ -23,6 +23,7 @@ import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 import java.util.*;
 
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
+import static org.zipcoder.neutrontools.NeutronTools.MODID;
 import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
 
 @Mixin(CreativeModeTab.class)
@@ -121,8 +122,11 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             if (tabEditConfig == null || tabEditConfig.tab_name_key == null) {
                 cached_displayName = this.displayName;
             } else {
-                cached_displayName = Component.translatable(CreativeTabUtils.prefix(tabEditConfig.tab_name_key)); //translatable (needs lang file)
-//                cached_displayName = Component.literal(CreativeTabUtils.prefix(tabEditConfig.tab_name_key)); //Literal (no need for translation)
+                cached_displayName = Component.translatable("itemGroup." + MODID + "."+
+                        tabEditConfig.tab_name_key.replace("itemGroup.", "")
+                                .replace(".", "_")
+                                .replace(" ", "_")); //translatable (needs lang file)
+//                cached_displayName = Component.literal(tabEditConfig.tab_name_key); //Literal (no need for translation)
                 isCachedCustomDisplayName = true;
             }
         }

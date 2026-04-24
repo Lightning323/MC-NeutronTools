@@ -1,11 +1,14 @@
 package org.zipcoder.neutrontools.events;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.zipcoder.neutrontools.NeutronTools;
@@ -45,6 +48,16 @@ public class ClientModEvents {
             }
         }
     }
+//
+//    @SubscribeEvent
+//    public static void buildContents(BuildCreativeModeTabContentsEvent event) {
+//        if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
+//            event.accept(Items.DIAMOND);
+//        }
+//        if (event.getTabKey() == NeutronTools.EXAMPLE_TAB.getKey()) {
+//            event.accept(Items.EMERALD);
+//        }
+//    }
 
     @SubscribeEvent
     public static void onClientLogin(PlayerEvent.PlayerLoggedInEvent event) {

@@ -43,7 +43,7 @@ public class NeutronCreativeTabs {
 
     public static void populateSortedTabsList(Collection<CreativeModeTab> allTabs) {
         if (!sortedTabs.isEmpty() || allTabs.isEmpty()) return;//We only have to populate this once
-
+//        System.out.println("All Tabs here : "+allTabs.stream().map(CreativeModeTab::getDisplayName).toList());
 
         LinkedHashSet<CreativeModeTab> filteredTabs = new LinkedHashSet<>();
         boolean addRemaining = false;
@@ -79,6 +79,7 @@ public class NeutronCreativeTabs {
 
         // 3. Final safety for mandatory tabs (only adds if not already present)
         filteredTabs.addAll(MANDATORY_TABS);
+//        System.out.println("Filtered Tabs: " + filteredTabs.stream().map(CreativeModeTab::getDisplayName).toList());
 
         // 4. Update the final list
         sortedTabs.clear();
