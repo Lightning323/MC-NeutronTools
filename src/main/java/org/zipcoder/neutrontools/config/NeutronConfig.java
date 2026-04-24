@@ -17,7 +17,6 @@ public class NeutronConfig {
                 NeutronTools.CONFIG_PATH.mkdirs();
                 CreativeTabConfig.plantStarterFiles();
             }
-
             File configFile = new File(NeutronTools.CONFIG_PATH, "neutron-tools-config.toml");
             try (FileConfig config = FileConfig.builder(configFile, TomlFormat.instance()).build()) {
                 if (configFile.exists()) {

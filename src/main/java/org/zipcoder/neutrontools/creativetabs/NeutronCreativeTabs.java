@@ -85,9 +85,9 @@ public class NeutronCreativeTabs {
         sortedTabs.addAll(filteredTabs);
 
         LOGGER.info("Populated sorted tabs list of {} total all tabs", allTabs.size());
-        for (CreativeModeTab tab : sortedTabs) {
-            LOGGER.info("Sorted Tab: {}", tab.getDisplayName().getString());
-        }
+//        for (CreativeModeTab tab : sortedTabs) {
+//            LOGGER.info("Sorted Tab: {}", tab.getDisplayName().getString());
+//        }
     }
 
     private static void addTabToFilteredListIfNotDisabled(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {

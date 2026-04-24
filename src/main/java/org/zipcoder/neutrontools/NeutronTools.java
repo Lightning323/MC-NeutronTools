@@ -53,12 +53,23 @@ public class NeutronTools {
 //                    .build();
 
             NEW_TABS.forEach((tabKey, tab) -> {
-                if (tabKey == null) {
-                    LOGGER.error("Tab name key is null");
-                    return;
+                String originalTabKey = tabKey == null ? "unknown" : tabKey;
+                try {
+                    if (tabKey.contains(":")) {
+                        tabKey = tabKey.split(":")[1];
+                    }
+                    //We need to replace all invalid characters
+                    tabKey = tabKey.replaceAll("[^a-z0-9/._-]", "");
+
+                    if (tabKey == null) {
+                        LOGGER.error("Tab name key is null");
+                        return;
+                    }
+                    LOGGER.info("Registering new tab {}", tabKey);
+                    event.register(Registries.CREATIVE_MODE_TAB, resource(tabKey), () -> tab);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to register new tab \"{}\"", originalTabKey, e);
                 }
-                LOGGER.info("Registering new tab {}", tabKey);
-                event.register(Registries.CREATIVE_MODE_TAB, resource(tabKey), () -> tab);
             });
         }
     }

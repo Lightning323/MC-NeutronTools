@@ -97,7 +97,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             if (tabEditConfig != null) {
                 tabEditConfig.modifyDisplayItems(displayItems, displayItemsSearchTab);
             }
-            System.out.println("Adding items to tab "+CreativeTabUtils.getRegistryID(tab)+" \tDisplay items: "+displayItems.size());
+//            System.out.println("Adding items to tab "+CreativeTabUtils.getRegistryID(tab)+" \tDisplay items: "+displayItems.size());
             //Add the items from unregistered tabs to the search tab otherwise they will not show up in the search tab
             displayItemsSearchTab.addAll(NeutronCreativeTabs.getItemsFromUnregisteredTabs());
         }

@@ -54,7 +54,7 @@ public class TabEditConfig {
 
     public TabEditConfig(TabEditJsonRepresentation json) {
         this.tab_name_key = json.tab_name_key;
-        this.tab_icon = CreativeTabUtils.makeTabIcon(json.tab_icon.name, json.tab_icon.nbt);
+        if (json.tab_icon != null) this.tab_icon = CreativeTabUtils.makeTabIcon(json.tab_icon.name, json.tab_icon.nbt);
         items_to_add = new HashMap<>();
         items_to_remove = new ArrayList<>();
 
