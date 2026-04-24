@@ -47,7 +47,14 @@ public class TabEditConfig {
         }
 
         //Add all new items to uniqueFilteredResult
-        items_to_add.forEach(uniqueFilteredResult::addAll);
+        items_to_add.forEach((indx, stacks) -> {
+                    if (indx == -1) {
+                        uniqueFilteredResult.addAll(stacks);
+                    } else {
+                        uniqueFilteredResult.addAll(indx, stacks);
+                    }
+                }
+        );
 
         displayItems.clear();
         displaySearchItems.clear();
@@ -64,7 +71,7 @@ public class TabEditConfig {
 
         if (json.items_to_add != null) {
             json.items_to_add.forEach(item -> {
-                int index = item.index == -1 ? items_to_add.size() : item.index;
+                int index = item.index;
 
                 ArrayList<ItemStack> stacks = new ArrayList<>();
 
