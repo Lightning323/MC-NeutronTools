@@ -2,13 +2,9 @@ package org.zipcoder.neutrontools;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -19,7 +15,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.slf4j.Logger;
@@ -27,8 +22,7 @@ import org.zipcoder.neutrontools.config.NeutronConfig;
 import org.zipcoder.neutrontools.network.SyncConfigPacket;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(NeutronTools.MODID)
@@ -43,32 +37,31 @@ public class NeutronTools {
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    public static final List<CreativeModeTab> newTabs = new ArrayList<>();
+    //This list doesnt get reset
+    public static final HashMap<String, CreativeModeTab> NEW_TABS = new HashMap<>();
 
     private void registerTabs(RegisterEvent event) {
         // Check if we are currently in the Creative Mode Tab registry phase
         if (event.getRegistryKey().equals(Registries.CREATIVE_MODE_TAB)) {
+//            CreativeModeTab myTab = CreativeModeTab.builder()
+//                    .title(Component.translatable("itemGroup." + MODID + ".example_tab"))
+//                    .icon(() -> new ItemStack(Items.ACACIA_BOAT))
+//                    .displayItems((parameters, output) -> {
+//                        output.accept(Items.ACACIA_BOAT);
+//                        output.accept(Items.DIAMOND);
+//                    })
+//                    .build();
 
-            // Define your tab
-            CreativeModeTab myTab = CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup." + MODID + ".example_tab"))
-                    .icon(() -> new ItemStack(Items.ACACIA_BOAT))
-                    .displayItems((parameters, output) -> {
-                        output.accept(Items.ACACIA_BOAT);
-                        output.accept(Items.DIAMOND);
-                    })
-                    .build();
-
-            // 1. Register it with NeoForge
-            event.register(Registries.CREATIVE_MODE_TAB, resource("example_tab"), () -> myTab);
-
-            // 2. Add it to your local list for tracking
-            newTabs.add(myTab);
-
-            LOGGER.info("Registered custom tab: {}", myTab.getDisplayName().getString());
+            NEW_TABS.forEach((tabKey, tab) -> {
+                if (tabKey == null) {
+                    LOGGER.error("Tab name key is null");
+                    return;
+                }
+                LOGGER.info("Registering new tab {}", tabKey);
+                event.register(Registries.CREATIVE_MODE_TAB, resource(tabKey), () -> tab);
+            });
         }
     }
-
 
 
     public NeutronTools(IEventBus modEventBus, ModContainer modContainer) {

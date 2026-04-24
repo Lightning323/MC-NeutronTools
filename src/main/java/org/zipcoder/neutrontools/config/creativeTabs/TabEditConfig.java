@@ -3,15 +3,13 @@ package org.zipcoder.neutrontools.config.creativeTabs;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
-import org.zipcoder.neutrontools.utils.CreativeTabUtils;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabUtils;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -59,6 +57,7 @@ public class TabEditConfig {
         this.tab_icon = CreativeTabUtils.makeTabIcon(json.tab_icon.name, json.tab_icon.nbt);
         items_to_add = new HashMap<>();
         items_to_remove = new ArrayList<>();
+
 
         json.items_to_add.forEach(item -> {
             int index = item.index == -1 ? items_to_add.size() : item.index;

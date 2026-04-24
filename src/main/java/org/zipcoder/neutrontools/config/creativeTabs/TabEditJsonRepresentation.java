@@ -1,22 +1,40 @@
 package org.zipcoder.neutrontools.config.creativeTabs;
 
 import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
+import org.apache.commons.lang3.tuple.Pair;
 import org.zipcoder.neutrontools.NeutronTools;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 class TabEditJsonRepresentation {
     public TabIcon tab_icon;
     public String tab_name_key;
     public ArrayList<ItemAdditionEntry> items_to_add;
     public ArrayList<ItemRemovalEntry> items_to_remove;
+    private final static Gson GSON = new Gson();
 
-    public static void load(File jsonFile, HashMap<String, TabEditJsonRepresentation> tabMap) {
-        Gson gson = new Gson();
+
+//    public static TabEditJsonRepresentation load(File jsonFile) {
+//        if (!jsonFile.exists()) return null;
+//        try (JsonReader jsonReader = new JsonReader(new FileReader(jsonFile))) {
+//            return GSON.fromJson(jsonReader, TabEditJsonRepresentation.class);
+//        } catch (Exception e) {
+//            NeutronTools.LOGGER.error("Failed to parse tab", e);
+//        }
+//        return null;
+//    }
+
+    public static void load(File jsonFile,BiConsumer<String,TabEditJsonRepresentation> consumer) {
+
         if (!jsonFile.exists()) return;
         try {
             // 1. Read JSON string as a JsonObject
@@ -30,8 +48,8 @@ class TabEditJsonRepresentation {
                 try {
                     // 3. Serialize (Deserialize) and add to the hashmap
                     // This will throw a JsonSyntaxException if the inner JSON is invalid
-                    TabEditJsonRepresentation tabObject = gson.fromJson(tabData, TabEditJsonRepresentation.class);
-                    tabMap.put(tabId, tabObject);
+                    TabEditJsonRepresentation tabObject = GSON.fromJson(tabData, TabEditJsonRepresentation.class);
+                    consumer.accept(tabId, tabObject);
                 } catch (JsonSyntaxException e) {
                     NeutronTools.LOGGER.error("Failed to parse tab: " + tabId, e);
                 }

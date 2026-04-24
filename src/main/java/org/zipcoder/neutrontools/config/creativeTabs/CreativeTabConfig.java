@@ -1,27 +1,23 @@
 package org.zipcoder.neutrontools.config.creativeTabs;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.neoforged.fml.loading.FMLPaths;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.utils.CreativeTabUtils;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
-import static org.zipcoder.neutrontools.NeutronTools.CONFIG_PATH;
-import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.makeItemStack;
+import static org.zipcoder.neutrontools.NeutronTools.*;
+import static org.zipcoder.neutrontools.creativetabs.CreativeTabUtils.makeItemStack;
 
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)
 //@Getter
@@ -37,7 +33,7 @@ public class CreativeTabConfig {
 
     public final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
 
-    public HashMap<CreativeModeTab, TabEditConfig> newTabs = new HashMap<>();
+
     public HashMap<CreativeModeTab, TabEditConfig> tabEdits = new HashMap<>();
 
     private boolean wasReloaded = false;
@@ -126,51 +122,45 @@ public class CreativeTabConfig {
         LOGGER.debug("Ordered tabs: {}", tabOrder);
 
         //-------------------------------------------------------
-        //Load tab edits
+        //Load tab edits / new tabs
         //-------------------------------------------------------
-        HashMap<String, TabEditJsonRepresentation> jsonTabEdits = new HashMap<>();
-        TabEditJsonRepresentation.load(new File(CONFIG_PATH, "tab_edits.json"), jsonTabEdits);
+        tabEdits.clear();
+
         File[] subfiles = new File(CONFIG_PATH, "tab_edits").listFiles();
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
-                if (tabEditFile.getName().endsWith(".json")) {
-                    TabEditJsonRepresentation.load(tabEditFile, jsonTabEdits);
-                }
+                if (tabEditFile.getName().endsWith(".json"))
+                    TabEditJsonRepresentation.load(tabEditFile, (key, value) -> {
+                        CreativeModeTab creativeTab = CreativeTabUtils.getTabFromString(key);
+                        if (creativeTab != null) tabEdits.put(creativeTab, new TabEditConfig(value));
+                    });
+            }
+        }
+        subfiles = new File(CONFIG_PATH, "new_tabs").listFiles();
+        if (subfiles != null) {
+            for (File tabEditFile : subfiles) {
+                if (tabEditFile.getName().endsWith(".json")) TabEditJsonRepresentation.load(tabEditFile,
+                        (tabName, tabData) -> {
+                            //Make the new tab as we are indexing tab edit files
+                            //Tab edits and new tabs do the same thing, we create the new tab, but then add items with tab edits
+                            CreativeModeTab myTab;
+                            if (NEW_TABS.containsKey(tabName)) {
+                                myTab = NEW_TABS.get(tabName);
+                            } else {
+                                myTab = CreativeModeTab.builder()
+                                        .title(Component.translatable("itemGroup." + MODID + "." + tabName))
+                                        .icon(CreativeTabUtils.makeTabIcon(tabData.tab_icon.name, tabData.tab_icon.nbt))
+                                        .build();
+                                NEW_TABS.put(tabName, myTab);
+                            }
+                            tabEdits.put(myTab, new TabEditConfig(tabData));
+                        });
             }
         }
 
-        LOGGER.debug("Tab Edits JSON: {}", jsonTabEdits);
 
-        tabEdits.clear();
-        jsonTabEdits.forEach((s, tab) -> {
-            CreativeModeTab tabKey = CreativeTabUtils.getTabFromString(s);
-            tabEdits.put(tabKey, new TabEditConfig(tab));
-        });
         LOGGER.debug("Tab Edits: {}", tabEdits);
-
-        //-------------------------------------------------------
-        //Load new tabs
-        //-------------------------------------------------------
-//        HashMap<String, TabEditJsonRepresentation> jsonNewTabs = new HashMap<>();
-//        TabEditJsonRepresentation.load(new File(CONFIG_PATH, "new_tabs.json"), jsonNewTabs);
-//        subfiles = new File(CONFIG_PATH, "new_tabs").listFiles();
-//        if (subfiles != null) {
-//            for (File tabEditFile : subfiles) {
-//                if (tabEditFile.getName().endsWith(".json")) {
-//                    TabEditJsonRepresentation.load(tabEditFile, jsonNewTabs);
-//                }
-//            }
-//        }
-//
-//        newTabs.clear();
-//        jsonNewTabs.forEach((s, tab) -> {
-//            TabEditConfig tabData = new TabEditConfig(tab);
-//            CreativeModeTab newTab = CreativeTabUtils.makeNewTab(s, tabData.tab_icon);
-//            newTabs.put(newTab, tabData);
-//        });
-//        LOGGER.debug("New tabs: {}", newTabs);
-
-
+        LOGGER.debug("New tabs: {}", NEW_TABS);
     }
 
 

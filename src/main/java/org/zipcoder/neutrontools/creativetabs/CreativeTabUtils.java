@@ -1,4 +1,4 @@
-package org.zipcoder.neutrontools.utils;
+package org.zipcoder.neutrontools.creativetabs;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.component.DataComponents;
@@ -17,7 +17,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.CustomData;
 import org.zipcoder.neutrontools.NeutronTools;
-import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
 import java.util.*;
@@ -26,12 +25,6 @@ import java.util.function.Supplier;
 
 public class CreativeTabUtils {
 
-    public static CreativeModeTab makeNewTab(String titleKey, Supplier<ItemStack> icon) {
-        CreativeModeTab.Builder builder = CreativeModeTab.builder();
-        builder.title(Component.translatable(prefix(titleKey)));
-        builder.icon(icon);
-        return builder.build();
-    }
 
     public static Supplier<ItemStack> makeTabIcon(String name, String nbtString) {
         ItemStack stack = makeItemStack(name, nbtString);

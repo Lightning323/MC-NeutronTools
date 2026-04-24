@@ -5,13 +5,12 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import org.zipcoder.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.zipcoder.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
-import org.zipcoder.neutrontools.utils.CreativeTabUtils;
 
 import java.util.*;
 
 import static com.mojang.text2speech.Narrator.LOGGER;
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getRegistryID;
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
+import static org.zipcoder.neutrontools.creativetabs.CreativeTabUtils.getRegistryID;
+import static org.zipcoder.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
 
 public class NeutronCreativeTabs {
 

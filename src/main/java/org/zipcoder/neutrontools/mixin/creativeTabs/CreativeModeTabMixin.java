@@ -3,7 +3,6 @@ package org.zipcoder.neutrontools.mixin.creativeTabs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,13 +17,13 @@ import org.zipcoder.neutrontools.config.creativeTabs.TabEditConfig;
 import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.zipcoder.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 import org.zipcoder.neutrontools.events.ClientModEvents;
-import org.zipcoder.neutrontools.utils.CreativeTabUtils;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabUtils;
 
 import java.util.*;
 
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 import static org.zipcoder.neutrontools.NeutronTools.MODID;
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
+import static org.zipcoder.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
 
 @Mixin(CreativeModeTab.class)
 public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
@@ -67,7 +66,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     }
 
     /// //////////////////////////////////////////
-    /// Injections =========================== //
+    /// Injections ============================ //
     /// //////////////////////////////////////////
 
 
@@ -98,6 +97,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             if (tabEditConfig != null) {
                 tabEditConfig.modifyDisplayItems(displayItems, displayItemsSearchTab);
             }
+            System.out.println("Adding items to tab "+CreativeTabUtils.getRegistryID(tab)+" \tDisplay items: "+displayItems.size());
             //Add the items from unregistered tabs to the search tab otherwise they will not show up in the search tab
             displayItemsSearchTab.addAll(NeutronCreativeTabs.getItemsFromUnregisteredTabs());
         }

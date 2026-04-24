@@ -17,14 +17,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.zipcoder.neutrontools.NeutronTools;
 import org.zipcoder.neutrontools.creativetabs.NeutronCreativeTabs;
-import org.zipcoder.neutrontools.utils.CreativeTabUtils;
+import org.zipcoder.neutrontools.creativetabs.CreativeTabUtils;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-import static org.zipcoder.neutrontools.utils.CreativeTabUtils.getTranslationKey;
+import static org.zipcoder.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
 
 public class ListAllCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
