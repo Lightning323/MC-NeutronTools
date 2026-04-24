@@ -62,88 +62,90 @@ public class TabEditConfig {
         items_to_add = new HashMap<>();
         items_to_remove = new ArrayList<>();
 
+        if (json.items_to_add != null) {
+            json.items_to_add.forEach(item -> {
+                int index = item.index == -1 ? items_to_add.size() : item.index;
 
-        json.items_to_add.forEach(item -> {
-            int index = item.index == -1 ? items_to_add.size() : item.index;
+                ArrayList<ItemStack> stacks = new ArrayList<>();
 
-            ArrayList<ItemStack> stacks = new ArrayList<>();
-
-            if (item.names != null) {
-                for (String name : item.names) {
-                    stacks.add(CreativeTabUtils.makeItemStack(name, item.nbt));
-                }
-            }
-
-            if (item.match_name != null) {
-                Pattern pattern = Pattern.compile(item.match_name);
-
-                stacks.addAll(BuiltInRegistries.ITEM.entrySet().stream()
-                        .filter(entry -> {
-                            // Get the ID (e.g., "minecraft:zombie_spawn_egg")
-                            String id = entry.getKey().location().toString();
-                            return pattern.matcher(id).matches();
-                        })
-                        .map(entry -> new ItemStack(entry.getValue()))
-                        .toList());
-            }
-            if (item.match_tab != null) {
-                Collection<ItemStack> itemStacks = getItemsFromTab(item.match_tab);
-                if (itemStacks != null) {
-                    stacks.addAll(itemStacks);
-                }
-            }
-            if (item.match_tags != null) {
-                for (String tag : item.match_tags) {
-                    List<Item> itemsInTag = BuiltInRegistries.ITEM.getOrCreateTag(getTagFromString(tag))
-                            .stream()
-                            .map(Holder::value)
-                            .toList();
-                    stacks.addAll(itemsInTag.stream().map(itemInTag -> new ItemStack(itemInTag, 1)).toList());
-                }
-            }
-
-            if (items_to_add.containsKey(index)) {
-                items_to_add.get(index).addAll(stacks);
-            } else items_to_add.put(index, stacks);
-        });
-
-        json.items_to_remove.forEach(item -> {
-            ArrayList<Item> stacks = new ArrayList<>();
-
-            if (item.names != null) {
-                for (String name : item.names) {
-                    stacks.add(CreativeTabUtils.getItemByName(name));
-                }
-            }
-
-            if (item.match_name != null) {
-                Pattern pattern = Pattern.compile(item.match_name);
-
-                stacks.addAll(BuiltInRegistries.ITEM.entrySet().stream()
-                        .filter(entry -> pattern.matcher(entry.getKey().location().toString()).matches())
-                        .map(entry -> entry.getValue()) // Returns the Item directly
-                        .toList());
-            }
-            if (item.match_tab != null) {
-                Collection<ItemStack> itemStacks = getItemsFromTab(item.match_tab);
-                if (itemStacks != null) {
-                    for (ItemStack itemStack : itemStacks) {
-                        stacks.add(itemStack.getItem());
+                if (item.names != null) {
+                    for (String name : item.names) {
+                        stacks.add(CreativeTabUtils.makeItemStack(name, item.nbt));
                     }
                 }
-            }
-            if (item.match_tags != null) {
-                for (String tag : item.match_tags) {
-                    List<Item> itemsInTag = BuiltInRegistries.ITEM.getOrCreateTag(getTagFromString(tag))
-                            .stream()
-                            .map(Holder::value)
-                            .toList();
-                    stacks.addAll(itemsInTag);
-                }
-            }
 
-            items_to_remove.addAll(stacks);
-        });
+                if (item.match_name != null) {
+                    Pattern pattern = Pattern.compile(item.match_name);
+
+                    stacks.addAll(BuiltInRegistries.ITEM.entrySet().stream()
+                            .filter(entry -> {
+                                // Get the ID (e.g., "minecraft:zombie_spawn_egg")
+                                String id = entry.getKey().location().toString();
+                                return pattern.matcher(id).matches();
+                            })
+                            .map(entry -> new ItemStack(entry.getValue()))
+                            .toList());
+                }
+                if (item.match_tab != null) {
+                    Collection<ItemStack> itemStacks = getItemsFromTab(item.match_tab);
+                    if (itemStacks != null) {
+                        stacks.addAll(itemStacks);
+                    }
+                }
+                if (item.match_tags != null) {
+                    for (String tag : item.match_tags) {
+                        List<Item> itemsInTag = BuiltInRegistries.ITEM.getOrCreateTag(getTagFromString(tag))
+                                .stream()
+                                .map(Holder::value)
+                                .toList();
+                        stacks.addAll(itemsInTag.stream().map(itemInTag -> new ItemStack(itemInTag, 1)).toList());
+                    }
+                }
+
+                if (items_to_add.containsKey(index)) {
+                    items_to_add.get(index).addAll(stacks);
+                } else items_to_add.put(index, stacks);
+            });
+        }
+        if (json.items_to_remove != null) {
+            json.items_to_remove.forEach(item -> {
+                ArrayList<Item> stacks = new ArrayList<>();
+
+                if (item.names != null) {
+                    for (String name : item.names) {
+                        stacks.add(CreativeTabUtils.getItemByName(name));
+                    }
+                }
+
+                if (item.match_name != null) {
+                    Pattern pattern = Pattern.compile(item.match_name);
+
+                    stacks.addAll(BuiltInRegistries.ITEM.entrySet().stream()
+                            .filter(entry -> pattern.matcher(entry.getKey().location().toString()).matches())
+                            .map(entry -> entry.getValue()) // Returns the Item directly
+                            .toList());
+                }
+                if (item.match_tab != null) {
+                    Collection<ItemStack> itemStacks = getItemsFromTab(item.match_tab);
+                    if (itemStacks != null) {
+                        for (ItemStack itemStack : itemStacks) {
+                            stacks.add(itemStack.getItem());
+                        }
+                    }
+                }
+                if (item.match_tags != null) {
+                    for (String tag : item.match_tags) {
+                        List<Item> itemsInTag = BuiltInRegistries.ITEM.getOrCreateTag(getTagFromString(tag))
+                                .stream()
+                                .map(Holder::value)
+                                .toList();
+                        stacks.addAll(itemsInTag);
+                    }
+                }
+
+                items_to_remove.addAll(stacks);
+            });
+        }
     }
 
     private Collection<ItemStack> getItemsFromTab(String matchTab) {
