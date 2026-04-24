@@ -84,7 +84,7 @@ public class NeutronCreativeTabs {
         orderedTabs.clear();
         orderedTabs.addAll(filteredTabs);
 
-        LOGGER.info("Populated sorted tabs list of {} total all tabs", allTabs.size());
+        LOGGER.info("Populated sorted tabs list of {} total tabs", allTabs.size());
 //        for (CreativeModeTab tab : sortedTabs) {
 //            LOGGER.info("Sorted Tab: {}", tab.getDisplayName().getString());
 //        }
