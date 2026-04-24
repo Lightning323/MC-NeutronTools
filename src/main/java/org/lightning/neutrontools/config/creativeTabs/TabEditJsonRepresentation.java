@@ -55,7 +55,7 @@ class TabEditJsonRepresentation {
     }
 
     public static class ItemAdditionEntry {
-        public int index;
+        public int index = -1;
         public ArrayList<String> names;
         public String match_name;
         public ArrayList<String> match_tags;
