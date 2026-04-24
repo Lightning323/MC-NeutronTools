@@ -1,0 +1,76 @@
+package org.lightning.neutrontools.config;
+
+import com.electronwill.nightconfig.core.file.FileConfig;
+import com.electronwill.nightconfig.toml.TomlFormat;
+import net.minecraft.util.Mth;
+import org.lightning.neutrontools.NeutronTools;
+import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
+
+import java.io.File;
+
+public class NeutronConfig {
+
+    public NeutronConfig() {
+        try {
+            if (!NeutronTools.CONFIG_PATH.exists()) {
+                NeutronTools.LOGGER.info("Config Dir: {}", NeutronTools.CONFIG_PATH);
+                NeutronTools.CONFIG_PATH.mkdirs();
+                CreativeTabConfig.plantStarterFiles();
+            }
+            File configFile = new File(NeutronTools.CONFIG_PATH, "neutron-tools-config.toml");
+            try (FileConfig config = FileConfig.builder(configFile, TomlFormat.instance()).build()) {
+                if (configFile.exists()) {
+                    loadConfig(config);
+                } else {
+                    writeConfig(config);
+                }
+            }
+        } catch (Exception e) {
+            NeutronTools.LOGGER.error("An error occurred initializing pre-init config!", e);
+        }
+    }
+
+    /**
+     * Default values go here
+     * Only boolean, int, double and string are supported
+     * NO FLOATS ALLOWED!
+     */
+    //--------------------------------------------------------------------
+    public boolean crashCommands = false;
+    public float hungerMultiplier = 1.0f;//Casting from double to float
+    public boolean hideCreativeTabItemsFromJEIBlacklist = true;
+    public boolean disableExperementalSettings = true;
+    //--------------------------------------------------------------------
+
+    /**
+     * Write a new config
+     */
+    private void writeConfig(FileConfig config) {
+        //--------------------------------------------------------------------
+        //common
+        config.set("common.crash_commands", crashCommands);
+        config.set("common.hunger_multiplier", (double) hungerMultiplier);
+        config.set("common.disable_experemental_settings_popup", disableExperementalSettings);
+        //client
+        config.set("client.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
+        //--------------------------------------------------------------------
+        config.save();
+    }
+
+    /**
+     * Load the config
+     * NOTE that doubles in the config MUST have .0 at the end otherwise it will be read as an int
+     */
+    private void loadConfig(FileConfig config) {
+        config.load();
+        //--------------------------------------------------------------------
+        crashCommands = config.getOrElse("common.crash_commands", crashCommands);
+
+        double hungerMultiplier_double = config.getOrElse("common.hunger_multiplier", (double) hungerMultiplier);
+        hungerMultiplier = Mth.clamp((float) hungerMultiplier_double, 0, 1000);
+
+        hideCreativeTabItemsFromJEIBlacklist = config.getOrElse("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
+        disableExperementalSettings = config.getOrElse("common.disable_experemental_settings_popup", disableExperementalSettings);
+        //--------------------------------------------------------------------
+    }
+}

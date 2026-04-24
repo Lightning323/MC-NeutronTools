@@ -1,11 +1,13 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "org.zipcoder.neutrontools.mixin",
+  "package": "org.lightning.neutrontools.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "PlayerMixin",
-    "PrimaryLevelDataMixinForge"
+    "PrimaryLevelDataMixinForge",
+    "disableExpSettings.CreateWorldScreenMixin",
+    "disableExpSettings.WorldOpenFlowsMixin"
   ],
   "client": [
     "creativeTabs.accessor.CreativeModeTabAccessor",
