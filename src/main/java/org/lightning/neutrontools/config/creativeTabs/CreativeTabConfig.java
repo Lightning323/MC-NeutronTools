@@ -143,8 +143,7 @@ public class CreativeTabConfig {
 
 
     public boolean isTabDisabled(CreativeModeTab self) {
-        return disabledTabs.contains(CreativeTabUtils.getRegistryID(self)) ||
-                disabledTabs.contains(CreativeTabUtils.getTranslationKey(self));
+        return disabledTabs.contains(CreativeTabUtils.getRegistryID(self));
     }
 
     public enum TabNameMode {

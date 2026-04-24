@@ -87,11 +87,7 @@ public class TabEditConfig {
                             .toList());
                 }
                 if (item.match_tab != null) {
-                    CreativeModeTab tab = CreativeTabUtils.getTabFromString(item.match_tab);
-                    if (tab != null) {
-                        stacks.addAll(NeutronTools.TABS.cache.getItemsInCreativeTab(tab));
-
-                    }
+                    stacks.addAll(NeutronTools.TABS.cache.getItemsInCreativeTab(item.match_tab, item.nbt));
                 }
                 if (item.match_tags != null) {
                     for (String tag : item.match_tags) {
@@ -127,12 +123,9 @@ public class TabEditConfig {
                             .toList());
                 }
                 if (item.match_tab != null) {
-                    CreativeModeTab tab = CreativeTabUtils.getTabFromString(item.match_tab);
-                    if (tab != null) {
-                        Collection<ItemStack> itemStacks = NeutronTools.TABS.cache.getItemsInCreativeTab(tab);
-                        for (ItemStack itemStack : itemStacks) {
-                            stacks.add(itemStack.getItem());
-                        }
+                    Collection<ItemStack> itemStacks = NeutronTools.TABS.cache.getItemsInCreativeTab(item.match_tab, null);
+                    for (ItemStack itemStack : itemStacks) {
+                        stacks.add(itemStack.getItem());
                     }
                 }
                 if (item.match_tags != null) {

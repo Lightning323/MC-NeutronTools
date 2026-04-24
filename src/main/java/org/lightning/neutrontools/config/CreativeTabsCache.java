@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
@@ -13,6 +14,7 @@ import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.lightning.neutrontools.NeutronTools.CONFIG_PATH;
 
@@ -27,7 +29,7 @@ public class CreativeTabsCache {
     public List<CreativeModeTab> originalCreativeTabs = new ArrayList<>();
 
     //The cached state of our original tabs (loaded from the cache file)
-    public final HashMap<String, Collection<ItemStack>> cacheFile_originalTabItems = new HashMap<>();
+    public final HashMap<String, Collection<String>> cacheFile_originalTabItems = new HashMap<>();
 
     public CreativeTabsCache() {
         if (hasCacheFile()) {
@@ -41,17 +43,30 @@ public class CreativeTabsCache {
         originalCreativeTabs.add(self);
     }
 
-    public Collection<ItemStack> getItemsInCreativeTab(CreativeModeTab tab) {
+    public Collection<ItemStack> getItemsInCreativeTab(String tabRegistryID, String nbtString) {
         /**
          * First, try to get the items if they are cached
          */
         //Get by registry id first, then by translation key if not found
-        Collection<ItemStack> itemStacks = originalTabItems.get(CreativeTabUtils.getRegistryID(tab));
+        Collection<ItemStack> itemStacks = originalTabItems.get(tabRegistryID);
         if (itemStacks != null) return itemStacks;
 
         if (hasCacheFile()) {
-            itemStacks = cacheFile_originalTabItems.get(CreativeTabUtils.getRegistryID(tab));
-            if (itemStacks != null) return itemStacks;
+            Collection<String> stringStacks = cacheFile_originalTabItems.get(tabRegistryID);
+            if (stringStacks != null) {
+                itemStacks = new ArrayList<>();
+                for (String str : stringStacks) {
+                    //modded items cant be converted to stacks until we are in buildContents,
+                    //otherwise we will just get air because the items arent registered yet
+                    Item itemByName = CreativeTabUtils.getItemByName(str);
+                    if (itemByName != null) {
+                        ItemStack stack = new ItemStack(itemByName);
+                        CreativeTabUtils.applyNBT(stack, nbtString);
+                        itemStacks.add(stack);
+                    }
+                }
+                return itemStacks;
+            }
         }
         return new ArrayList<>();
     }
@@ -100,14 +115,10 @@ public class CreativeTabsCache {
             NeutronTools.LOGGER.warn("No creative tab cache found at {}", loadFile.getAbsolutePath());
             return false;
         }
-
         NeutronTools.LOGGER.info("Loading original creative tab list from {}", loadFile.getAbsolutePath());
-        Gson gson = new Gson();
-
         try (java.io.FileReader reader = new java.io.FileReader(loadFile)) {
-            JsonObject root = gson.fromJson(reader, JsonObject.class);
+            JsonObject root = GSON.fromJson(reader, JsonObject.class);
             if (root == null || !root.has("tabs")) return false;
-
             JsonArray tabsArray = root.getAsJsonArray("tabs");
 
             // Clear old cached data before repopulating
@@ -118,21 +129,11 @@ public class CreativeTabsCache {
                 String tabName = tabJson.get("tab").getAsString();
                 JsonArray itemsArray = tabJson.getAsJsonArray("names");
 
-                List<ItemStack> itemStacks = new ArrayList<>();
+                List<String> itemStacks = new ArrayList<>();
                 itemsArray.forEach(itemElement -> {
                     String itemRegistryName = itemElement.getAsString();
-
-                    // Convert Registry String back to Item and then to ItemStack
-                    net.minecraft.resources.ResourceLocation loc = net.minecraft.resources.ResourceLocation.tryParse(itemRegistryName);
-                    if (loc != null) {
-                        net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(loc);
-                        // Check if item isn't the 'air' default (meaning registry lookup failed)
-                        if (item != net.minecraft.world.item.Items.AIR || itemRegistryName.equals("minecraft:air")) {
-                            itemStacks.add(new ItemStack(item));
-                        }
-                    }
+                    itemStacks.add(itemRegistryName);
                 });
-
                 cacheFile_originalTabItems.put(tabName, itemStacks);
             });
 

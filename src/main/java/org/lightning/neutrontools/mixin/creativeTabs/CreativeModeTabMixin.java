@@ -13,6 +13,7 @@ import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.lightning.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
+import org.lightning.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

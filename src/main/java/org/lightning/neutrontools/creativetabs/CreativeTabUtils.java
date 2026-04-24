@@ -48,9 +48,16 @@ public class CreativeTabUtils {
         return stack;
     }
 
-    public static void applyNBT(ItemStack stack, String nbtString) throws CommandSyntaxException {
+    public static void applyNBT(ItemStack stack, String nbtString) {
+        if (nbtString == null) return;
         //TODO: Make this more efficient, use the syntax loading in the give command to parse the nbt
-        CompoundTag tag = TagParser.parseTag(nbtString);
+        CompoundTag tag = null;
+        try {
+            tag = TagParser.parseTag(nbtString);
+        } catch (CommandSyntaxException e) {
+            NeutronTools.LOGGER.error("Failed to Process NBT: {}", nbtString, e);
+            return;
+        }
 
         // 2. Check if the tag contains 'display.Name' (Old Format)
         // OR if you just passed a tag like {customName: "..."}
@@ -84,9 +91,9 @@ public class CreativeTabUtils {
         return itemOptional.map(Item::getDefaultInstance).orElse(ItemStack.EMPTY);
     }
 
-    public static String getTranslationKey(CreativeModeTab tab) {
-        return getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
-    }
+//    public static String getTranslationKey(CreativeModeTab tab) {
+//        return getTranslationKey(((CreativeModeTabAccessor) tab).getInternalDisplayName());
+//    }
 
     public static String getTranslationKey(Component component) {
         if (component.getContents() instanceof TranslatableContents contents) {
@@ -152,15 +159,22 @@ public class CreativeTabUtils {
         }
 
         // 2. Fallback to checking translation keys for Vanilla/Registered tabs
-        for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
-            if (getTranslationKey(tab).equals(key)) {
-                return tab;
-            }
-        }
+        //We dont want to encourage the use of translation keys to find tabs
+//        for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
+//            if (getTranslationKey(tab).equals(key)) {
+//                return tab;
+//            }
+//        }
         return null;
     }
 
 
+    /**
+     * Gets the item from registry ID
+     *
+     * @param name registry ID of the item
+     * @return the item, or null if not found
+     */
     public static Item getItemByName(String name) {
         // 1. ResourceLocation constructor is now private.
         // Use .parse() or .tryParse()

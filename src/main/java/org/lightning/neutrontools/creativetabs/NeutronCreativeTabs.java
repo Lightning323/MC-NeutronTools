@@ -2,7 +2,6 @@ package org.lightning.neutrontools.creativetabs;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
 import org.lightning.neutrontools.config.CreativeTabsCache;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
@@ -11,7 +10,6 @@ import java.util.*;
 
 import static com.mojang.text2speech.Narrator.LOGGER;
 import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getRegistryID;
-import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
 
 public class NeutronCreativeTabs {
 
@@ -46,16 +44,7 @@ public class NeutronCreativeTabs {
             }
 
             allTabs.stream()
-                    .filter(tab -> {
-                        String key = getTranslationKey(tab);
-                        if (key.equalsIgnoreCase(orderedTab)
-                                || key.replace("itemGroup.", "").equalsIgnoreCase(orderedTab))
-                            return true;
-
-                        if (CreativeTabUtils.getRegistryID(tab).equalsIgnoreCase(orderedTab)) return true;
-
-                        return false;
-                    })
+                    .filter(tab -> CreativeTabUtils.getRegistryID(tab).equalsIgnoreCase(orderedTab))
                     .findFirst()
                     .ifPresent(pTab -> addTabToFilteredListIfNotDisabled(pTab, filteredTabs));
         }
@@ -83,8 +72,7 @@ public class NeutronCreativeTabs {
 
     private void addTabToFilteredListIfNotDisabled(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
         //If our tab is not in the disabled tabs list, it makes it into the filtered list
-        if (!CreativeTabConfig.INSTANCE.disabledTabs.contains(getTranslationKey(tab)) &&
-                !CreativeTabConfig.INSTANCE.disabledTabs.contains(getRegistryID(tab))) {
+        if (!CreativeTabConfig.INSTANCE.disabledTabs.contains(getRegistryID(tab))) {
             filteredTabs.add(tab);
         }
     }
