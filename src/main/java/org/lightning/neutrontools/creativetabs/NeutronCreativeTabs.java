@@ -19,15 +19,6 @@ public class NeutronCreativeTabs {
     public final CreativeTabsCache cache = new CreativeTabsCache();
     public final LinkedList<CreativeModeTab> orderedTabs = new LinkedList<>();
     public final HashMap<String, CreativeModeTab> newTabs = new HashMap<>();
-    public int builtContentsTabs;
-
-    public void playerLoggedIn() {
-        /**
-         * Some variables do have to be reset when a player logs in
-         * Otherwise, they will persist between sessions
-         */
-        builtContentsTabs = 0;
-    }
 
     public NeutronCreativeTabs() {
     }

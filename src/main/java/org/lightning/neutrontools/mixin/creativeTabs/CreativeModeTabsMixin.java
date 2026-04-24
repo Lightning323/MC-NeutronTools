@@ -8,6 +8,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.lightning.neutrontools.NeutronTools;
+import org.lightning.neutrontools.config.CreativeTabsCache;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.lightning.neutrontools.creativetabs.client.impl.ForgeTabData;
@@ -23,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.lightning.neutrontools.NeutronTools.LOGGER;
+
 @Mixin(value = CreativeModeTabs.class, priority = 0)
 public abstract class CreativeModeTabsMixin {
 
@@ -36,6 +39,19 @@ public abstract class CreativeModeTabsMixin {
     /////////////////////////////////////////////
     /// Injections =========================== //
     /////////////////////////////////////////////
+
+    @Inject(
+            method = "buildAllTabContents",
+            at = @At("TAIL"),
+            remap = true
+    )
+    private static void onAllTabsFinishedBuilding(CreativeModeTab.ItemDisplayParameters parameters, CallbackInfo ci) {
+        // At this point, EVERY tab has run its buildContents method.
+        // The displayItems and displayItemsSearchTab lists are now fully populated.
+        NeutronTools.LOGGER.info("All Creative Tab contents have been built...");
+        NeutronTools.TABS.cache.writeCache();
+    }
+
 //
 //    @Inject(method = "validate", at = @At("HEAD"), cancellable = true)
 //    private static void injectValidation(CallbackInfo ci) {

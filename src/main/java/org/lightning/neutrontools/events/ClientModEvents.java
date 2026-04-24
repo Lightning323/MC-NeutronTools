@@ -58,6 +58,6 @@ public class ClientModEvents {
 
     @SubscribeEvent
     public static void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
-        NeutronTools.TABS.playerLoggedIn();
+
     }
 }

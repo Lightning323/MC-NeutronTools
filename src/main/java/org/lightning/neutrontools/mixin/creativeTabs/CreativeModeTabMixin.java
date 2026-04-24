@@ -3,6 +3,7 @@ package org.lightning.neutrontools.mixin.creativeTabs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.CreativeModeTabRegistry;
@@ -59,25 +60,14 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
     @Inject(method = "buildContents", at = @At("TAIL"), cancellable = true)
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
-        NeutronTools.TABS.builtContentsTabs++;
-        int totalTabs = //BuiltInRegistries.CREATIVE_MODE_TAB.size();
-                CreativeModeTabRegistry.getSortedCreativeModeTabs().size();
-
         CreativeModeTab self = (CreativeModeTab) (Object) this;
         if (!NeutronCreativeTabs.MANDATORY_TABS.contains(self)) { //We should not modify mandatory tabs
             NeutronTools.TABS.cache.buildContents(self, displayItems, displayItemsSearchTab);
-            LOGGER.info("Building contents of tab ({}/{}) {}",
-                    NeutronTools.TABS.builtContentsTabs,
-                    totalTabs,
+            LOGGER.info("Building contents of tab{}",
                     CreativeTabUtils.getRegistryID(self));
             //We have to do this beforehand because some mods make it impossible to edit display items after buildContents
             modifyDisplayItems();
             hideDisabledItemsFromSearch();
-        }
-
-        if (NeutronTools.TABS.builtContentsTabs >= totalTabs) {
-            LOGGER.info("Finished building contents of all tabs");
-            NeutronTools.TABS.cache.writeCache();
         }
     }
 
