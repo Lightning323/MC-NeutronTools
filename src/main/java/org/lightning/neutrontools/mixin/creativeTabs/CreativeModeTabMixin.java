@@ -39,10 +39,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Shadow
     @Final
     private Component displayName;
-
-    @Shadow
-    public abstract Collection<ItemStack> getDisplayItems();
-
     @Shadow
     @Final
     private int searchBarWidth;
@@ -53,34 +49,20 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Unique
     private boolean isCachedCustomIcon = false;
     @Unique
-    private boolean isCachedCustomDisplayName = false;
-    @Unique
     private Component cached_displayName = null;
 
-    /**
-     * Resets the cache for this tab
-     */
-    @Override
-    public void resetCache() {
-        isCachedCustomIcon = false;
-        isCachedCustomDisplayName = false;
-        cached_TabIcon = null;
-        cached_displayName = null;
-    }
 
     /// //////////////////////////////////////////
     /// Injections ============================ //
     /// //////////////////////////////////////////
 
-
     @Inject(method = "buildContents", at = @At("TAIL"), cancellable = true)
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
-        CreativeModeTab self = (CreativeModeTab) (Object) this;
-        //Add original tab items to the config first
-        NeutronTools.TABS.cache.buildContents(self, displayItems, displayItemsSearchTab);
         NeutronTools.TABS.builtContentsTabs++;
 
+        CreativeModeTab self = (CreativeModeTab) (Object) this;
         if (!NeutronCreativeTabs.MANDATORY_TABS.contains(self)) { //We should not modify mandatory tabs
+            NeutronTools.TABS.cache.buildContents(self, displayItems, displayItemsSearchTab);
             LOGGER.info("Building contents of tab {}", CreativeTabUtils.getRegistryID(self));
             //We have to do this beforehand because some mods make it impossible to edit display items after buildContents
             modifyDisplayItems();
@@ -133,8 +115,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
                         tabEditConfig.tab_name_key.replace("itemGroup.", "")
                                 .replace(".", "_")
                                 .replace(" ", "_")); //translatable (needs lang file)
-//                cached_displayName = Component.literal(tabEditConfig.tab_name_key); //Literal (no need for translation)
-                isCachedCustomDisplayName = true;
             }
         }
 
@@ -153,12 +133,14 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
         if (!isCachedCustomIcon) {
-            TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
-            if (tabEditConfig != null
-                    && tabEditConfig.tab_icon != null
-                    && tabEditConfig.tab_icon.get() != ItemStack.EMPTY) {
-                LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
-                cached_TabIcon = tabEditConfig.tab_icon.get();
+            if (!NeutronCreativeTabs.MANDATORY_TABS.contains(self)) {
+                TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
+                if (tabEditConfig != null
+                        && tabEditConfig.tab_icon != null
+                        && tabEditConfig.tab_icon.get() != ItemStack.EMPTY) {
+                    LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
+                    cached_TabIcon = tabEditConfig.tab_icon.get();
+                }
             }
             isCachedCustomIcon = true;
         }

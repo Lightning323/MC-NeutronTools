@@ -105,7 +105,7 @@ public class CreativeTabConfig {
                     });
             }
         }
-        subfiles = new File(CONFIG_PATH, "NeutronTools.tabs.newTabs").listFiles();
+        subfiles = new File(CONFIG_PATH, "new_tabs").listFiles();
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
                 if (tabEditFile.getName().endsWith(".json")) TabEditJsonRepresentation.load(tabEditFile,
