@@ -18,7 +18,7 @@ import static org.lightning.neutrontools.NeutronTools.CONFIG_PATH;
 
 public class CreativeTabsCache {
     public static final File CREATIVE_TABS_CACHE_FILE = new File(CONFIG_PATH, "cached_original_tabs.json");
-    private final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     //The current state of our original tabs in the form of registry id -> items
     public final HashMap<String, Collection<ItemStack>> originalTabItems = new HashMap<>();
@@ -56,9 +56,12 @@ public class CreativeTabsCache {
         return new ArrayList<>();
     }
 
+    private boolean savedCache = false;
 
-    public boolean writeCache() {
-        return writeCacheToFile(CREATIVE_TABS_CACHE_FILE);
+    public void writeCache() {
+        if (!savedCache) {//We only have to write the cache once
+            if (writeCacheToFile(CREATIVE_TABS_CACHE_FILE)) savedCache = true;
+        }
     }
 
     public boolean writeCacheToFile(File saveFile) {
@@ -91,29 +94,6 @@ public class CreativeTabsCache {
         }
         return false;
     }
-
-
-    /**
-     * Writes a list of ordered tabs
-     *
-     * @param saveFile
-     * @return
-     */
-    public boolean writeSimpleTabList(File saveFile) {
-        JsonObject root = new JsonObject();
-        JsonArray list = new JsonArray();
-
-        try (FileWriter writer = new FileWriter(saveFile)) {
-            originalTabItems.forEach((tabName, items) -> list.add(tabName));
-            root.add("ordered_tabs", list);
-            GSON.toJson(root, writer);
-            return true;
-        } catch (Exception e) {
-            NeutronTools.LOGGER.warn("Failed to save list: {}", e.getMessage());
-        }
-        return false;
-    }
-
 
     private boolean readCacheFromFile(File loadFile) {
         if (!loadFile.exists()) {

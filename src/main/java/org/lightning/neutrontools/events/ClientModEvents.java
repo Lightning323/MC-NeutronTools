@@ -6,8 +6,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
@@ -57,7 +57,7 @@ public class ClientModEvents {
 //    }
 
     @SubscribeEvent
-    public static void onClientLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        NeutronCreativeTabs.playerLoggedIn();
+    public static void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
+        NeutronTools.TABS.playerLoggedIn();
     }
 }

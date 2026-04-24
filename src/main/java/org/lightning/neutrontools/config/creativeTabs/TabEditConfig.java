@@ -9,15 +9,11 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 
-import java.io.File;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-
-import static org.lightning.neutrontools.NeutronTools.CONFIG_PATH;
 
 /**
  * Tab edit config is called after the tags and creative tabs have been loaded.
@@ -93,7 +89,7 @@ public class TabEditConfig {
                 if (item.match_tab != null) {
                     CreativeModeTab tab = CreativeTabUtils.getTabFromString(item.match_tab);
                     if (tab != null) {
-                        stacks.addAll(NeutronCreativeTabs.cache.getItemsInCreativeTab(tab));
+                        stacks.addAll(NeutronTools.TABS.cache.getItemsInCreativeTab(tab));
 
                     }
                 }
@@ -133,7 +129,7 @@ public class TabEditConfig {
                 if (item.match_tab != null) {
                     CreativeModeTab tab = CreativeTabUtils.getTabFromString(item.match_tab);
                     if (tab != null) {
-                        Collection<ItemStack> itemStacks = NeutronCreativeTabs.cache.getItemsInCreativeTab(tab);
+                        Collection<ItemStack> itemStacks = NeutronTools.TABS.cache.getItemsInCreativeTab(tab);
                         for (ItemStack itemStack : itemStacks) {
                             stacks.add(itemStack.getItem());
                         }

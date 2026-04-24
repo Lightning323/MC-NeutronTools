@@ -15,13 +15,24 @@ import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getTransl
 
 public class NeutronCreativeTabs {
 
-    //We need to add the items from unregistered tabs to the search tab otherwise they will not show up in the search
-    final static Set<ItemStack> itemsFromUnregisteredTabs = new HashSet<>();
+    //All data pertaining to the creative tabs, must be stored here
+    public final CreativeTabsCache cache = new CreativeTabsCache();
+    public final LinkedList<CreativeModeTab> orderedTabs = new LinkedList<>();
+    public final HashMap<String, CreativeModeTab> newTabs = new HashMap<>();
+    public int builtContentsTabs;
 
-    public static CreativeTabsCache cache = new CreativeTabsCache();
+    public void playerLoggedIn() {
+        /**
+         * Some variables do have to be reset when a player logs in
+         * Otherwise, they will persist between sessions
+         */
+        builtContentsTabs = 0;
+    }
+
+    public NeutronCreativeTabs() {
+    }
 
     public static final List<CreativeModeTab> MANDATORY_TABS = new ArrayList<>();
-    public static final LinkedList<CreativeModeTab> sortedTabs = new LinkedList<>();
 
     static {
         MANDATORY_TABS.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getSearchTab()));
@@ -29,13 +40,8 @@ public class NeutronCreativeTabs {
         MANDATORY_TABS.add(BuiltInRegistries.CREATIVE_MODE_TAB.get(CreativeModeTabsAccessor.getInventoryTab()));
     }
 
-
-    public static void playerLoggedIn() {
-        cache = new CreativeTabsCache(); //Reload the cache
-    }
-
-    public static void populateSortedTabsList(Collection<CreativeModeTab> allTabs) {
-        if (!sortedTabs.isEmpty() || allTabs.isEmpty()) return;//We only have to populate this once
+    public void populateSortedTabsList(Collection<CreativeModeTab> allTabs) {
+        if (!orderedTabs.isEmpty() || allTabs.isEmpty()) return;//We only have to populate this once
 //        System.out.println("All Tabs here : "+allTabs.stream().map(CreativeModeTab::getDisplayName).toList());
 
         LinkedHashSet<CreativeModeTab> filteredTabs = new LinkedHashSet<>();
@@ -75,8 +81,8 @@ public class NeutronCreativeTabs {
 //        System.out.println("Filtered Tabs: " + filteredTabs.stream().map(CreativeModeTab::getDisplayName).toList());
 
         // 4. Update the final list
-        sortedTabs.clear();
-        sortedTabs.addAll(filteredTabs);
+        orderedTabs.clear();
+        orderedTabs.addAll(filteredTabs);
 
         LOGGER.info("Populated sorted tabs list of {} total all tabs", allTabs.size());
 //        for (CreativeModeTab tab : sortedTabs) {
@@ -84,7 +90,7 @@ public class NeutronCreativeTabs {
 //        }
     }
 
-    private static void addTabToFilteredListIfNotDisabled(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
+    private void addTabToFilteredListIfNotDisabled(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
         //If our tab is not in the disabled tabs list, it makes it into the filtered list
         if (!CreativeTabConfig.INSTANCE.disabledTabs.contains(getTranslationKey(tab)) &&
                 !CreativeTabConfig.INSTANCE.disabledTabs.contains(getRegistryID(tab))) {

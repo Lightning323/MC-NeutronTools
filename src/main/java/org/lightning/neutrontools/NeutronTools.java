@@ -17,12 +17,12 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.RegisterEvent;
+import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.slf4j.Logger;
 import org.lightning.neutrontools.config.NeutronConfig;
 import org.lightning.neutrontools.network.SyncConfigPacket;
 
 import java.io.File;
-import java.util.HashMap;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(NeutronTools.MODID)
@@ -32,26 +32,15 @@ public class NeutronTools {
 
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final NeutronConfig CONFIG = new NeutronConfig();
-
+    public static final NeutronCreativeTabs TABS = new NeutronCreativeTabs();
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    //This list doesnt get reset
-    public static final HashMap<String, CreativeModeTab> NEW_TABS = new HashMap<>();
 
     private void registerTabs(RegisterEvent event) {
         // Check if we are currently in the Creative Mode Tab registry phase
         if (event.getRegistryKey().equals(Registries.CREATIVE_MODE_TAB)) {
-//            CreativeModeTab myTab = CreativeModeTab.builder()
-//                    .title(Component.translatable("itemGroup." + MODID + ".example_tab"))
-//                    .icon(() -> new ItemStack(Items.ACACIA_BOAT))
-//                    .displayItems((parameters, output) -> {
-//                        output.accept(Items.ACACIA_BOAT);
-//                        output.accept(Items.DIAMOND);
-//                    })
-//                    .build();
-
-            NEW_TABS.forEach((tabKey, tab) -> {
+            TABS.newTabs.forEach((tabKey, tab) -> {
                 String originalTabKey = tabKey == null ? "unknown" : tabKey;
                 try {
                     if (tabKey.contains(":")) {
@@ -105,7 +94,4 @@ public class NeutronTools {
             PacketDistributor.sendToPlayer(player, new SyncConfigPacket(CONFIG));
         }
     }
-
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-
 }

@@ -46,7 +46,7 @@ public class CreativeTabConfig {
                     "{\n\"disabled_items\":[]\n}");
             Files.writeString(new File(CONFIG_PATH, "ordered_tabs.json").toPath(),
                     "{\n\"ordered_tabs\":[]\n}");
-            new File(CONFIG_PATH, "new_tabs").mkdirs();
+            new File(CONFIG_PATH, "NeutronTools.tabs.newTabs").mkdirs();
             new File(CONFIG_PATH, "tab_edits").mkdirs();
         } catch (Exception e) {
             NeutronTools.LOGGER.error("Failed to plant starter files", e);
@@ -105,7 +105,7 @@ public class CreativeTabConfig {
                     });
             }
         }
-        subfiles = new File(CONFIG_PATH, "new_tabs").listFiles();
+        subfiles = new File(CONFIG_PATH, "NeutronTools.tabs.newTabs").listFiles();
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
                 if (tabEditFile.getName().endsWith(".json")) TabEditJsonRepresentation.load(tabEditFile,
@@ -113,14 +113,14 @@ public class CreativeTabConfig {
                             //Make the new tab as we are indexing tab edit files
                             //Tab edits and new tabs do the same thing, we create the new tab, but then add items with tab edits
                             CreativeModeTab myTab;
-                            if (NEW_TABS.containsKey(tabName)) {
-                                myTab = NEW_TABS.get(tabName);
+                            if (NeutronTools.TABS.newTabs.containsKey(tabName)) {
+                                myTab = NeutronTools.TABS.newTabs.get(tabName);
                             } else {
                                 myTab = CreativeModeTab.builder()
                                         .title(Component.translatable("itemGroup." + MODID + "." + tabName))
                                         .icon(CreativeTabUtils.makeTabIcon(tabData.tab_icon.name, tabData.tab_icon.nbt))
                                         .build();
-                                NEW_TABS.put(tabName, myTab);
+                                NeutronTools.TABS.newTabs.put(tabName, myTab);
                             }
                             tabEdits.put(myTab, new TabEditConfig(tabData));
                         });
@@ -129,7 +129,7 @@ public class CreativeTabConfig {
 
 
         LOGGER.debug("Tab Edits: {}", tabEdits);
-        LOGGER.debug("New tabs: {}", NEW_TABS);
+        LOGGER.debug("New tabs: {}", NeutronTools.TABS.newTabs);
     }
 
 

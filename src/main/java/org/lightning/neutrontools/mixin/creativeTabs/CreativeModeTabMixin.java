@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
@@ -76,7 +77,8 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
         CreativeModeTab self = (CreativeModeTab) (Object) this;
         //Add original tab items to the config first
-        NeutronCreativeTabs.cache.buildContents(self, displayItems, displayItemsSearchTab);
+        NeutronTools.TABS.cache.buildContents(self, displayItems, displayItemsSearchTab);
+        NeutronTools.TABS.builtContentsTabs++;
 
         if (!NeutronCreativeTabs.MANDATORY_TABS.contains(self)) { //We should not modify mandatory tabs
             LOGGER.info("Building contents of tab {}", CreativeTabUtils.getRegistryID(self));
@@ -86,9 +88,9 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         }
 
         // Check if this was the final tab
-        if (NeutronCreativeTabs.cache.originalCreativeTabs.size() >= BuiltInRegistries.CREATIVE_MODE_TAB.size()) {
+        if (NeutronTools.TABS.builtContentsTabs >= BuiltInRegistries.CREATIVE_MODE_TAB.size()) {
             LOGGER.info("Finished building contents of all tabs");
-            NeutronCreativeTabs.cache.writeCache();
+            NeutronTools.TABS.cache.writeCache();
         }
     }
 
