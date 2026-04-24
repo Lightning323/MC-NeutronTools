@@ -1,9 +1,5 @@
 package org.lightning.neutrontools.commands;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -14,17 +10,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
+import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
-
-import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
+import java.util.ArrayList;
 
 public class ListAllCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -80,7 +73,7 @@ public class ListAllCommand {
                         }))
                         .then(Commands.literal("original_tabs").executes(context -> {
                             File savePath = new File("original_tabs.json");
-                            if (listCreativeTabItems(savePath, NeutronCreativeTabs.cached_originalCreativeTabItems)) {
+                            if (NeutronCreativeTabs.cache.writeCacheToFile(savePath)) {
                                 Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
                                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
@@ -98,41 +91,6 @@ public class ListAllCommand {
     }
 
 
-    private static boolean listCreativeTabItems(File saveFile, HashMap<String, Collection<ItemStack>> list) {
-        NeutronTools.LOGGER.info("Saving original creative tab list to {}", saveFile.getAbsolutePath());
-
-        // Use Gson for clean JSON formatting
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        JsonObject root = new JsonObject();
-        JsonArray tabsArray = new JsonArray();
-        JsonArray orderedTabs = new JsonArray();
-
-        try (FileWriter writer = new FileWriter(saveFile)) {
-            // 1. Process Registered Tabs
-            list.forEach((tabName, items) -> {
-                JsonObject tabJson = new JsonObject();
-                tabJson.addProperty("tab", tabName);
-                orderedTabs.add(tabName);
-
-                JsonArray itemsArray = new JsonArray();
-                for (ItemStack item : items) {
-                    itemsArray.add(BuiltInRegistries.ITEM.getKey(item.getItem()).toString());
-                }
-                tabJson.add("names", itemsArray);
-                tabsArray.add(tabJson);
-            });
-            root.add("allTabs", orderedTabs);
-            root.add("tabs", tabsArray);
-            gson.toJson(root, writer);
-
-            NeutronTools.LOGGER.info("Saved item list to: {}", saveFile.getAbsolutePath());
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            NeutronTools.LOGGER.warn("Failed to save item list: {}", e.getMessage());
-        }
-        return false;
-    }
 
 
     private static boolean listBlocksToFile(File saveFile) {

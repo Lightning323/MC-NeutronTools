@@ -3,6 +3,7 @@ package org.lightning.neutrontools.creativetabs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import org.lightning.neutrontools.config.CreativeTabsCache;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 
@@ -17,8 +18,7 @@ public class NeutronCreativeTabs {
     //We need to add the items from unregistered tabs to the search tab otherwise they will not show up in the search
     final static Set<ItemStack> itemsFromUnregisteredTabs = new HashSet<>();
 
-    public static final HashMap<String, Collection<ItemStack>> cached_originalCreativeTabItems = new HashMap<>();
-    public static List<CreativeModeTab> cached_originalCreativeTabs = new ArrayList<>();
+    public static CreativeTabsCache cache = new CreativeTabsCache();
 
     public static final List<CreativeModeTab> MANDATORY_TABS = new ArrayList<>();
     public static final LinkedList<CreativeModeTab> sortedTabs = new LinkedList<>();
@@ -30,10 +30,8 @@ public class NeutronCreativeTabs {
     }
 
 
-
     public static void playerLoggedIn() {
-        cached_originalCreativeTabItems.clear();
-        cached_originalCreativeTabs.clear();
+        cache = new CreativeTabsCache(); //Reload the cache
     }
 
     public static void populateSortedTabsList(Collection<CreativeModeTab> allTabs) {

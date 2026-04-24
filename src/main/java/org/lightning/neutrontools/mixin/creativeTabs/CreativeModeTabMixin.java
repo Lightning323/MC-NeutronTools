@@ -5,6 +5,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
+import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
+import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
+import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
+import org.lightning.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -13,14 +18,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
-import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
-import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
-import org.lightning.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
-import org.lightning.neutrontools.events.ClientModEvents;
-import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.lightning.neutrontools.NeutronTools.LOGGER;
 import static org.lightning.neutrontools.NeutronTools.MODID;
@@ -74,14 +75,25 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
     @Inject(method = "buildContents", at = @At("TAIL"), cancellable = true)
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
         CreativeModeTab self = (CreativeModeTab) (Object) this;
-
         //Add original tab items to the config first
-        NeutronCreativeTabs.cached_originalCreativeTabItems.put(CreativeTabUtils.getRegistryID(self), new ArrayList<>(displayItems));
-        NeutronCreativeTabs.cached_originalCreativeTabs.add(self);
+        NeutronCreativeTabs.cache.buildContents(self, displayItems, displayItemsSearchTab);
 
-        // Get the total number of registered tabs
-        int totalTabs = BuiltInRegistries.CREATIVE_MODE_TAB.size();
+        if (!NeutronCreativeTabs.MANDATORY_TABS.contains(self)) { //We should not modify mandatory tabs
+            LOGGER.info("Building contents of tab {}", CreativeTabUtils.getRegistryID(self));
+            //We have to do this beforehand because some mods make it impossible to edit display items after buildContents
+            modifyDisplayItems();
+            hideDisabledItemsFromSearch();
+        }
 
+        // Check if this was the final tab
+        if (NeutronCreativeTabs.cache.originalCreativeTabs.size() >= BuiltInRegistries.CREATIVE_MODE_TAB.size()) {
+            LOGGER.info("Finished building contents of all tabs");
+            NeutronCreativeTabs.cache.writeCache();
+        }
+    }
+
+
+    private void hideDisabledItemsFromSearch() {
         //Remove disabled items right away (Dont wait)
         //We can only hide items from search if they are hidden at the right time
         HashSet<Item> disabled_items = new HashSet<>(CreativeTabConfig.INSTANCE.disabledItems);
@@ -89,14 +101,9 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
 //        TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
 //        if (tabEditConfig != null) disabled_items.addAll(tabEditConfig.items_to_remove);
         displayItemsSearchTab.removeIf(stack -> disabled_items.contains(stack.getItem()));
-
-        // Check if this was the final tab
-        if (NeutronCreativeTabs.cached_originalCreativeTabs.size() >= totalTabs) {
-            onAllTabsFinishedBuilding();
-        }
     }
 
-    public void modifyItems() {
+    public void modifyDisplayItems() {
         CreativeModeTab tab = (CreativeModeTab) (Object) this;
         if (CreativeTabConfig.INSTANCE.isTabDisabled(tab)) {
             displayItems.clear();
@@ -109,14 +116,6 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         }
     }
 
-    @Unique
-    private void onAllTabsFinishedBuilding() {
-        LOGGER.info("Modifying items for all tabs; Tags ready: {}", ClientModEvents.isTagsReady());
-        CreativeTabConfig.INSTANCE.load();
-        for (CreativeModeTab tab : NeutronCreativeTabs.cached_originalCreativeTabs) {
-            ((CreativeModeTabMixin_I) tab).modifyItems();
-        }
-    }
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void injectDisplayName(CallbackInfoReturnable<Component> cir) {
@@ -166,6 +165,4 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             cir.setReturnValue(cached_TabIcon);
 
     }
-
-
 }

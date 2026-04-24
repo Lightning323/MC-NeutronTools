@@ -8,12 +8,16 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 
+import java.io.File;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+
+import static org.lightning.neutrontools.NeutronTools.CONFIG_PATH;
 
 /**
  * Tab edit config is called after the tags and creative tabs have been loaded.
@@ -87,9 +91,10 @@ public class TabEditConfig {
                             .toList());
                 }
                 if (item.match_tab != null) {
-                    Collection<ItemStack> itemStacks = getItemsFromTab(item.match_tab);
-                    if (itemStacks != null) {
-                        stacks.addAll(itemStacks);
+                    CreativeModeTab tab = CreativeTabUtils.getTabFromString(item.match_tab);
+                    if (tab != null) {
+                        stacks.addAll(NeutronCreativeTabs.cache.getItemsInCreativeTab(tab));
+
                     }
                 }
                 if (item.match_tags != null) {
@@ -126,8 +131,9 @@ public class TabEditConfig {
                             .toList());
                 }
                 if (item.match_tab != null) {
-                    Collection<ItemStack> itemStacks = getItemsFromTab(item.match_tab);
-                    if (itemStacks != null) {
+                    CreativeModeTab tab = CreativeTabUtils.getTabFromString(item.match_tab);
+                    if (tab != null) {
+                        Collection<ItemStack> itemStacks = NeutronCreativeTabs.cache.getItemsInCreativeTab(tab);
                         for (ItemStack itemStack : itemStacks) {
                             stacks.add(itemStack.getItem());
                         }
@@ -148,16 +154,6 @@ public class TabEditConfig {
         }
     }
 
-    private Collection<ItemStack> getItemsFromTab(String matchTab) {
-        CreativeModeTab tab = CreativeTabUtils.getTabFromString(matchTab);
-        if (tab == null) return null;
-        //Get by registry id first, then by translation key if not found
-        Collection<ItemStack> itemStacks = NeutronCreativeTabs.cached_originalCreativeTabItems.get(CreativeTabUtils.getRegistryID(tab));
-        if (itemStacks == null) {
-            return NeutronCreativeTabs.cached_originalCreativeTabItems.get(CreativeTabUtils.getTranslationKey(tab));
-        }
-        return itemStacks;
-    }
 
     public TagKey<Item> getTagFromString(String tagString) {
         // 1. Create a ResourceLocation from the string (e.g., "minecraft:planks")
