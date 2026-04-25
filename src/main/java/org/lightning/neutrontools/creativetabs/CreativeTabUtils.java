@@ -17,7 +17,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.CustomData;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
