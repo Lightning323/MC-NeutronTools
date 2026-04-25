@@ -1,30 +1,16 @@
 package org.lightning.neutrontools.mixin.creativeTabs;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.neoforged.neoforge.common.CreativeModeTabRegistry;
-import org.jetbrains.annotations.Nullable;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.config.CreativeTabsCache;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
-import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
-import org.lightning.neutrontools.creativetabs.client.impl.ForgeTabData;
-import org.lightning.neutrontools.mixin.creativeTabs.accessor.ForceCreativeTabAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Stream;
-
-import static org.lightning.neutrontools.NeutronTools.LOGGER;
 
 @Mixin(value = CreativeModeTabs.class, priority = 0)
 public abstract class CreativeModeTabsMixin {
