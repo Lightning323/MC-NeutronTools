@@ -27,7 +27,7 @@ import static org.lightning.neutrontools.NeutronTools.MODID;
 import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
 
 @Mixin(CreativeModeTab.class)
-public abstract class CreativeModeTabMixin  {
+public abstract class CreativeModeTabMixin {
 
     @Shadow
     private Collection<ItemStack> displayItems;
@@ -59,22 +59,10 @@ public abstract class CreativeModeTabMixin  {
         CreativeModeTab self = (CreativeModeTab) (Object) this;
         if (!NeutronCreativeTabs.MANDATORY_TABS.contains(self)) { //We should not modify mandatory tabs
             NeutronTools.TABS.cache.buildContents(self, displayItems, displayItemsSearchTab);
-            LOGGER.info("Building contents of tab{}",
-                    CreativeTabUtils.getRegistryID(self));
-            //We have to do this beforehand because some mods make it impossible to edit display items after buildContents
-
-
             if (CreativeTabConfig.INSTANCE.isTabDisabled(self)) {
                 displayItems.clear();
                 displayItemsSearchTab.clear();
-            } else {
-                TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
-                if (tabEditConfig != null) {
-                    tabEditConfig.modifyDisplayItems(displayItems, displayItemsSearchTab);
-                }
-            }
-
-            hideDisabledItemsFromSearch();
+            } else hideDisabledItemsFromSearch();
         }
     }
 
@@ -88,8 +76,6 @@ public abstract class CreativeModeTabMixin  {
 //        if (tabEditConfig != null) disabled_items.addAll(tabEditConfig.items_to_remove);
         displayItemsSearchTab.removeIf(stack -> disabled_items.contains(stack.getItem()));
     }
-
-
 
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)

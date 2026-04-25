@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 
@@ -27,6 +28,18 @@ public class TabEditConfig {
     public Map<Integer, List<ItemStack>> items_to_add;
     public ArrayList<Item> items_to_remove;
 
+    //For the event hook
+    public void modifyContentsFromEvent(BuildCreativeModeTabContentsEvent event) {
+        items_to_add.forEach((indx, stacks) -> {
+                    event.acceptAll(stacks);
+                }
+        );
+        items_to_remove.forEach(item -> event.remove(
+                new ItemStack(item, 1),
+                CreativeModeTab.TabVisibility.PARENT_TAB_ONLY));
+    }
+
+    //For the mixin
     public void modifyDisplayItems(Collection<ItemStack> displayItems, Collection<ItemStack> displaySearchItems) {
         //Keep only unique items and Make sure disabled items are removed from list
         Set<CreativeTabUtils.StackFingerprint> seen = new HashSet<>();
