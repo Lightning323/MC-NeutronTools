@@ -57,7 +57,10 @@ public class TabEditConfig {
                     if (indx.isEmpty()) event.acceptAll(stacks);
                     else {
                         Item previous = CreativeTabUtils.getItemByName(indx);
-                        if (previous == null) {
+                        if (previous == null ||
+                                //If the previous item is not in the parent entries, we should add all items to the end
+                                !event.getParentEntries().contains(new ItemStack(previous,1))
+                        ) {
                             event.acceptAll(stacks);
                         } else {
                             ItemStack previousStack = new ItemStack(previous, 1);

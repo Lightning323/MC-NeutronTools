@@ -47,26 +47,9 @@ public class ClientModEvents {
         }
     }
 
-    @SubscribeEvent
     public static void buildContents(BuildCreativeModeTabContentsEvent event) {
-//       CreativeTabConfig.INSTANCE.load(); //FIXME: It matters A GREAT DEAL where this is loaded, this seems to be the only reliable way to ensure modded items are added
+       CreativeTabConfig.INSTANCE.load(); //FIXME: It matters A GREAT DEAL where this is loaded, this seems to be the only reliable way to ensure modded items are added
         //TODO: Some mods change the way creative tabs are registered, and so the only reliable way to ensure modded items are added is to add them here, instead of in the mixin
-
-        if (!NeutronCreativeTabs.MANDATORY_TABS.contains(event.getTab())) { //We should not modify mandatory tabs
-            NeutronTools.TABS.cache.buildContents(event.getTab(),
-                    event.getTab().getDisplayItems(),
-                    event.getTab().getSearchTabDisplayItems());
-            if (CreativeTabConfig.INSTANCE.isTabDisabled(event.getTab())) {
-                event.getTab().getDisplayItems().clear();
-                event.getTab().getSearchTabDisplayItems().clear();
-            } else {
-                HashSet<Item> disabled_items = new HashSet<>(CreativeTabConfig.INSTANCE.disabledItems);
-                //NOTE: We dont have to hide the items hidden manually because if they were hidden from all tabs, they should have been hidden with disabledItems
-//        TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
-//        if (tabEditConfig != null) disabled_items.addAll(tabEditConfig.items_to_remove);
-                event.getTab().getSearchTabDisplayItems().removeIf(stack -> disabled_items.contains(stack.getItem()));
-            }
-        }
 
         TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(event.getTab());
         if (tabEditConfig != null) {

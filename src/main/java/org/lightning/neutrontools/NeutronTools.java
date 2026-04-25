@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.CreativeModeTab;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -18,6 +19,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
+import org.lightning.neutrontools.events.ClientModEvents;
 import org.slf4j.Logger;
 import org.lightning.neutrontools.config.NeutronConfig;
 import org.lightning.neutrontools.network.SyncConfigPacket;
@@ -72,6 +74,7 @@ public class NeutronTools {
         // Note that this is necessary if and only if we want *this* class (Neutrontools) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
+        modEventBus.addListener(EventPriority.LOWEST, ClientModEvents::buildContents);
         CREATIVE_MODE_TABS.register(modEventBus);
     }
 
