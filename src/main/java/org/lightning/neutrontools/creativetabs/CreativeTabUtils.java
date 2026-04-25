@@ -88,7 +88,8 @@ public class CreativeTabUtils {
     public static ItemStack makeItemStack(String itemId) {
         if (itemId == null) return ItemStack.EMPTY;
         Optional<Item> itemOptional = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(itemId));
-        return itemOptional.map(Item::getDefaultInstance).orElse(ItemStack.EMPTY);
+        ItemStack stack = itemOptional.map(Item::getDefaultInstance).orElse(ItemStack.EMPTY);
+        return stack;
     }
 
 //    public static String getTranslationKey(CreativeModeTab tab) {

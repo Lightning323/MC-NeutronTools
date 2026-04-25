@@ -79,7 +79,8 @@ public class TabEditConfig {
 
                 if (item.names != null) {
                     for (String name : item.names) {
-                        stacks.add(CreativeTabUtils.makeItemStack(name, item.nbt));
+                        ItemStack stack = CreativeTabUtils.makeItemStack(name, item.nbt);
+                        if (!stack.isEmpty()) stacks.add(stack);
                     }
                 }
 
@@ -92,7 +93,7 @@ public class TabEditConfig {
                                 String id = entry.getKey().location().toString();
                                 return pattern.matcher(id).matches();
                             })
-                            .map(entry -> new ItemStack(entry.getValue()))
+                            .map(entry -> new ItemStack(entry.getValue(), 1))
                             .toList());
                 }
                 if (item.match_tab != null) {
