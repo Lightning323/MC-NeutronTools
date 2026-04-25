@@ -72,20 +72,19 @@ public class TabEditConfig {
         items_to_remove = new ArrayList<>();
 
         if (json.items_to_add != null) {
-            json.items_to_add.forEach(item -> {
-                int index = item.index;
+            json.items_to_add.forEach(itemsEntry -> {
+                int index = itemsEntry.index;
 
                 ArrayList<ItemStack> stacks = new ArrayList<>();
 
-                if (item.names != null) {
-                    for (String name : item.names) {
-                        ItemStack stack = CreativeTabUtils.makeItemStack(name, item.nbt);
+                if (itemsEntry.names != null) {
+                    for (String name : itemsEntry.names) {
+                        ItemStack stack = CreativeTabUtils.makeItemStack(name, itemsEntry.nbt);
                         if (!stack.isEmpty()) stacks.add(stack);
                     }
                 }
-
-                if (item.match_name != null) {
-                    Pattern pattern = Pattern.compile(item.match_name);
+                if (itemsEntry.match_name != null) {
+                    Pattern pattern = Pattern.compile(itemsEntry.match_name);
 
                     stacks.addAll(BuiltInRegistries.ITEM.entrySet().stream()
                             .filter(entry -> {
@@ -96,11 +95,11 @@ public class TabEditConfig {
                             .map(entry -> new ItemStack(entry.getValue(), 1))
                             .toList());
                 }
-                if (item.match_tab != null) {
-                    stacks.addAll(NeutronTools.TABS.cache.getItemsInCreativeTab(item.match_tab, item.nbt));
+                if (itemsEntry.match_tab != null) {
+                    stacks.addAll(NeutronTools.TABS.cache.getItemsInCreativeTab(itemsEntry.match_tab, itemsEntry.nbt));
                 }
-                if (item.match_tags != null) {
-                    for (String tag : item.match_tags) {
+                if (itemsEntry.match_tags != null) {
+                    for (String tag : itemsEntry.match_tags) {
                         List<Item> itemsInTag = BuiltInRegistries.ITEM.getOrCreateTag(getTagFromString(tag))
                                 .stream()
                                 .map(Holder::value)

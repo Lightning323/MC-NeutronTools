@@ -1,19 +1,14 @@
 package org.lightning.neutrontools.mixin.creativeTabs;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
-import org.lightning.neutrontools.creativetabs.client.impl.CreativeModeTabMixin_I;
-import org.lightning.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabAccessor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,7 +27,7 @@ import static org.lightning.neutrontools.NeutronTools.MODID;
 import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
 
 @Mixin(CreativeModeTab.class)
-public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
+public abstract class CreativeModeTabMixin  {
 
     @Shadow
     private Collection<ItemStack> displayItems;
@@ -67,7 +62,18 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
             LOGGER.info("Building contents of tab{}",
                     CreativeTabUtils.getRegistryID(self));
             //We have to do this beforehand because some mods make it impossible to edit display items after buildContents
-            modifyDisplayItems();
+
+
+            if (CreativeTabConfig.INSTANCE.isTabDisabled(self)) {
+                displayItems.clear();
+                displayItemsSearchTab.clear();
+            } else {
+                TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
+                if (tabEditConfig != null) {
+                    tabEditConfig.modifyDisplayItems(displayItems, displayItemsSearchTab);
+                }
+            }
+
             hideDisabledItemsFromSearch();
         }
     }
@@ -83,18 +89,7 @@ public abstract class CreativeModeTabMixin implements CreativeModeTabMixin_I {
         displayItemsSearchTab.removeIf(stack -> disabled_items.contains(stack.getItem()));
     }
 
-    public void modifyDisplayItems() {
-        CreativeModeTab tab = (CreativeModeTab) (Object) this;
-        if (CreativeTabConfig.INSTANCE.isTabDisabled(tab)) {
-            displayItems.clear();
-            displayItemsSearchTab.clear();
-        } else {
-            TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(tab);
-            if (tabEditConfig != null) {
-                tabEditConfig.modifyDisplayItems(displayItems, displayItemsSearchTab);
-            }
-        }
-    }
+
 
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
