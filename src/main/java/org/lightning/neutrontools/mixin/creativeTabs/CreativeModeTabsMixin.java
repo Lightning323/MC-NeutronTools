@@ -25,14 +25,14 @@ public abstract class CreativeModeTabsMixin {
     /// Injections =========================== //
     /// //////////////////////////////////////////
 
-    @Inject(
-            method = "buildAllTabContents",
-            at = @At("HEAD"),
-            remap = true
-    )
-    private static void onAllTabsStartedBuilding(CreativeModeTab.ItemDisplayParameters parameters, CallbackInfo ci) {
-        CreativeTabConfig.INSTANCE.load(); //Load tab config JUST before build contents
-    }
+//    @Inject(
+//            method = "buildAllTabContents",
+//            at = @At("HEAD"),
+//            remap = true
+//    )
+//    private static void onAllTabsStartedBuilding(CreativeModeTab.ItemDisplayParameters parameters, CallbackInfo ci) {
+//        CreativeTabConfig.INSTANCE.load(); //DOES NOTHING!
+//    }
 
     @Inject(
             method = "buildAllTabContents",

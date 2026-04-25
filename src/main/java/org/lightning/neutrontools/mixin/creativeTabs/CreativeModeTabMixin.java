@@ -54,28 +54,10 @@ public abstract class CreativeModeTabMixin {
     /// Injections ============================ //
     /// //////////////////////////////////////////
 
-    @Inject(method = "buildContents", at = @At("TAIL"), cancellable = true)
-    private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
-        CreativeModeTab self = (CreativeModeTab) (Object) this;
-        if (!NeutronCreativeTabs.MANDATORY_TABS.contains(self)) { //We should not modify mandatory tabs
-            NeutronTools.TABS.cache.buildContents(self, displayItems, displayItemsSearchTab);
-            if (CreativeTabConfig.INSTANCE.isTabDisabled(self)) {
-                displayItems.clear();
-                displayItemsSearchTab.clear();
-            } else hideDisabledItemsFromSearch();
-        }
-    }
-
-
-    private void hideDisabledItemsFromSearch() {
-        //Remove disabled items right away (Dont wait)
-        //We can only hide items from search if they are hidden at the right time
-        HashSet<Item> disabled_items = new HashSet<>(CreativeTabConfig.INSTANCE.disabledItems);
-        //NOTE: We dont have to hide the items hidden manually because if they were hidden from all tabs, they should have been hidden with disabledItems
-//        TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
-//        if (tabEditConfig != null) disabled_items.addAll(tabEditConfig.items_to_remove);
-        displayItemsSearchTab.removeIf(stack -> disabled_items.contains(stack.getItem()));
-    }
+//    @Inject(method = "buildContents", at = @At("TAIL"), cancellable = true)
+//    private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
+//
+//    }
 
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)

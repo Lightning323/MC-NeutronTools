@@ -1,6 +1,8 @@
 package org.lightning.neutrontools.config.creativeTabs;
 
+import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +17,7 @@ import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Tab edit config is called after the tags and creative tabs have been loaded.
@@ -27,9 +30,30 @@ public class TabEditConfig {
     public Map<String, List<ItemStack>> items_to_add;
     public ArrayList<Item> items_to_remove;
 
+    private record StackKey(Item item, DataComponentMap components) {
+        static StackKey of(ItemStack stack) {
+            return new StackKey(stack.getItem(), stack.getComponents());
+        }
+    }
+
     //For the event hook
     public void modifyContentsFromEvent(BuildCreativeModeTabContentsEvent event) {
+//        ObjectSortedSet<ItemStack> parentEntries = event.getParentEntries();
+//        Set<ItemStack> parentEntries = new HashSet<>(event.getParentEntries());
+        Set<StackKey> parentEntries = event.getParentEntries().stream()
+                .map(StackKey::of)
+                .collect(Collectors.toSet());
+
         items_to_add.forEach((indx, stacks) -> {
+                    stacks.removeIf(is -> {
+                        if (is.getCount() != 1) return true; //if itemstack count is not 1, the game will crash
+
+                        StackKey key = StackKey.of(is);
+                        // 3. Check if it's already in the master set
+                        // .add() returns 'false' if the element was already present!
+                        boolean isDuplicate = !parentEntries.add(key);
+                        return isDuplicate;
+                    });
                     if (indx.isEmpty()) event.acceptAll(stacks);
                     else {
                         Item previous = CreativeTabUtils.getItemByName(indx);
@@ -100,8 +124,6 @@ public class TabEditConfig {
             });
         }
 
-        //Safety clean, to remove invalid items
-        items_to_add.values().removeIf(stacks -> stacks.removeIf((is) -> is.getCount() != 1));
 
         if (json.items_to_remove != null) {
             json.items_to_remove.forEach(item -> {

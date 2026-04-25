@@ -38,7 +38,9 @@ public class CreativeTabsCache {
     }
 
 
-    public void buildContents(CreativeModeTab self, Collection<ItemStack> displayItems, Set<ItemStack> displayItemsSearchTab) {
+    public void buildContents(CreativeModeTab self,
+                              Collection<ItemStack> displayItems,
+                              Collection<ItemStack> displayItemsSearchTab) {
         originalTabItems.put(CreativeTabUtils.getRegistryID(self), new ArrayList<>(displayItems));
         originalCreativeTabs.add(self);
     }
