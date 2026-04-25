@@ -114,6 +114,10 @@ public class TabEditConfig {
                 } else items_to_add.put(index, stacks);
             });
         }
+
+        //Safety clean, to remove invalid items
+        items_to_add.values().removeIf(stacks -> stacks.removeIf((is) -> is.getCount() != 1));
+
         if (json.items_to_remove != null) {
             json.items_to_remove.forEach(item -> {
                 ArrayList<Item> stacks = new ArrayList<>();
