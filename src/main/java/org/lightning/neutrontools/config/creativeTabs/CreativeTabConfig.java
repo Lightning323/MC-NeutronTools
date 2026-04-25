@@ -128,8 +128,8 @@ public class CreativeTabConfig {
         }
 
 
-        LOGGER.debug("Tab Edits: {}", tabEdits);
-        LOGGER.debug("New tabs: {}", NeutronTools.TABS.newTabs);
+        LOGGER.info("Tab Edits: {}", tabEdits);
+        LOGGER.info("New tabs: {}", NeutronTools.TABS.newTabs);
     }
 
 

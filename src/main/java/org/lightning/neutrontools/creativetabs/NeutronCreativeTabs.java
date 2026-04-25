@@ -34,32 +34,23 @@ public class NeutronCreativeTabs {
 //        System.out.println("All Tabs here : "+allTabs.stream().map(CreativeModeTab::getDisplayName).toList());
 
         LinkedHashSet<CreativeModeTab> filteredTabs = new LinkedHashSet<>();
-        boolean addRemaining = false;
 
         // 1. Process specific ordering
         for (String orderedTab : CreativeTabConfig.INSTANCE.tabOrder) {
-            if (orderedTab.equalsIgnoreCase("existing")) {
-                addRemaining = true;
-                continue;
-            }
-
-            allTabs.stream()
+             allTabs.stream()
                     .filter(tab -> CreativeTabUtils.getRegistryID(tab).equalsIgnoreCase(orderedTab))
                     .findFirst()
                     .ifPresent(pTab -> addTabToFilteredListIfNotDisabled(pTab, filteredTabs));
         }
 
         // 2. Process "existing" (catch-all for tabs not mentioned in tabOrder)
-        if (addRemaining || CreativeTabConfig.INSTANCE.tabOrder.isEmpty()) {
             for (CreativeModeTab tab : allTabs) {
                 addTabToFilteredListIfNotDisabled(tab, filteredTabs);
             }
-        }
+
 
         // 3. Final safety for mandatory tabs (only adds if not already present)
         filteredTabs.addAll(MANDATORY_TABS);
-//        System.out.println("Filtered Tabs: " + filteredTabs.stream().map(CreativeModeTab::getDisplayName).toList());
-
         // 4. Update the final list
         orderedTabs.clear();
         orderedTabs.addAll(filteredTabs);
