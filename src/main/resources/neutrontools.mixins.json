@@ -13,7 +13,8 @@
     "creativeTabs.accessor.CreativeModeTabsAccessor",
     "creativeTabs.CreativeModeTabMixin",
     "creativeTabs.CreativeModeTabRegistryMixin",
-    "creativeTabs.CreativeModeTabsMixin"
+    "creativeTabs.CreativeModeTabsMixin",
+    "creativeTabs.MixinCreativeTabCrashFix"
   ],
   "injectors": {
     "defaultRequire": 1

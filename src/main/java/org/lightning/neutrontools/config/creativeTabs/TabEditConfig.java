@@ -38,28 +38,24 @@ public class TabEditConfig {
 
     //For the event hook
     public void modifyContentsFromEvent(BuildCreativeModeTabContentsEvent event) {
-//        ObjectSortedSet<ItemStack> parentEntries = event.getParentEntries();
+//Now that we are prevening crashes on the mixin, level, we no longer need the following code
 //        Set<ItemStack> parentEntries = new HashSet<>(event.getParentEntries());
-        Set<StackKey> parentEntries = event.getParentEntries().stream()
-                .map(StackKey::of)
-                .collect(Collectors.toSet());
+//        Set<StackKey> parentEntries = event.getParentEntries().stream()
+//                .map(StackKey::of)
+//                .collect(Collectors.toSet());
 
         items_to_add.forEach((indx, stacks) -> {
                     stacks.removeIf(is -> {
-                        if (is.getCount() != 1) return true; //if itemstack count is not 1, the game will crash
-
-                        StackKey key = StackKey.of(is);
-                        // 3. Check if it's already in the master set
-                        // .add() returns 'false' if the element was already present!
-                        boolean isDuplicate = !parentEntries.add(key);
-                        return isDuplicate;
+                        return is.getCount() != 1; //if itemstack count is not 1, the game will crash
+                        //|| !parentEntries.add(StackKey.of(is)
                     });
+
                     if (indx.isEmpty()) event.acceptAll(stacks);
                     else {
                         Item previous = CreativeTabUtils.getItemByName(indx);
-                        if (previous == null ||
-                                //If the previous item is not in the parent entries, we should add all items to the end
-                                !event.getParentEntries().contains(new ItemStack(previous,1))
+                        if (previous == null
+                            //If the previous item is not in the parent entries, we should add all items to the end
+//                                !event.getParentEntries().contains(new ItemStack(previous,1))
                         ) {
                             event.acceptAll(stacks);
                         } else {
