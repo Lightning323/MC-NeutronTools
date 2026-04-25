@@ -5,6 +5,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -51,6 +52,7 @@ public class TabEditConfig {
                     if (indx == -1) {
                         uniqueFilteredResult.addAll(stacks);
                     } else {
+                        indx = Mth.clamp(indx, 0, stacks.size());
                         uniqueFilteredResult.addAll(indx, stacks);
                     }
                 }
