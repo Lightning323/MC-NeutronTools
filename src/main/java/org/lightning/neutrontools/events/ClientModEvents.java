@@ -1,5 +1,7 @@
 package org.lightning.neutrontools.events;
 
+import net.minecraft.client.gui.components.toasts.RecipeToast;
+import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -9,6 +11,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import org.lightning.neutrontools.NeutronTools;
@@ -26,6 +29,16 @@ import java.util.concurrent.atomic.AtomicInteger;
         value = net.neoforged.api.distmarker.Dist.CLIENT
 )
 public class ClientModEvents {
+
+    // Register this on the MinecraftForge.EVENT_BUS or use @SubscribeEvent
+    @SubscribeEvent
+    public static void onToastAdd(ToastAddEvent event) {
+        if (event.getToast() instanceof RecipeToast && NeutronTools.CONFIG.hideRecipeToasts) {
+            event.setCanceled(true);
+        } else if (event.getToast() instanceof TutorialToast && NeutronTools.CONFIG.hideTutorialToasts) {
+            event.setCanceled(true);
+        }
+    }
 
     //    @SubscribeEvent
 //    public static void onClientSetup(FMLClientSetupEvent event) {
@@ -48,7 +61,7 @@ public class ClientModEvents {
     }
 
     public static void buildContents(BuildCreativeModeTabContentsEvent event) {
-       CreativeTabConfig.INSTANCE.load(); //FIXME: It matters A GREAT DEAL where this is loaded, this seems to be the only reliable way to ensure modded items are added
+        CreativeTabConfig.INSTANCE.load(); //FIXME: It matters A GREAT DEAL where this is loaded, this seems to be the only reliable way to ensure modded items are added
         //TODO: Some mods change the way creative tabs are registered, and so the only reliable way to ensure modded items are added is to add them here, instead of in the mixin
 
         TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(event.getTab());

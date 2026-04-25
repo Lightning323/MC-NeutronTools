@@ -2,7 +2,6 @@ package org.lightning.neutrontools.config;
 
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
-import net.minecraft.util.Mth;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 
@@ -20,9 +19,9 @@ public class NeutronConfig {
             File configFile = new File(NeutronTools.CONFIG_PATH, "neutron-tools-config.toml");
             try (FileConfig config = FileConfig.builder(configFile, TomlFormat.instance()).build()) {
                 if (configFile.exists()) {
-                    loadConfig(config);
+                    writeReadConfig(config, true);
                 } else {
-                    writeConfig(config);
+                    writeReadConfig(config, false);
                 }
             }
         } catch (Exception e) {
@@ -40,37 +39,32 @@ public class NeutronConfig {
     public float hungerMultiplier = 1.0f;//Casting from double to float
     public boolean hideCreativeTabItemsFromJEIBlacklist = true;
     public boolean disableExperementalSettings = true;
+    public boolean hideRecipeToasts = true;
+    public boolean hideTutorialToasts = false;
     //--------------------------------------------------------------------
 
-    /**
-     * Write a new config
-     */
-    private void writeConfig(FileConfig config) {
-        //--------------------------------------------------------------------
-        //common
-        config.set("common.crash_commands", crashCommands);
-        config.set("common.hunger_multiplier", (double) hungerMultiplier);
-        config.set("common.disable_experemental_settings_popup", disableExperementalSettings);
-        //client
-        config.set("client.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
-        //--------------------------------------------------------------------
-        config.save();
+    private void writeReadConfig(FileConfig config, boolean isReading) {
+        if (isReading) config.load();
+
+        //Common
+        crashCommands = getAndSet(config, isReading, "common.crash_commands", crashCommands);
+        hungerMultiplier = (float) (double) getAndSet(config, isReading, "common.hunger_multiplier", (double) hungerMultiplier);
+        disableExperementalSettings = getAndSet(config, isReading, "common.disable_experemental_settings_popup", disableExperementalSettings);
+
+        // Client
+        hideCreativeTabItemsFromJEIBlacklist = getAndSet(config, isReading, "client.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
+        hideRecipeToasts = getAndSet(config, isReading, "client.hide_recipe_toasts", hideRecipeToasts);
+        hideTutorialToasts = getAndSet(config, isReading, "client.hide_tutorial_toasts", hideTutorialToasts);
+
+        if (!isReading) config.save();
     }
 
-    /**
-     * Load the config
-     * NOTE that doubles in the config MUST have .0 at the end otherwise it will be read as an int
-     */
-    private void loadConfig(FileConfig config) {
-        config.load();
-        //--------------------------------------------------------------------
-        crashCommands = config.getOrElse("common.crash_commands", crashCommands);
-
-        double hungerMultiplier_double = config.getOrElse("common.hunger_multiplier", (double) hungerMultiplier);
-        hungerMultiplier = Mth.clamp((float) hungerMultiplier_double, 0, 1000);
-
-        hideCreativeTabItemsFromJEIBlacklist = config.getOrElse("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
-        disableExperementalSettings = config.getOrElse("common.disable_experemental_settings_popup", disableExperementalSettings);
-        //--------------------------------------------------------------------
+    private <T> T getAndSet(FileConfig config, boolean isReading, String key, T value) {
+        if (isReading) {
+            return config.getOrElse(key, value);
+        } else {
+            config.set(key, value);
+            return value;
+        }
     }
 }
