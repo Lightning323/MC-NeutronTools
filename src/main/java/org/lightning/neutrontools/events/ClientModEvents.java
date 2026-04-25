@@ -13,7 +13,6 @@ import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -24,23 +23,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 )
 public class ClientModEvents {
 
-    @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event) {
-    }
+//    @SubscribeEvent
+//    public static void onClientSetup(FMLClientSetupEvent event) {
+//    }
 
-    private static boolean tagsReady = false;
-
-    @SubscribeEvent
-    public static void onTagsUpdated(TagsUpdatedEvent event) {
-        // This check ensures we only update the creative tabs when Item tags are updated,
-        // since we need them in order to determine which items go in which tabs
-        if (event.getRegistryAccess().registry(Registries.ITEM).isPresent()) {
-            if (FMLEnvironment.dist == Dist.CLIENT) {
-                tagsReady = true;
-//                CreativeTabConfig.INSTANCE.load();
-            }
-        }
-    }
+//    private static boolean tagsReady = false;
+//
+//    @SubscribeEvent
+//    public static void onTagsUpdated(TagsUpdatedEvent event) {
+//        // This check ensures we only update the creative tabs when Item tags are updated,
+//        // since we need them in order to determine which items go in which tabs
+//        if (event.getRegistryAccess().registry(Registries.ITEM).isPresent()) {
+//            if (FMLEnvironment.dist == Dist.CLIENT) {
+//                tagsReady = true;
+////                CreativeTabConfig.INSTANCE.load();
+//            }
+//        }
+//    }
 
     @SubscribeEvent
     public static void buildContents(BuildCreativeModeTabContentsEvent event) {
@@ -53,8 +52,7 @@ public class ClientModEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
-
-    }
+//    @SubscribeEvent
+//    public static void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
+//    }
 }

@@ -5,7 +5,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -25,13 +24,25 @@ public class TabEditConfig {
 
     public Supplier<ItemStack> tab_icon;
     public String tab_name_key;
-    public Map<Integer, List<ItemStack>> items_to_add;
+    public Map<String, List<ItemStack>> items_to_add;
     public ArrayList<Item> items_to_remove;
 
     //For the event hook
     public void modifyContentsFromEvent(BuildCreativeModeTabContentsEvent event) {
         items_to_add.forEach((indx, stacks) -> {
-                    event.acceptAll(stacks);
+                    if (indx.isEmpty()) event.acceptAll(stacks);
+                    else {
+                        Item previous = CreativeTabUtils.getItemByName(indx);
+                        if (previous == null) {
+                            event.acceptAll(stacks);
+                        } else {
+                            ItemStack previousStack = new ItemStack(previous, 1);
+                            for (ItemStack stack : stacks) {
+                                event.insertAfter(previousStack, stack, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+                                previousStack = stack;
+                            }
+                        }
+                    }
                 }
         );
         items_to_remove.forEach(item -> event.remove(
@@ -39,44 +50,6 @@ public class TabEditConfig {
                 CreativeModeTab.TabVisibility.PARENT_TAB_ONLY));
     }
 
-    //For the mixin
-    public void modifyDisplayItems(Collection<ItemStack> displayItems, Collection<ItemStack> displaySearchItems) {
-        //Keep only unique items and Make sure disabled items are removed from list
-        Set<CreativeTabUtils.StackFingerprint> seen = new HashSet<>();
-        List<ItemStack> uniqueFilteredResult = new ArrayList<>();
-
-        //iterate over displayItems and add unique, non-disabled items only
-        for (ItemStack stack : displayItems) {
-            Item item = stack.getItem();
-            // For 1.12 - 1.20.4: use stack.getTag()
-            // For 1.20.5+: use stack.getComponents()
-            if ( //TODO: If the item is not added to the JEI blacklist, it might still not be hidden from search
-                    seen.add(
-                            new CreativeTabUtils.StackFingerprint(stack.getItem(), stack.getComponents()))
-                            && !items_to_remove.contains(item) //If the item is not in our tab removal list
-                            && !CreativeTabConfig.INSTANCE.disabledItems.contains(item) //If the item is not disabled
-            ) {
-                uniqueFilteredResult.add(stack);
-            }
-        }
-
-        //Add all new items to uniqueFilteredResult
-        items_to_add.forEach((indx, stacks) -> {
-                    if (indx == -1) {
-                        uniqueFilteredResult.addAll(stacks);
-                    } else {
-                        indx = Mth.clamp(indx, 0, stacks.size());
-                        uniqueFilteredResult.addAll(indx, stacks);
-                    }
-                }
-        );
-
-        displayItems.clear();
-        displaySearchItems.clear();
-
-        displayItems.addAll(uniqueFilteredResult);
-        displaySearchItems.addAll(uniqueFilteredResult);
-    }
 
     public TabEditConfig(TabEditJsonRepresentation json) {
         this.tab_name_key = json.tab_name_key;
@@ -86,7 +59,7 @@ public class TabEditConfig {
 
         if (json.items_to_add != null) {
             json.items_to_add.forEach(itemsEntry -> {
-                int index = itemsEntry.index;
+                String index = itemsEntry.after != null ? itemsEntry.after : "";
 
                 ArrayList<ItemStack> stacks = new ArrayList<>();
 

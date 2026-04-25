@@ -10,12 +10,10 @@
     "disableExpSettings.WorldOpenFlowsMixin"
   ],
   "client": [
-    "creativeTabs.accessor.CreativeModeTabAccessor",
     "creativeTabs.accessor.CreativeModeTabsAccessor",
     "creativeTabs.CreativeModeTabMixin",
     "creativeTabs.CreativeModeTabRegistryMixin",
-    "creativeTabs.CreativeModeTabsMixin",
-    "creativeTabs.accessor.ForceCreativeTabAccessor"
+    "creativeTabs.CreativeModeTabsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

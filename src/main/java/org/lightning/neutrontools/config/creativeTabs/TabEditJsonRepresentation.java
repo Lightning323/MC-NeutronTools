@@ -55,7 +55,7 @@ class TabEditJsonRepresentation {
     }
 
     public static class ItemAdditionEntry {
-        public int index = -1;
+        public String after;
         public ArrayList<String> names;
         public String match_name;
         public ArrayList<String> match_tags;
@@ -66,7 +66,7 @@ class TabEditJsonRepresentation {
         @Override
         public String toString() {
             return "ItemAdditionEntry{" +
-                    "index=" + index +
+                    "addAfter=" + after +
                     ", names=" + names +
                     ", match_name='" + match_name + '\'' +
                     ", match_tags=" + match_tags +
