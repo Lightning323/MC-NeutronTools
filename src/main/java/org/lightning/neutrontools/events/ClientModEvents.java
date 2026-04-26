@@ -61,9 +61,9 @@ public class ClientModEvents {
     }
 
     public static void buildContents(BuildCreativeModeTabContentsEvent event) {
-        CreativeTabConfig.INSTANCE.load(); //FIXME: It matters A GREAT DEAL where this is loaded, this seems to be the only reliable way to ensure modded items are added
-        //TODO: Some mods change the way creative tabs are registered, and so the only reliable way to ensure modded items are added is to add them here, instead of in the mixin
-
+        //FIXME: It matters A GREAT DEAL where this is loaded, this seems to be the only reliable way to ensure modded items are added
+        //FIXME: Fix pugs relating to opening of creative tab, and Optimize this so that the creative tab config doesnt have to be loaded more than once
+        //CreativeTabConfig.INSTANCE.load();
         TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(event.getTab());
         if (tabEditConfig != null) {
             tabEditConfig.modifyContentsFromEvent(event);
