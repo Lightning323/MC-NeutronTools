@@ -22,8 +22,20 @@ import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.makeItemS
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)
 //@Getter
 public class CreativeTabConfig {
+
+
+    public void setBuildSetup(boolean b) {
+        buildSetup = b;
+    }
+
+    public boolean buildSetup() {
+        return buildSetup;
+    }
+
+
     public CreativeTabConfig() {
         load();
+        buildSetup = true;
     }
 
     public static final CreativeTabConfig INSTANCE = new CreativeTabConfig();
@@ -36,7 +48,7 @@ public class CreativeTabConfig {
 
     public HashMap<CreativeModeTab, TabEditConfig> tabEdits = new HashMap<>();
 
-    private boolean wasReloaded = false;
+    private boolean buildSetup = false;
 
     public static void plantStarterFiles() {
         try {
@@ -55,7 +67,7 @@ public class CreativeTabConfig {
 
     public void load() {
         NeutronTools.LOGGER.debug("Loading Creative Tab Config");
-        wasReloaded = true;
+        buildSetup = true;
 
         //-------------------------------------------------------
         //Load simple lists
@@ -130,15 +142,6 @@ public class CreativeTabConfig {
 //        LOGGER.debug("Disabled items: {}", disabledItems);
 //        LOGGER.info("Tab Edits: {}", tabEdits);
 //        LOGGER.info("New tabs: {}", NeutronTools.TABS.newTabs);
-    }
-
-
-    public void setWasReloaded(boolean b) {
-        wasReloaded = b;
-    }
-
-    public boolean isWasReloaded() {
-        return wasReloaded;
     }
 
 

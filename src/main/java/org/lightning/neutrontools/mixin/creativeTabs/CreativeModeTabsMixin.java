@@ -33,7 +33,6 @@ public abstract class CreativeModeTabsMixin {
 //    private static void onAllTabsStartedBuilding(CreativeModeTab.ItemDisplayParameters parameters, CallbackInfo ci) {
 //        CreativeTabConfig.INSTANCE.load(); //DOES NOTHING!
 //    }
-
     @Inject(
             method = "buildAllTabContents",
             at = @At("TAIL"),
@@ -44,6 +43,7 @@ public abstract class CreativeModeTabsMixin {
         // The displayItems and displayItemsSearchTab lists are now fully populated.
         NeutronTools.LOGGER.info("All Creative Tab contents have been built...");
         NeutronTools.TABS.cache.writeCache();
+//        CreativeTabConfig.INSTANCE.setBuildSetup(true); //Set it to true in case we run build contents more than once
     }
 
 //
