@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
+import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -76,7 +77,7 @@ public class ListAllCommand {
                         }))
                         .then(Commands.literal("original_tabs").executes(context -> {
                             File savePath = new File("original_tabs.json");
-                            if (NeutronTools.TABS.cache.writeCacheToFile(savePath)) {
+                            if (NeutronCreativeTabs.INSTANCE.cache.writeCacheToFile(savePath)) {
                                 Component successMessage = Component.literal("List saved to: ").append(Component.literal(savePath.getAbsolutePath()))
                                         .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
                                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
@@ -121,7 +122,7 @@ public class ListAllCommand {
         JsonArray list = new JsonArray();
 
         try (FileWriter writer = new FileWriter(saveFile)) {
-            NeutronTools.TABS.orderedTabs.forEach((tab) ->
+            NeutronCreativeTabs.INSTANCE.orderedTabs.forEach((tab) ->
                     list.add(CreativeTabUtils.getRegistryID(tab)
                     ));
             root.add("ordered_tabs", list);

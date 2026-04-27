@@ -8,6 +8,7 @@ import net.minecraft.world.item.Item;
 import net.neoforged.fml.loading.FMLPaths;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
+import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 
 import java.io.File;
 import java.io.IOException;
@@ -123,14 +124,14 @@ public class CreativeTabConfig {
                             //Make the new tab as we are indexing tab edit files
                             //Tab edits and new tabs do the same thing, we create the new tab, but then add items with tab edits
                             CreativeModeTab myTab;
-                            if (NeutronTools.TABS.newTabs.containsKey(tabName)) {
-                                myTab = NeutronTools.TABS.newTabs.get(tabName);
+                            if (NeutronCreativeTabs.INSTANCE.newTabs.containsKey(tabName)) {
+                                myTab = NeutronCreativeTabs.INSTANCE.newTabs.get(tabName);
                             } else {
                                 myTab = CreativeModeTab.builder()
                                         .title(Component.translatable("itemGroup." + MODID + "." + tabName))
                                         .icon(CreativeTabUtils.makeTabIcon(tabData.tab_icon.name, tabData.tab_icon.nbt))
                                         .build();
-                                NeutronTools.TABS.newTabs.put(tabName, myTab);
+                                NeutronCreativeTabs.INSTANCE.newTabs.put(tabName, myTab);
                             }
                             tabEdits.put(myTab, new TabEditConfig(tabData));
                         });

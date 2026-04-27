@@ -2,7 +2,7 @@ package org.lightning.neutrontools.mixin.creativeTabs;
 
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.neoforge.common.CreativeModeTabRegistry;
-import org.lightning.neutrontools.NeutronTools;
+import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,10 +28,10 @@ public abstract class CreativeModeTabRegistryMixin {
     private static void injectCustomTabs(CallbackInfoReturnable<List<CreativeModeTab>> cir) {
         //First time caching of our original creative tabs
         List<CreativeModeTab> allTabs = cir.getReturnValue();
-        NeutronTools.TABS.populateSortedTabsList(allTabs);
+        NeutronCreativeTabs.INSTANCE.populateSortedTabsList(allTabs);
 
         //This is the mixin where we exclude disabled tabs
-        List<CreativeModeTab> list = NeutronTools.TABS.orderedTabs.stream()
+        List<CreativeModeTab> list = NeutronCreativeTabs.INSTANCE.orderedTabs.stream()
                 .filter(t -> !getDefaultTabs().contains(t)).toList();
         cir.setReturnValue(list);
     }

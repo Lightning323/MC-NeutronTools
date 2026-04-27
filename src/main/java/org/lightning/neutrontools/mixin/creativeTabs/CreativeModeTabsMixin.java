@@ -3,7 +3,7 @@ package org.lightning.neutrontools.mixin.creativeTabs;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
+import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,7 +42,7 @@ public abstract class CreativeModeTabsMixin {
         // At this point, EVERY tab has run its buildContents method.
         // The displayItems and displayItemsSearchTab lists are now fully populated.
         NeutronTools.LOGGER.info("All Creative Tab contents have been built...");
-        NeutronTools.TABS.cache.writeCache();
+        NeutronCreativeTabs.INSTANCE.cache.writeCache();
 //        CreativeTabConfig.INSTANCE.setBuildSetup(true); //Set it to true in case we run build contents more than once
     }
 

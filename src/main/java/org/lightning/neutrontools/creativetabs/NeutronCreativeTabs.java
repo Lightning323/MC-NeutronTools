@@ -1,7 +1,12 @@
 package org.lightning.neutrontools.creativetabs;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.registries.RegisterEvent;
+import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.CreativeTabsCache;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
@@ -13,6 +18,7 @@ import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getRegist
 
 public class NeutronCreativeTabs {
 
+    public static final NeutronCreativeTabs INSTANCE = new NeutronCreativeTabs();
     //All data pertaining to the creative tabs, must be stored here
     public final CreativeTabsCache cache = new CreativeTabsCache();
     public final LinkedList<CreativeModeTab> orderedTabs = new LinkedList<>();
@@ -20,6 +26,32 @@ public class NeutronCreativeTabs {
 
     public NeutronCreativeTabs() {
     }
+
+    public static void registerTabs(RegisterEvent event) {
+        // Check if we are currently in the Creative Mode Tab registry phase
+        if (event.getRegistryKey().equals(Registries.CREATIVE_MODE_TAB)) {
+            INSTANCE.newTabs.forEach((tabKey, tab) -> {
+                String originalTabKey = tabKey == null ? "unknown" : tabKey;
+                try {
+                    if (tabKey.contains(":")) {
+                        tabKey = tabKey.split(":")[1];
+                    }
+                    //We need to replace all invalid characters
+                    tabKey = tabKey.replaceAll("[^a-z0-9/._-]", "");
+
+                    if (tabKey == null) {
+                        LOGGER.error("Tab name key is null");
+                        return;
+                    }
+                    LOGGER.info("Registering new tab {}", tabKey);
+                    event.register(Registries.CREATIVE_MODE_TAB, NeutronTools.resource(tabKey), () -> tab);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to register new tab \"{}\"", originalTabKey, e);
+                }
+            });
+        }
+    }
+
 
     public static final List<CreativeModeTab> MANDATORY_TABS = new ArrayList<>();
 
@@ -37,16 +69,16 @@ public class NeutronCreativeTabs {
 
         // 1. Process specific ordering
         for (String orderedTab : CreativeTabConfig.INSTANCE.tabOrder) {
-             allTabs.stream()
+            allTabs.stream()
                     .filter(tab -> CreativeTabUtils.getRegistryID(tab).equalsIgnoreCase(orderedTab))
                     .findFirst()
                     .ifPresent(pTab -> addTabToFilteredListIfNotDisabled(pTab, filteredTabs));
         }
 
         // 2. Process "existing" (catch-all for tabs not mentioned in tabOrder)
-            for (CreativeModeTab tab : allTabs) {
-                addTabToFilteredListIfNotDisabled(tab, filteredTabs);
-            }
+        for (CreativeModeTab tab : allTabs) {
+            addTabToFilteredListIfNotDisabled(tab, filteredTabs);
+        }
 
 
         // 3. Final safety for mandatory tabs (only adds if not already present)

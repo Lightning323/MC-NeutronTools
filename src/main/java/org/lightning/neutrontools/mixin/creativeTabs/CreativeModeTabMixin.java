@@ -4,7 +4,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
@@ -58,7 +57,7 @@ public abstract class CreativeModeTabMixin {
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
         CreativeModeTab tab = (CreativeModeTab) ((Object)this);
         if (!NeutronCreativeTabs.MANDATORY_TABS.contains(tab)) { //We should not modify mandatory tabs
-            NeutronTools.TABS.cache.buildContents(tab,
+            NeutronCreativeTabs.INSTANCE.cache.buildContents(tab,
                     tab.getDisplayItems(),
                     tab.getSearchTabDisplayItems());
             if (CreativeTabConfig.INSTANCE.isTabDisabled(tab)) {

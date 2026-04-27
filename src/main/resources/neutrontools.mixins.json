@@ -6,11 +6,11 @@
   "mixins": [
     "PlayerMixin",
     "PrimaryLevelDataMixinForge",
-    "disableExpSettings.CreateWorldScreenMixin",
-    "disableExpSettings.WorldOpenFlowsMixin"
+    "creativeTabs.accessor.CreativeModeTabsAccessor"
   ],
   "client": [
-    "creativeTabs.accessor.CreativeModeTabsAccessor",
+    "disableExpSettings.CreateWorldScreenMixin",
+    "disableExpSettings.WorldOpenFlowsMixin",
     "creativeTabs.CreativeModeTabMixin",
     "creativeTabs.CreativeModeTabRegistryMixin",
     "creativeTabs.CreativeModeTabsMixin",

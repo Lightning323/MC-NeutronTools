@@ -17,7 +17,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.RegisterEvent;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.lightning.neutrontools.events.ClientModEvents;
 import org.slf4j.Logger;
@@ -34,41 +33,15 @@ public class NeutronTools {
 
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final NeutronConfig CONFIG = new NeutronConfig();
-    public static final NeutronCreativeTabs TABS = new NeutronCreativeTabs();
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-
-    private void registerTabs(RegisterEvent event) {
-        // Check if we are currently in the Creative Mode Tab registry phase
-        if (event.getRegistryKey().equals(Registries.CREATIVE_MODE_TAB)) {
-            TABS.newTabs.forEach((tabKey, tab) -> {
-                String originalTabKey = tabKey == null ? "unknown" : tabKey;
-                try {
-                    if (tabKey.contains(":")) {
-                        tabKey = tabKey.split(":")[1];
-                    }
-                    //We need to replace all invalid characters
-                    tabKey = tabKey.replaceAll("[^a-z0-9/._-]", "");
-
-                    if (tabKey == null) {
-                        LOGGER.error("Tab name key is null");
-                        return;
-                    }
-                    LOGGER.info("Registering new tab {}", tabKey);
-                    event.register(Registries.CREATIVE_MODE_TAB, resource(tabKey), () -> tab);
-                } catch (Exception e) {
-                    LOGGER.error("Failed to register new tab \"{}\"", originalTabKey, e);
-                }
-            });
-        }
-    }
 
 
     public NeutronTools(IEventBus modEventBus, ModContainer modContainer) {
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::registerTabs);
+        modEventBus.addListener(NeutronCreativeTabs::registerTabs);
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (Neutrontools) to respond directly to events.

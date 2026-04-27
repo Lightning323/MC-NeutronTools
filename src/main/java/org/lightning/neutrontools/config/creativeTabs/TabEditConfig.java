@@ -1,6 +1,5 @@
 package org.lightning.neutrontools.config.creativeTabs;
 
-import it.unimi.dsi.fastutil.objects.ObjectSortedSet;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -11,13 +10,12 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
+import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Tab edit config is called after the tags and creative tabs have been loaded.
@@ -105,7 +103,7 @@ public class TabEditConfig {
                             .toList());
                 }
                 if (itemsEntry.match_tab != null) {
-                    stacks.addAll(NeutronTools.TABS.cache.getItemsInCreativeTab(itemsEntry.match_tab, itemsEntry.nbt));
+                    stacks.addAll(NeutronCreativeTabs.INSTANCE.cache.getItemsInCreativeTab(itemsEntry.match_tab, itemsEntry.nbt));
                 }
                 if (itemsEntry.match_tags != null) {
                     for (String tag : itemsEntry.match_tags) {
@@ -143,7 +141,7 @@ public class TabEditConfig {
                             .toList());
                 }
                 if (item.match_tab != null) {
-                    Collection<ItemStack> itemStacks = NeutronTools.TABS.cache.getItemsInCreativeTab(item.match_tab, null);
+                    Collection<ItemStack> itemStacks = NeutronCreativeTabs.INSTANCE.cache.getItemsInCreativeTab(item.match_tab, null);
                     for (ItemStack itemStack : itemStacks) {
                         stacks.add(itemStack.getItem());
                     }
