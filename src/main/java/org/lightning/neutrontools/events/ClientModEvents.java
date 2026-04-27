@@ -58,8 +58,6 @@ public class ClientModEvents {
     public static void buildContents(BuildCreativeModeTabContentsEvent event) {
         //FIXME: It matters A GREAT DEAL where this is loaded, this seems to be the only reliable way to ensure modded items are added
         //FIXME: Fix pugs relating to opening of creative tab, and Optimize this so that the creative tab config doesnt have to be loaded more than once
-        //Only load this the first time it is needed
-        //This still has to occur every time to index everything
         if (CreativeTabConfig.INSTANCE.buildSetup()) {
             CreativeTabConfig.INSTANCE.load();
             CreativeTabConfig.INSTANCE.setBuildSetup(false);
