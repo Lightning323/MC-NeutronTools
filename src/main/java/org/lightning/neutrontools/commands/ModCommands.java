@@ -240,7 +240,7 @@ public class ModCommands {
         dispatcher.register(root);
 
         // Keep your ListAllCommand separate
-        ListAllCommand.register(dispatcher);
+        GenerateCommand.register(dispatcher);
     }
 
 

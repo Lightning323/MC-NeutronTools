@@ -10,6 +10,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 
@@ -69,6 +70,7 @@ public class TabEditConfig {
         items_to_remove.forEach(item -> event.remove(
                 new ItemStack(item, 1),
                 CreativeModeTab.TabVisibility.PARENT_TAB_ONLY));
+
     }
 
 

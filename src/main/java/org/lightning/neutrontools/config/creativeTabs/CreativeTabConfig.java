@@ -138,10 +138,10 @@ public class CreativeTabConfig {
             }
         }
 
-//        LOGGER.debug("Disabled tabs: {}", disabledTabs);
-//        LOGGER.debug("Ordered tabs: {}", tabOrder);
-//        LOGGER.debug("Disabled items: {}", disabledItems);
-//        LOGGER.info("Tab Edits: {}", tabEdits);
+        LOGGER.info("Disabled tabs: {}", disabledTabs);
+        LOGGER.info("Ordered tabs: {}", tabOrder);
+        LOGGER.info("Disabled items: {}", disabledItems);
+        LOGGER.info("Tab Edits: {}", tabEdits);
 //        LOGGER.info("New tabs: {}", NeutronTools.TABS.newTabs);
     }
 
