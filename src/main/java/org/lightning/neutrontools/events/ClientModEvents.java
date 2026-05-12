@@ -7,12 +7,10 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
 
 
@@ -49,8 +47,8 @@ public class ClientModEvents {
         // since we need them in order to determine which items go in which tabs
         if (event.getRegistryAccess().registry(Registries.ITEM).isPresent()) {
             if (FMLEnvironment.dist == Dist.CLIENT) {
-//                if (!tagsReady) CreativeTabConfig.INSTANCE.load(); //Also a very good place to load the config
                 tagsReady = true;
+                NeutronTools.CONFIG_DISABLED_ITEMS.loadItems();
             }
         }
     }
@@ -58,11 +56,12 @@ public class ClientModEvents {
     public static void buildContents(BuildCreativeModeTabContentsEvent event) {
         //FIXME: It matters A GREAT DEAL where this is loaded, this seems to be the only reliable way to ensure modded items are added
         //FIXME: Fix pugs relating to opening of creative tab, and Optimize this so that the creative tab config doesnt have to be loaded more than once
-        if (CreativeTabConfig.INSTANCE.buildSetup()) {
-            CreativeTabConfig.INSTANCE.load();
-            CreativeTabConfig.INSTANCE.setBuildSetup(false);
+        if (NeutronTools.CONFIG_CREATIVE_TABS.buildSetup()) {
+            NeutronTools.CONFIG_CREATIVE_TABS.load();
+            NeutronTools.CONFIG_DISABLED_ITEMS.loadItems();
+            NeutronTools.CONFIG_CREATIVE_TABS.setBuildSetup(false);
         }
-        TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(event.getTab());
+        TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.tabEdits.get(event.getTab());
         if (tabEditConfig != null) {
             tabEditConfig.modifyContentsFromEvent(event);
         }

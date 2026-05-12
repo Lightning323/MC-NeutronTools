@@ -3,12 +3,9 @@ package org.lightning.neutrontools.creativetabs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.CreativeTabsCache;
-import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
 
 import java.util.*;
@@ -68,7 +65,7 @@ public class NeutronCreativeTabs {
         LinkedHashSet<CreativeModeTab> filteredTabs = new LinkedHashSet<>();
 
         // 1. Process specific ordering
-        for (String orderedTab : CreativeTabConfig.INSTANCE.tabOrder) {
+        for (String orderedTab : NeutronTools.CONFIG_CREATIVE_TABS.tabOrder) {
             allTabs.stream()
                     .filter(tab -> CreativeTabUtils.getRegistryID(tab).equalsIgnoreCase(orderedTab))
                     .findFirst()
@@ -95,7 +92,7 @@ public class NeutronCreativeTabs {
 
     private void addTabToFilteredListIfNotDisabled(CreativeModeTab tab, LinkedHashSet<CreativeModeTab> filteredTabs) {
         //If our tab is not in the disabled tabs list, it makes it into the filtered list
-        if (!CreativeTabConfig.INSTANCE.disabledTabs.contains(getRegistryID(tab))) {
+        if (!NeutronTools.CONFIG_CREATIVE_TABS.disabledTabs.contains(getRegistryID(tab))) {
             filteredTabs.add(tab);
         }
     }

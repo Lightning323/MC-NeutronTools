@@ -6,7 +6,10 @@
   "mixins": [
     "PlayerMixin",
     "PrimaryLevelDataMixinForge",
-    "creativeTabs.accessor.CreativeModeTabsAccessor"
+    "creativeTabs.accessor.CreativeModeTabsAccessor",
+    "item.RecipeManagerMixin",
+    "item.ItemEntityMixin",
+    "item.VillagerTradeMixin"
   ],
   "client": [
     "disableExpSettings.CreateWorldScreenMixin",

@@ -4,7 +4,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
+import org.lightning.neutrontools.NeutronTools;
+import org.lightning.neutrontools.config.creativeTabs.NeutronCreativeTabConfig;
 import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
@@ -25,7 +26,7 @@ import static org.lightning.neutrontools.NeutronTools.LOGGER;
 import static org.lightning.neutrontools.NeutronTools.MODID;
 import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
 
-@Mixin(CreativeModeTab.class)
+@Mixin(value={CreativeModeTab.class}, priority=100000)
 public abstract class CreativeModeTabMixin {
 
     @Shadow
@@ -60,16 +61,16 @@ public abstract class CreativeModeTabMixin {
             NeutronCreativeTabs.INSTANCE.cache.buildContents(tab,
                     tab.getDisplayItems(),
                     tab.getSearchTabDisplayItems());
-            if (CreativeTabConfig.INSTANCE.isTabDisabled(tab)) {
+            if (NeutronTools.CONFIG_CREATIVE_TABS.isTabDisabled(tab)) {
                 tab.getDisplayItems().clear();
                 tab.getSearchTabDisplayItems().clear();
             } else {
-                HashSet<Item> disabled_items = new HashSet<>(CreativeTabConfig.INSTANCE.disabledItems);
+                HashSet<Item> disabled_items = new HashSet<>(NeutronTools.CONFIG_DISABLED_ITEMS.disabledItems);
                 //NOTE: We dont have to hide the items hidden manually because if they were hidden from all tabs, they should have been hidden with disabledItems
 //        TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
 //        if (tabEditConfig != null) disabled_items.addAll(tabEditConfig.items_to_remove);
-                tab.getDisplayItems().removeIf(stack -> disabled_items.contains(stack.getItem()));
-                tab.getSearchTabDisplayItems().removeIf(stack -> disabled_items.contains(stack.getItem()));
+                displayItems.removeIf(stack -> disabled_items.contains(stack.getItem()));
+                displayItemsSearchTab.removeIf(stack -> disabled_items.contains(stack.getItem()));
             }
         }
     }
@@ -81,7 +82,7 @@ public abstract class CreativeModeTabMixin {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
 
         if (cached_displayName == null) {
-            TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
+            TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.tabEdits.get(self);
             if (tabEditConfig == null || tabEditConfig.tab_name_key == null) {
                 cached_displayName = this.displayName;
             } else {
@@ -92,9 +93,9 @@ public abstract class CreativeModeTabMixin {
             }
         }
 
-        if (CreativeTabConfig.INSTANCE.getTabNameMode() == CreativeTabConfig.TabNameMode.RESOURCE_ID) {
+        if (NeutronTools.CONFIG_CREATIVE_TABS.getTabNameMode() == NeutronCreativeTabConfig.TabNameMode.RESOURCE_ID) {
             cir.setReturnValue(Component.literal(CreativeTabUtils.getRegistryID(self)));
-        } else if (CreativeTabConfig.INSTANCE.getTabNameMode() == CreativeTabConfig.TabNameMode.TRANSLATION_KEY) {
+        } else if (NeutronTools.CONFIG_CREATIVE_TABS.getTabNameMode() == NeutronCreativeTabConfig.TabNameMode.TRANSLATION_KEY) {
             cir.setReturnValue(Component.literal(getTranslationKey(cached_displayName)));
         } else cir.setReturnValue(cached_displayName);
 
@@ -108,7 +109,7 @@ public abstract class CreativeModeTabMixin {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
         if (!isCachedCustomIcon) {
             if (!NeutronCreativeTabs.MANDATORY_TABS.contains(self)) {
-                TabEditConfig tabEditConfig = CreativeTabConfig.INSTANCE.tabEdits.get(self);
+                TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.tabEdits.get(self);
                 if (tabEditConfig != null
                         && tabEditConfig.tab_icon != null
                         && tabEditConfig.tab_icon.get() != ItemStack.EMPTY) {

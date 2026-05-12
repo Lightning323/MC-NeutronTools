@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.loading.FMLPaths;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
@@ -22,7 +23,7 @@ import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.makeItemS
 
 //@NoArgsConstructor(access = AccessLevel.PRIVATE)
 //@Getter
-public class CreativeTabConfig {
+public class NeutronCreativeTabConfig {
 
 
     public void setBuildSetup(boolean b) {
@@ -34,37 +35,19 @@ public class CreativeTabConfig {
     }
 
 
-    public CreativeTabConfig() {
+    public NeutronCreativeTabConfig() {
         load();
         buildSetup = true;
     }
 
-    public static final CreativeTabConfig INSTANCE = new CreativeTabConfig();
-
     public final Set<String> disabledTabs = new HashSet<>();
-    public final Set<Item> disabledItems = new HashSet<>();
+
 
     public final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
-
-
     public HashMap<CreativeModeTab, TabEditConfig> tabEdits = new HashMap<>();
-
     private boolean buildSetup = false;
 
-    public static void plantStarterFiles() {
-        try {
-            Files.writeString(new File(CONFIG_PATH, "disabled_tabs.json").toPath(),
-                    "{\n\"disabled_tabs\":[]\n}");
-            Files.writeString(new File(CONFIG_PATH, "disabled_items.json").toPath(),
-                    "{\n\"disabled_items\":[]\n}");
-            Files.writeString(new File(CONFIG_PATH, "ordered_tabs.json").toPath(),
-                    "{\n\"ordered_tabs\":[]\n}");
-            new File(CONFIG_PATH, "NeutronTools.tabs.newTabs").mkdirs();
-            new File(CONFIG_PATH, "tab_edits").mkdirs();
-        } catch (Exception e) {
-            NeutronTools.LOGGER.error("Failed to plant starter files", e);
-        }
-    }
+
 
     public void load() {
         NeutronTools.LOGGER.debug("Loading Creative Tab Config");
@@ -73,39 +56,15 @@ public class CreativeTabConfig {
         //-------------------------------------------------------
         //Load simple lists
         //-------------------------------------------------------
-        disabledItems.clear();
         disabledTabs.clear();
         tabOrder.clear();
         loadSimpleJsonLists(new File(CONFIG_PATH, "disabled_tabs.json"));
-        loadSimpleJsonLists(new File(CONFIG_PATH, "disabled_items.json"));
         loadSimpleJsonLists(new File(CONFIG_PATH, "ordered_tabs.json"));
-
-        //-------------------------------------------------------
-        //Add disabled items from JEI
-        //-------------------------------------------------------
-        if (NeutronTools.CONFIG.hideCreativeTabItemsFromJEIBlacklist) {
-            Path configDir = FMLPaths.CONFIGDIR.get();
-            File jeiBlacklist = new File(configDir.toFile(), "jei/blacklist.cfg");
-            if (jeiBlacklist.exists()) {
-                try {
-                    Files.readAllLines(jeiBlacklist.toPath()).forEach(line -> {
-                        if (!line.isBlank()) {
-                            Item i = makeItemStack(line.strip()).getItem();
-                            disabledItems.add(i);
-                        }
-                    });
-                } catch (IOException e) {
-                    NeutronTools.LOGGER.warn("Failed to process JEI blacklisted items {}", e);
-                }
-            }
-        }
-
 
         //-------------------------------------------------------
         //Load tab edits / new tabs
         //-------------------------------------------------------
         tabEdits.clear();
-
         File[] subfiles = new File(CONFIG_PATH, "tab_edits").listFiles();
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
@@ -138,11 +97,12 @@ public class CreativeTabConfig {
             }
         }
 
-        LOGGER.info("Disabled tabs: {}", disabledTabs);
-        LOGGER.info("Ordered tabs: {}", tabOrder);
-        LOGGER.info("Disabled items: {}", disabledItems);
-        LOGGER.info("Tab Edits: {}", tabEdits);
+        if (CONFIG.verboseMode) {
+            LOGGER.info("Disabled tabs: {}", disabledTabs);
+            LOGGER.info("Ordered tabs: {}", tabOrder);
+            LOGGER.info("Tab Edits: {}", tabEdits);
 //        LOGGER.info("New tabs: {}", NeutronTools.TABS.newTabs);
+        }
     }
 
 
@@ -186,12 +146,6 @@ public class CreativeTabConfig {
             if (jsonObject.has("ordered_tabs")) {
                 jsonObject.getAsJsonArray("ordered_tabs").forEach(e -> {
                     tabOrder.add(e.getAsString());
-                });
-            }
-            if (jsonObject.has("disabled_items")) {
-                jsonObject.getAsJsonArray("disabled_items").forEach(e -> {
-                    Item i = makeItemStack(e.getAsString()).getItem();
-                    disabledItems.add(i);
                 });
             }
         }

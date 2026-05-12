@@ -17,6 +17,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.lightning.neutrontools.config.NeutronDisabledItemConfig;
+import org.lightning.neutrontools.config.creativeTabs.NeutronCreativeTabConfig;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.lightning.neutrontools.events.ClientModEvents;
 import org.slf4j.Logger;
@@ -32,10 +34,12 @@ public class NeutronTools {
     public static final File CONFIG_PATH = new File(FMLPaths.CONFIGDIR.get().toFile(), "/" + MODID);
 
     public static final Logger LOGGER = LogUtils.getLogger();
+
     public static final NeutronConfig CONFIG = new NeutronConfig();
+    public static final NeutronCreativeTabConfig CONFIG_CREATIVE_TABS = new NeutronCreativeTabConfig();
+    public static final NeutronDisabledItemConfig CONFIG_DISABLED_ITEMS = new NeutronDisabledItemConfig();
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
-
 
 
     public NeutronTools(IEventBus modEventBus, ModContainer modContainer) {

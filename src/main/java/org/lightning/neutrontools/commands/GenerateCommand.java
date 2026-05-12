@@ -15,14 +15,12 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.function.Predicate;
@@ -33,7 +31,6 @@ public class GenerateCommand {
     private static File basePath = new File("generated");
 
     private static int generate(String path, CommandContext<CommandSourceStack> context, Predicate<File> function) {
-
         try {
             File savePath = new File(basePath, path);
             basePath.mkdirs();
@@ -77,12 +74,7 @@ public class GenerateCommand {
                         }))
                         .then(Commands.literal("ordered_tabs_list").executes(context ->
                                 generate("ordered_tabs.json", context, GenerateCommand::writeOrderedTabs)))
-                        .then(Commands.literal("disabled_items_datapack").executes(context ->
-                                GenerateCommand.generate("neutron_disabled_items", context, savePath ->
-                                        ItemDisabledDatapack.generateDisabledItemsDatapack(
-                                                CreativeTabConfig.INSTANCE.disabledItems,
-                                                savePath.toPath(),
-                                                "neutron_disabled_items"))))
+
                 )
 
         );

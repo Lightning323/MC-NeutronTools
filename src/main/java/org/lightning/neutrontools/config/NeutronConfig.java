@@ -3,18 +3,36 @@ package org.lightning.neutrontools.config;
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
+import org.lightning.neutrontools.config.creativeTabs.NeutronCreativeTabConfig;
 
 import java.io.File;
+import java.nio.file.Files;
+
+import static org.lightning.neutrontools.NeutronTools.CONFIG_PATH;
 
 public class NeutronConfig {
+
+    public static void plantStarterFiles() {
+        try {
+            Files.writeString(new File(CONFIG_PATH, "disabled_tabs.json").toPath(),
+                    "{\n\"disabled_tabs\":[]\n}");
+            Files.writeString(new File(CONFIG_PATH, "disabled_items.json").toPath(),
+                    "{\n\"disabled_items\":[]\n}");
+            Files.writeString(new File(CONFIG_PATH, "ordered_tabs.json").toPath(),
+                    "{\n\"ordered_tabs\":[]\n}");
+            new File(CONFIG_PATH, "NeutronTools.tabs.newTabs").mkdirs();
+            new File(CONFIG_PATH, "tab_edits").mkdirs();
+        } catch (Exception e) {
+            NeutronTools.LOGGER.error("Failed to plant starter files", e);
+        }
+    }
 
     public NeutronConfig() {
         try {
             if (!NeutronTools.CONFIG_PATH.exists()) {
                 NeutronTools.LOGGER.info("Config Dir: {}", NeutronTools.CONFIG_PATH);
                 NeutronTools.CONFIG_PATH.mkdirs();
-                CreativeTabConfig.plantStarterFiles();
+                plantStarterFiles();
             }
             File configFile = new File(NeutronTools.CONFIG_PATH, "neutron-tools-config.toml");
             try (FileConfig config = FileConfig.builder(configFile, TomlFormat.instance()).build()) {
@@ -41,6 +59,7 @@ public class NeutronConfig {
     public boolean disableExperementalSettings = true;
     public boolean hideRecipeToasts = true;
     public boolean hideTutorialToasts = false;
+    public boolean verboseMode = false;
     //--------------------------------------------------------------------
 
     private void writeReadConfig(FileConfig config, boolean isReading) {
@@ -50,6 +69,7 @@ public class NeutronConfig {
         crashCommands = getAndSet(config, isReading, "common.crash_commands", crashCommands);
         hungerMultiplier = (float) (double) getAndSet(config, isReading, "common.hunger_multiplier", (double) hungerMultiplier);
         disableExperementalSettings = getAndSet(config, isReading, "common.disable_experemental_settings_popup", disableExperementalSettings);
+        verboseMode = getAndSet(config, isReading, "common.verbose_mode", verboseMode);
 
         // Client
         hideCreativeTabItemsFromJEIBlacklist = getAndSet(config, isReading, "client.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);

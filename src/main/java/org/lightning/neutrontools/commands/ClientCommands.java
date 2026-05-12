@@ -9,7 +9,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.config.creativeTabs.CreativeTabConfig;
+import org.lightning.neutrontools.config.creativeTabs.NeutronCreativeTabConfig;
 
 import java.util.Arrays;
 
@@ -32,7 +32,7 @@ public class ClientCommands {
                                         .then(Commands.argument("mode", StringArgumentType.word())
                                                 .suggests((context, builder) ->
                                                         SharedSuggestionProvider.suggest(
-                                                                Arrays.stream(CreativeTabConfig.TabNameMode.values())
+                                                                Arrays.stream(NeutronCreativeTabConfig.TabNameMode.values())
                                                                         .map(Enum::name)
                                                                         .map(String::toLowerCase),
                                                                 builder
@@ -42,10 +42,10 @@ public class ClientCommands {
                                                     String input = StringArgumentType.getString(context, "mode").toUpperCase();
 
                                                     try {
-                                                        CreativeTabConfig.TabNameMode mode =
-                                                                CreativeTabConfig.TabNameMode.valueOf(input);
+                                                        NeutronCreativeTabConfig.TabNameMode mode =
+                                                                NeutronCreativeTabConfig.TabNameMode.valueOf(input);
 
-                                                        CreativeTabConfig.INSTANCE.setTabNameMode(mode);
+                                                        NeutronTools.CONFIG_CREATIVE_TABS.setTabNameMode(mode);
 
                                                         String msg = switch (mode) {
                                                             case NORMAL -> "Showing standard tab names";
