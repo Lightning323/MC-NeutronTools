@@ -7,10 +7,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.CreativeTabsCache;
 import org.lightning.neutrontools.mixin.creativeTabs.accessor.CreativeModeTabsAccessor;
-
 import java.util.*;
-
-import static com.mojang.text2speech.Narrator.LOGGER;
 import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getRegistryID;
 
 public class NeutronCreativeTabs {
@@ -37,13 +34,13 @@ public class NeutronCreativeTabs {
                     tabKey = tabKey.replaceAll("[^a-z0-9/._-]", "");
 
                     if (tabKey == null) {
-                        LOGGER.error("Tab name key is null");
+                        NeutronTools.LOGGER.error("Tab name key is null");
                         return;
                     }
-                    LOGGER.info("Registering new tab {}", tabKey);
+                    NeutronTools.LOGGER.info("Registering new tab {}", tabKey);
                     event.register(Registries.CREATIVE_MODE_TAB, NeutronTools.resource(tabKey), () -> tab);
                 } catch (Exception e) {
-                    LOGGER.error("Failed to register new tab \"{}\"", originalTabKey, e);
+                    NeutronTools.LOGGER.error("Failed to register new tab \"{}\"", originalTabKey, e);
                 }
             });
         }

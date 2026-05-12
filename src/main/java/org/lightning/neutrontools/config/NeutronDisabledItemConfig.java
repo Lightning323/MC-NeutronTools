@@ -50,7 +50,7 @@ public class NeutronDisabledItemConfig {
     public final Set<String> disabledItemIds = new HashSet<>();
 
     private void addDisabledItemID(String id) {
-        if (id != null || !id.isBlank()) disabledItemIds.add(id);
+        if (id != null && !id.isBlank()) disabledItemIds.add(id);
     }
 
     public void loadItems() {

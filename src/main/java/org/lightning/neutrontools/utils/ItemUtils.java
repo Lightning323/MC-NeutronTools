@@ -14,10 +14,13 @@ public class ItemUtils {
     }
 
     public static boolean isDisabled(String itemid) {
-        if (itemid.equals("minecraft:air")) {
-            return false;
-        }
-        return false;
+        if (itemid.equals("minecraft:air")) return false;
+        return NeutronTools.CONFIG_DISABLED_ITEMS.disabledItemIds.contains(itemid);
+    }
+
+    public static boolean isDisabled(Item item) {
+        if (item == null || item.equals(Items.AIR)) return false;
+        return NeutronTools.CONFIG_DISABLED_ITEMS.disabledItems.contains(item);
     }
 
     public static boolean isDisabled(ItemStack stack) {
@@ -39,23 +42,6 @@ public class ItemUtils {
     }
 
     public static boolean shouldRecipeBeDisabled(String itemid) {
-        if (ItemUtils.isDisabled(itemid)) {
-            return true;
-        }
-        boolean hashmapOptimizations = false;//ItemObliterator.Config.use_hashmap_optimizations;
-        if (!hashmapOptimizations) {
-            for (String blacklisted_id : NeutronTools.CONFIG_DISABLED_ITEMS.disabledItemIds) {
-                String regex;
-                if (blacklisted_id == null || blacklisted_id.startsWith("//")) continue;
-                if (blacklisted_id.equals(itemid)) {
-                    return true;
-                }
-                if (!blacklisted_id.startsWith("!") || !itemid.matches(regex = blacklisted_id.substring(1))) continue;
-                return true;
-            }
-        } else {
-            return NeutronTools.CONFIG_DISABLED_ITEMS.disabledItemIds.contains(itemid);
-        }
-        return false;
+        return (ItemUtils.isDisabled(itemid));
     }
 }
