@@ -3,6 +3,7 @@ package org.lightning.neutrontools.config.creativeTabs;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

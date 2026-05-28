@@ -2,9 +2,14 @@ package org.lightning.neutrontools.events;
 
 import net.minecraft.client.gui.components.toasts.RecipeToast;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
@@ -12,7 +17,9 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
-
+import dev.simulated_team.simulated.registrate.SimulatedRegistrate;
+import net.minecraft.core.registries.BuiltInRegistries;
+import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 
 @EventBusSubscriber(
         modid = NeutronTools.MODID,
@@ -55,11 +62,17 @@ public class ClientModEvents {
 
     public static void buildContents(BuildCreativeModeTabContentsEvent event) {
         //FIXME: It matters A GREAT DEAL where this is loaded, this seems to be the only reliable way to ensure modded items are added
-        //FIXME: Fix pugs relating to opening of creative tab, and Optimize this so that the creative tab config doesnt have to be loaded more than once
+        //FIXME: Fix bugs relating to opening of creative tab, and Optimize this so that the creative tab config doesnt have to be loaded more than once
+
+
         if (NeutronTools.CONFIG_CREATIVE_TABS.buildSetup()) {
             NeutronTools.CONFIG_CREATIVE_TABS.load();
             NeutronTools.CONFIG_DISABLED_ITEMS.loadItems();
             NeutronTools.CONFIG_CREATIVE_TABS.setBuildSetup(false);
+            if (FMLEnvironment.dist == Dist.CLIENT && ModList.get().isLoaded("simulated")) {
+                TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.tabEdits.get(event.getTab());
+                tabEditConfig.modifySimulatedContents(event);
+            }
         }
         TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.tabEdits.get(event.getTab());
         if (tabEditConfig != null) {

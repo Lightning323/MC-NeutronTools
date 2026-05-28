@@ -1,14 +1,13 @@
 package org.lightning.neutrontools.config.creativeTabs;
 
+import dev.simulated_team.simulated.registrate.SimulatedRegistrate;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
@@ -34,6 +33,35 @@ public class TabEditConfig {
             return new StackKey(stack.getItem(), stack.getComponents());
         }
     }
+
+    public void modifySimulatedContents(BuildCreativeModeTabContentsEvent event) {
+        ResourceLocation SIMULATED_SECTION = ResourceLocation.fromNamespaceAndPath("simulated", "simulated");
+        ResourceLocation AERONAUTICS_SECTION = ResourceLocation.fromNamespaceAndPath("aeronautics", "aeronautics");
+        ResourceLocation OFFROAD_SECTION = ResourceLocation.fromNamespaceAndPath("offroad", "offroad");
+
+        items_to_add.forEach((indx, stacks) -> {
+            for (ItemStack stack : stacks) {
+                SimulatedRegistrate.TAB_ITEMS.add(() -> stack.getItem());
+                ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                SimulatedRegistrate.ITEM_TO_SECTION.put(itemKey, AERONAUTICS_SECTION);
+            }
+        });
+        SimulatedRegistrate.TAB_ITEMS.removeIf(itemSupplier -> {
+            Item item = itemSupplier.get();
+            if (item != null) {
+                ResourceLocation simulatedTabItem = BuiltInRegistries.ITEM.getKey(item);
+                //Remove items that are in the remove list
+                for (Item itemToRemove : items_to_remove) {
+                    ResourceLocation removalKey = BuiltInRegistries.ITEM.getKey(itemToRemove);
+                    if (simulatedTabItem.equals(removalKey)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+    }
+
 
     //For the event hook
     public void modifyContentsFromEvent(BuildCreativeModeTabContentsEvent event) {

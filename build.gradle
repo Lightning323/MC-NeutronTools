@@ -10,8 +10,74 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven {
         url "https://cursemaven.com"
+    }
+    maven {
+        url = "https://modmaven.dev/"
+    }
+    maven {
+        name = "Modrinth Maven"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup("maven.modrinth")
+        }
+    }
+    maven {
+        name = "create maven"
+        url = "https://maven.tterrag.com/"
+        content {
+            includeGroup("com.simibubi.create")
+            includeGroup("com.jozufozu.flywheel")
+        }
+    }
+    maven {
+        name = "CreateMaven"
+        url = "https://maven.createmod.net"
+    }
+    maven {
+        name = "RyanHCode Maven"
+        url = "https://maven.ryanhcode.dev/releases"
+    }
+    maven {
+        url = "https://maven.theillusivec4.top/"
+    }
+
+    maven {
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        name = "Latvian Maven"
+        url = "https://maven.latvian.dev/releases"
+        content {
+            includeGroup("dev.latvian.mods")
+            includeGroup("dev.latvian.apps")
+        }
+    }
+    maven {
+        name = "JitPack"
+        url = "https://jitpack.io"
+        content {
+            includeGroup("com.github.rtyley")
+        }
+    }
+    maven {
+        name = "Kotlin for Forge"
+        url = "https://thedarkcolour.github.io/KotlinForForge/"
+        content {
+            includeGroup("thedarkcolour")
+        }
+    }
+
+    maven {
+        name = "Squiddev maven cct"
+        url = "https://maven.squiddev.cc/"
+        content {
+            includeGroup("cc.tweaked")
+            includeModule("org.squiddev", "Cobalt")
+        }
     }
 }
 
@@ -106,6 +172,30 @@ dependencies {
 
     implementation "curse.maven:jei-238222:7420587"
     runtimeOnly "curse.maven:macaws-roofs-352039:6494399"
+
+    //Compatability
+    //Create
+    implementation("com.simibubi.create:create-${minecraft_version}:${create_version}") {
+        // Exclude optional integrations we do not ship/use locally
+        exclude group: "com.tterrag.registrate", module: "Registrate"
+        exclude group: "dev.ftb.mods", module: "ftb-chunks-neoforge"
+        exclude group: "dev.ftb.mods", module: "ftb-teams-neoforge"
+        exclude group: "dev.ftb.mods", module: "ftb-library-neoforge"
+        exclude group: "info.journeymap", module: "journeymap-api-neoforge"
+        exclude group: "dev.architectury", module: "architectury-neoforge"
+    }
+    implementation "net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}"
+    compileOnly "dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}"
+    implementation "dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}"
+    // Optional compat jars are Forge/older NeoForge; keep as compile-only for API references only
+    compileOnly "curse.maven:createdieselgenerators-869316:6920093"
+    compileOnly "curse.maven:createindustry-693815:7236535"
+    //CC
+    compileOnly "cc.tweaked:cc-tweaked-${minecraft_version}-forge:${cc_version}"
+    compileOnly "dev.ryanhcode.sable:sable-common-${minecraft_version}:${sable_version}"
+    compileOnly files("libs/simulated-neoforge-${minecraft_version}-1.1.3.jar")
+    runtimeOnly files("libs/sable-neoforge-${minecraft_version}-${sable_version}.jar")
+    runtimeOnly files("libs/create-aeronautics-bundled-${minecraft_version}-1.1.3.jar")
 
 //    implementation "curse.maven:quark-243121:7980026"
 

@@ -1,6 +1,5 @@
 package org.lightning.neutrontools.utils;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -9,9 +8,6 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import org.lightning.neutrontools.NeutronTools;
 
 public class ItemUtils {
-    public static String getItemId(Item item) {
-        return BuiltInRegistries.ITEM.getKey(item).toString();
-    }
 
     public static boolean isDisabled(String itemid) {
         if (itemid.equals("minecraft:air")) return false;
@@ -28,7 +24,7 @@ public class ItemUtils {
         if (stack == null || stack.isEmpty() || stack.is(Items.AIR)) {
             return false;
         }
-        return ItemUtils.isDisabled(ItemUtils.getItemId(stack.getItem()));
+        return ItemUtils.isDisabled(ResourceUtils.getRegistryID(stack.getItem()));
     }
 
     public static boolean isDisabled(MerchantOffer offer) {
