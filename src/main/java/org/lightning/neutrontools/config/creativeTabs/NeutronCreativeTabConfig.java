@@ -5,18 +5,13 @@ import com.google.gson.JsonParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.fml.loading.FMLPaths;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 import static org.lightning.neutrontools.NeutronTools.*;
@@ -45,9 +40,32 @@ public class NeutronCreativeTabConfig {
 
 
     public final LinkedHashSet<String> tabOrder = new LinkedHashSet<>();
-    public HashMap<CreativeModeTab, TabEditConfig> tabEdits = new HashMap<>();
+    private final HashMap<String, TabEditConfig> tabEdits = new HashMap<>();
+    private final HashMap<CreativeModeTab, TabEditConfig> newTabEdits = new HashMap<>();
     private boolean buildSetup = false;
 
+    /**
+     * Get the tab edit for a given tab OR a new tab edit if the tab does not exist
+     * @param tab
+     * @return
+     */
+    public TabEditConfig getTabEdit(CreativeModeTab tab) {
+        TabEditConfig out = tabEdits.get(CreativeTabUtils.getRegistryID(tab));
+        if (out == null) {
+            out = newTabEdits.get(tab);
+        }
+        return out;
+    }
+
+    public TabEditConfig getTabEdit(ResourceLocation tabId) {
+        TabEditConfig out = tabEdits.get(tabId.toString());
+        return out;
+    }
+
+    public TabEditConfig getTabEdit(String tabId) {
+        TabEditConfig out = tabEdits.get(tabId);
+        return out;
+    }
 
 
     public void load() {
@@ -71,8 +89,7 @@ public class NeutronCreativeTabConfig {
             for (File tabEditFile : subfiles) {
                 if (tabEditFile.getName().endsWith(".json"))
                     TabEditJsonRepresentation.load(tabEditFile, (key, value) -> {
-                        CreativeModeTab creativeTab = CreativeTabUtils.getTabFromString(key);
-                        if (creativeTab != null) tabEdits.put(creativeTab, new TabEditConfig(value));
+                        tabEdits.put(key, new TabEditConfig(value));
                     });
             }
         }
@@ -80,20 +97,21 @@ public class NeutronCreativeTabConfig {
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
                 if (tabEditFile.getName().endsWith(".json")) TabEditJsonRepresentation.load(tabEditFile,
-                        (tabName, tabData) -> {
+                        (key, tabData) -> {
                             //Make the new tab as we are indexing tab edit files
                             //Tab edits and new tabs do the same thing, we create the new tab, but then add items with tab edits
                             CreativeModeTab myTab;
-                            if (NeutronCreativeTabs.INSTANCE.newTabs.containsKey(tabName)) {
-                                myTab = NeutronCreativeTabs.INSTANCE.newTabs.get(tabName);
+                            if (NeutronCreativeTabs.INSTANCE.newTabs.containsKey(key)) {
+                                myTab = NeutronCreativeTabs.INSTANCE.newTabs.get(key);
                             } else {
                                 myTab = CreativeModeTab.builder()
-                                        .title(Component.translatable("itemGroup." + MODID + "." + tabName))
+                                        .title(Component.translatable("itemGroup." + MODID + "." + key))
                                         .icon(CreativeTabUtils.makeTabIcon(tabData.tab_icon.name, tabData.tab_icon.nbt))
                                         .build();
-                                NeutronCreativeTabs.INSTANCE.newTabs.put(tabName, myTab);
+                                NeutronCreativeTabs.INSTANCE.newTabs.put(key, myTab);
                             }
-                            tabEdits.put(myTab, new TabEditConfig(tabData));
+                            newTabEdits.put(myTab, new TabEditConfig(tabData));
+                            tabEdits.put(key, new TabEditConfig(tabData));
                         });
             }
         }

@@ -17,6 +17,8 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import static com.mojang.text2speech.Narrator.LOGGER;
+
 /**
  * Tab edit config is called after the tags and creative tabs have been loaded.
  * We take all that information and make a concrete set of items to add and remove.
@@ -34,18 +36,41 @@ public class TabEditConfig {
         }
     }
 
+
     public void modifySimulatedContents(BuildCreativeModeTabContentsEvent event) {
         ResourceLocation SIMULATED_SECTION = ResourceLocation.fromNamespaceAndPath("simulated", "simulated");
         ResourceLocation AERONAUTICS_SECTION = ResourceLocation.fromNamespaceAndPath("aeronautics", "aeronautics");
         ResourceLocation OFFROAD_SECTION = ResourceLocation.fromNamespaceAndPath("offroad", "offroad");
 
         items_to_add.forEach((indx, stacks) -> {
+
+            //Parse the section
+            ResourceLocation aeronauticsSection = SIMULATED_SECTION;
+            if (indx != null && !indx.isBlank()) {
+                try {
+                    if (indx.trim().equalsIgnoreCase("aeronautics")) {
+                        aeronauticsSection = AERONAUTICS_SECTION;
+                    } else if (indx.trim().equalsIgnoreCase("offroad")) {
+                        aeronauticsSection = OFFROAD_SECTION;
+                    } else {
+                        aeronauticsSection = ResourceLocation.tryParse(indx);
+                    }
+                } catch (Throwable e) {
+                    LOGGER.error("Failed to parse aeronautics section: " + indx, e);
+                    aeronauticsSection = SIMULATED_SECTION;
+                }
+                if (aeronauticsSection == null)
+                    aeronauticsSection = SIMULATED_SECTION;
+            }
+            //Add the items to the tab
             for (ItemStack stack : stacks) {
-                SimulatedRegistrate.TAB_ITEMS.add(() -> stack.getItem());
+                SimulatedRegistrate.TAB_ITEMS.add(stack::getItem);
                 ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(stack.getItem());
-                SimulatedRegistrate.ITEM_TO_SECTION.put(itemKey, AERONAUTICS_SECTION);
+                SimulatedRegistrate.ITEM_TO_SECTION.put(itemKey, aeronauticsSection);
             }
         });
+
+        //Remove items that are in the remove list
         SimulatedRegistrate.TAB_ITEMS.removeIf(itemSupplier -> {
             Item item = itemSupplier.get();
             if (item != null) {

@@ -26,7 +26,7 @@ import static org.lightning.neutrontools.NeutronTools.LOGGER;
 import static org.lightning.neutrontools.NeutronTools.MODID;
 import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
 
-@Mixin(value={CreativeModeTab.class}, priority=100000)
+@Mixin(value = {CreativeModeTab.class}, priority = 100000)
 public abstract class CreativeModeTabMixin {
 
     @Shadow
@@ -56,7 +56,7 @@ public abstract class CreativeModeTabMixin {
 
     @Inject(method = "buildContents", at = @At("TAIL"), cancellable = true)
     private void injectBuildContents(CreativeModeTab.ItemDisplayParameters arg, CallbackInfo ci) {
-        CreativeModeTab tab = (CreativeModeTab) ((Object)this);
+        CreativeModeTab tab = (CreativeModeTab) ((Object) this);
         if (!NeutronCreativeTabs.MANDATORY_TABS.contains(tab)) { //We should not modify mandatory tabs
             NeutronCreativeTabs.INSTANCE.cache.buildContents(tab,
                     tab.getDisplayItems(),
@@ -82,7 +82,7 @@ public abstract class CreativeModeTabMixin {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
 
         if (cached_displayName == null) {
-            TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.tabEdits.get(self);
+            TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.getTabEdit(self);
             if (tabEditConfig == null || tabEditConfig.tab_name_key == null) {
                 cached_displayName = this.displayName;
             } else {
@@ -109,7 +109,7 @@ public abstract class CreativeModeTabMixin {
         CreativeModeTab self = (CreativeModeTab) ((Object) this);
         if (!isCachedCustomIcon) {
             if (!NeutronCreativeTabs.MANDATORY_TABS.contains(self)) {
-                TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.tabEdits.get(self);
+                TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.getTabEdit(self);
                 if (tabEditConfig != null
                         && tabEditConfig.tab_icon != null
                         && tabEditConfig.tab_icon.get() != ItemStack.EMPTY) {
