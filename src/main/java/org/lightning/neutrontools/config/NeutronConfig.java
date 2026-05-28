@@ -20,7 +20,7 @@ public class NeutronConfig {
                     "{\n\"disabled_items\":[]\n}");
             Files.writeString(new File(CONFIG_PATH, "ordered_tabs.json").toPath(),
                     "{\n\"ordered_tabs\":[]\n}");
-            new File(CONFIG_PATH, "NeutronTools.tabs.newTabs").mkdirs();
+            new File(CONFIG_PATH, "new_tabs").mkdirs();
             new File(CONFIG_PATH, "tab_edits").mkdirs();
         } catch (Exception e) {
             NeutronTools.LOGGER.error("Failed to plant starter files", e);

@@ -71,7 +71,7 @@ public class ClientModEvents {
             NeutronTools.CONFIG_CREATIVE_TABS.setBuildSetup(false);
             if (FMLEnvironment.dist == Dist.CLIENT && ModList.get().isLoaded("simulated")) {
                 TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.getTabEdit("simulated:main_tab");
-                tabEditConfig.modifySimulatedContents(event);
+                if (tabEditConfig != null) tabEditConfig.modifySimulatedContents(event);
             }
         }
         TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.getTabEdit(event.getTab());
