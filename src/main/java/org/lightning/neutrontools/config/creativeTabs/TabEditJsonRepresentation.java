@@ -45,12 +45,12 @@ class TabEditJsonRepresentation {
                     TabEditJsonRepresentation tabObject = GSON.fromJson(tabData, TabEditJsonRepresentation.class);
                     consumer.accept(tabId, tabObject);
                 } catch (JsonSyntaxException e) {
-                    NeutronTools.LOGGER.error("Failed to parse tab: " + tabId, e);
+                    NeutronTools.LOG.error("Failed to parse tab: " + tabId, e);
                 }
             }
 
         } catch (Exception e) {
-            NeutronTools.LOGGER.error("Failed to read tab edit json structure", e);
+            NeutronTools.LOG.error("Failed to read tab edit json structure", e);
         }
     }
 

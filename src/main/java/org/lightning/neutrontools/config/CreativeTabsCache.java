@@ -14,12 +14,11 @@ import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.lightning.neutrontools.NeutronTools.CONFIG_PATH;
+import static org.lightning.neutrontools.NeutronTools.BASE_CONFIG_DIRECTORY;
 
 public class CreativeTabsCache {
-    public static final File CREATIVE_TABS_CACHE_FILE = new File(CONFIG_PATH, "cached_original_tabs.json");
+    public static final File CREATIVE_TABS_CACHE_FILE = new File(BASE_CONFIG_DIRECTORY.toFile(), "cached_original_tabs.json");
     public final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     //The current state of our original tabs in the form of registry id -> items
@@ -82,7 +81,7 @@ public class CreativeTabsCache {
     }
 
     public boolean writeCacheToFile(File saveFile) {
-        NeutronTools.LOGGER.info("Saving original creative tab list to {}", saveFile.getAbsolutePath());
+        NeutronTools.LOG.info("Saving original creative tab list to {}", saveFile.getAbsolutePath());
         JsonObject root = new JsonObject();
         JsonArray tabsArray = new JsonArray();
 
@@ -103,21 +102,21 @@ public class CreativeTabsCache {
             root.add("tabs", tabsArray);
             GSON.toJson(root, writer);
 
-            NeutronTools.LOGGER.info("Saved item list to: {}", saveFile.getAbsolutePath());
+            NeutronTools.LOG.info("Saved item list to: {}", saveFile.getAbsolutePath());
             return true;
         } catch (Exception e) {
             e.printStackTrace();
-            NeutronTools.LOGGER.warn("Failed to save item list: {}", e.getMessage());
+            NeutronTools.LOG.warn("Failed to save item list: {}", e.getMessage());
         }
         return false;
     }
 
     private boolean readCacheFromFile(File loadFile) {
         if (!loadFile.exists()) {
-            NeutronTools.LOGGER.warn("No creative tab cache found at {}", loadFile.getAbsolutePath());
+            NeutronTools.LOG.warn("No creative tab cache found at {}", loadFile.getAbsolutePath());
             return false;
         }
-        NeutronTools.LOGGER.info("Loading original creative tab list from {}", loadFile.getAbsolutePath());
+        NeutronTools.LOG.info("Loading original creative tab list from {}", loadFile.getAbsolutePath());
         try (java.io.FileReader reader = new java.io.FileReader(loadFile)) {
             JsonObject root = GSON.fromJson(reader, JsonObject.class);
             if (root == null || !root.has("tabs")) return false;
@@ -139,10 +138,10 @@ public class CreativeTabsCache {
                 cacheFile_originalTabItems.put(tabName, itemStacks);
             });
 
-            NeutronTools.LOGGER.info("Successfully loaded {} tabs from cache file.", cacheFile_originalTabItems.size());
+            NeutronTools.LOG.info("Successfully loaded {} tabs from cache file.", cacheFile_originalTabItems.size());
             return true;
         } catch (Exception e) {
-            NeutronTools.LOGGER.error("Failed to read creative tab cache file: {}", e.getMessage());
+            NeutronTools.LOG.error("Failed to read creative tab cache file: {}", e.getMessage());
             e.printStackTrace();
             return false;
         }

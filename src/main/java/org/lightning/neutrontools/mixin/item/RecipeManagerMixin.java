@@ -76,7 +76,7 @@ public class RecipeManagerMixin {
                 filteredMap.put(ResourceLocation2, jsonElement);
             }
             catch (JsonParseException | IllegalArgumentException e) {
-                NeutronTools.LOGGER.debug("Parsing error loading recipe {}", (Object)ResourceLocation2, (Object)e);
+                NeutronTools.LOG.debug("Parsing error loading recipe {}", (Object)ResourceLocation2, (Object)e);
                 filteredMap.put(ResourceLocation2, jsonElement);
             }
         }

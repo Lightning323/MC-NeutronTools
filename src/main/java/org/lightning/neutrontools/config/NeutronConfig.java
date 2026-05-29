@@ -3,38 +3,38 @@ package org.lightning.neutrontools.config;
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.electronwill.nightconfig.toml.TomlFormat;
 import org.lightning.neutrontools.NeutronTools;
-import org.lightning.neutrontools.config.creativeTabs.NeutronCreativeTabConfig;
 
 import java.io.File;
 import java.nio.file.Files;
 
-import static org.lightning.neutrontools.NeutronTools.CONFIG_PATH;
+import static org.lightning.neutrontools.NeutronTools.BASE_CONFIG_DIRECTORY;
 
 public class NeutronConfig {
 
+    public static final File DISABLED_TABS_FILE = new File(BASE_CONFIG_DIRECTORY.toFile(), "disabled_tabs.json");
+    public static final File DISABLED_ITEMS_FILE = new File(BASE_CONFIG_DIRECTORY.toFile(), "disabled_items.json");
+    public static final File ORDERED_TABS_FILE = new File(BASE_CONFIG_DIRECTORY.toFile(), "ordered_tabs.json");
+    public static final File NEW_TABS_DIRECTORY = new File(BASE_CONFIG_DIRECTORY.toFile(), "new_tabs");
+    public static final File TAB_EDITS_DIRECTORY = new File(BASE_CONFIG_DIRECTORY.toFile(), "tab_edits");
+
     public static void plantStarterFiles() {
+        NeutronTools.BASE_CONFIG_DIRECTORY.toFile().mkdirs();
         try {
-            Files.writeString(new File(CONFIG_PATH, "disabled_tabs.json").toPath(),
-                    "{\n\"disabled_tabs\":[]\n}");
-            Files.writeString(new File(CONFIG_PATH, "disabled_items.json").toPath(),
-                    "{\n\"disabled_items\":[]\n}");
-            Files.writeString(new File(CONFIG_PATH, "ordered_tabs.json").toPath(),
-                    "{\n\"ordered_tabs\":[]\n}");
-            new File(CONFIG_PATH, "new_tabs").mkdirs();
-            new File(CONFIG_PATH, "tab_edits").mkdirs();
+            if (!DISABLED_TABS_FILE.exists()) Files.writeString(DISABLED_TABS_FILE.toPath(), "{\n\"disabled_tabs\":[]\n}");
+            if (!DISABLED_ITEMS_FILE.exists()) Files.writeString(DISABLED_ITEMS_FILE.toPath(), "{\n\"disabled_items\":[]\n}");
+            if (!ORDERED_TABS_FILE.exists()) Files.writeString(ORDERED_TABS_FILE.toPath(), "{\n\"ordered_tabs\":[]\n}");
+
+            NEW_TABS_DIRECTORY.mkdirs();
+            TAB_EDITS_DIRECTORY.mkdirs();
         } catch (Exception e) {
-            NeutronTools.LOGGER.error("Failed to plant starter files", e);
+            NeutronTools.LOG.error("Failed to plant starter files", e);
         }
     }
 
     public NeutronConfig() {
+        plantStarterFiles();
         try {
-            if (!NeutronTools.CONFIG_PATH.exists()) {
-                NeutronTools.LOGGER.info("Config Dir: {}", NeutronTools.CONFIG_PATH);
-                NeutronTools.CONFIG_PATH.mkdirs();
-                plantStarterFiles();
-            }
-            File configFile = new File(NeutronTools.CONFIG_PATH, "neutron-tools-config.toml");
+            File configFile = new File(NeutronTools.BASE_CONFIG_DIRECTORY.toFile(), "neutron-tools-config.toml");
             try (FileConfig config = FileConfig.builder(configFile, TomlFormat.instance()).build()) {
                 if (configFile.exists()) {
                     writeReadConfig(config, true);
@@ -43,7 +43,7 @@ public class NeutronConfig {
                 }
             }
         } catch (Exception e) {
-            NeutronTools.LOGGER.error("An error occurred initializing pre-init config!", e);
+            NeutronTools.LOG.error("An error occurred initializing pre-init config!", e);
         }
     }
 
@@ -60,6 +60,7 @@ public class NeutronConfig {
     public boolean hideRecipeToasts = true;
     public boolean hideTutorialToasts = false;
     public boolean verboseMode = false;
+    public boolean loadFromBaseDatapacksDirectory = true;
     //--------------------------------------------------------------------
 
     private void writeReadConfig(FileConfig config, boolean isReading) {
@@ -70,6 +71,7 @@ public class NeutronConfig {
         hungerMultiplier = (float) (double) getAndSet(config, isReading, "common.hunger_multiplier", (double) hungerMultiplier);
         disableExperementalSettings = getAndSet(config, isReading, "common.disable_experemental_settings_popup", disableExperementalSettings);
         verboseMode = getAndSet(config, isReading, "common.verbose_mode", verboseMode);
+        loadFromBaseDatapacksDirectory = getAndSet(config, isReading, "common.loadBaseDatapackDirectory", loadFromBaseDatapacksDirectory);
 
         // Client
         hideCreativeTabItemsFromJEIBlacklist = getAndSet(config, isReading, "client.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);

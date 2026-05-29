@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import org.lightning.neutrontools.NeutronTools;
+import org.lightning.neutrontools.config.NeutronConfig;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 
@@ -69,7 +70,7 @@ public class NeutronCreativeTabConfig {
 
 
     public void load() {
-        NeutronTools.LOGGER.debug("Loading Creative Tab Config");
+        NeutronTools.LOG.debug("Loading Creative Tab Config");
         buildSetup = true;
 
         //-------------------------------------------------------
@@ -77,14 +78,14 @@ public class NeutronCreativeTabConfig {
         //-------------------------------------------------------
         disabledTabs.clear();
         tabOrder.clear();
-        loadSimpleJsonLists(new File(CONFIG_PATH, "disabled_tabs.json"));
-        loadSimpleJsonLists(new File(CONFIG_PATH, "ordered_tabs.json"));
+        loadSimpleJsonLists(NeutronConfig.DISABLED_TABS_FILE);
+        loadSimpleJsonLists(NeutronConfig.ORDERED_TABS_FILE);
 
         //-------------------------------------------------------
         //Load tab edits / new tabs
         //-------------------------------------------------------
         tabEdits.clear();
-        File[] subfiles = new File(CONFIG_PATH, "tab_edits").listFiles();
+        File[] subfiles = NeutronConfig.TAB_EDITS_DIRECTORY.listFiles();
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
                 if (tabEditFile.getName().endsWith(".json"))
@@ -93,7 +94,7 @@ public class NeutronCreativeTabConfig {
                     });
             }
         }
-        subfiles = new File(CONFIG_PATH, "new_tabs").listFiles();
+        subfiles = NeutronConfig.NEW_TABS_DIRECTORY.listFiles();
         if (subfiles != null) {
             for (File tabEditFile : subfiles) {
                 if (tabEditFile.getName().endsWith(".json")) TabEditJsonRepresentation.load(tabEditFile,
@@ -117,9 +118,9 @@ public class NeutronCreativeTabConfig {
         }
 
         if (CONFIG.verboseMode) {
-            LOGGER.info("Disabled tabs: {}", disabledTabs);
-            LOGGER.info("Ordered tabs: {}", tabOrder);
-            LOGGER.info("Tab Edits: {}", tabEdits);
+            LOG.info("Disabled tabs: {}", disabledTabs);
+            LOG.info("Ordered tabs: {}", tabOrder);
+            LOG.info("Tab Edits: {}", tabEdits);
 //        LOGGER.info("New tabs: {}", NeutronTools.TABS.newTabs);
         }
     }
@@ -152,7 +153,7 @@ public class NeutronCreativeTabConfig {
         try (Reader reader = Files.newBufferedReader(file.toPath())) {
             jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
         } catch (Exception e) {
-            NeutronTools.LOGGER.warn("Failed to parse config file: {}", file);
+            NeutronTools.LOG.warn("Failed to parse config file: {}", file);
             return;
         }
 

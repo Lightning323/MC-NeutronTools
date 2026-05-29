@@ -9,7 +9,8 @@
     "creativeTabs.accessor.CreativeModeTabsAccessor",
     "item.RecipeManagerMixin",
     "item.ItemEntityMixin",
-    "item.VillagerTradeMixin"
+    "item.VillagerTradeMixin",
+    "FolderRepositorySourceAccessor"
   ],
   "client": [
     "disableExpSettings.CreateWorldScreenMixin",

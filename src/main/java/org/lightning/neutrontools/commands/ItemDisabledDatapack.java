@@ -53,7 +53,7 @@ public class ItemDisabledDatapack {
                 String[] split = recipeId.split(":");
 
                 if (split.length != 2) {
-                    NeutronTools.LOGGER.debug("Invalid recipe id: {}", recipeId);
+                    NeutronTools.LOG.debug("Invalid recipe id: {}", recipeId);
                     continue;
                 }
 
@@ -82,10 +82,10 @@ public class ItemDisabledDatapack {
 
                 Files.writeString(recipeFile, root.toString());
             }
-            NeutronTools.LOGGER.debug("Datapack generated at: {}", packRoot.toAbsolutePath());
+            NeutronTools.LOG.debug("Datapack generated at: {}", packRoot.toAbsolutePath());
             return true;
         } catch (IOException e) {
-            NeutronTools.LOGGER.debug("Failed to generate datapack: {}", e.getMessage());
+            NeutronTools.LOG.debug("Failed to generate datapack: {}", e.getMessage());
             return false;
         }
 

@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.lightning.neutrontools.NeutronTools.LOGGER;
+import static org.lightning.neutrontools.NeutronTools.LOG;
 import static org.lightning.neutrontools.NeutronTools.MODID;
 import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.getTranslationKey;
 
@@ -113,7 +113,7 @@ public abstract class CreativeModeTabMixin {
                 if (tabEditConfig != null
                         && tabEditConfig.tab_icon != null
                         && tabEditConfig.tab_icon.get() != ItemStack.EMPTY) {
-                    LOGGER.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
+                    LOG.debug("tab {}: \tCaching tab icon...", this.displayName.getString());
                     cached_TabIcon = tabEditConfig.tab_icon.get();
                 }
             }

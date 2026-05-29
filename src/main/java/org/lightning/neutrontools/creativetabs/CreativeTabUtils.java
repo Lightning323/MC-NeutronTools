@@ -39,7 +39,7 @@ public class CreativeTabUtils {
                 try {
                     applyNBT(stack, nbtString);
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to Process NBT for Item: {}; NBT: {}",
+                    NeutronTools.LOG.error("Failed to Process NBT for Item: {}; NBT: {}",
                             name, nbtString, e);
                 }
             }
@@ -54,7 +54,7 @@ public class CreativeTabUtils {
         try {
             tag = TagParser.parseTag(nbtString);
         } catch (CommandSyntaxException e) {
-            NeutronTools.LOGGER.error("Failed to Process NBT: {}", nbtString, e);
+            NeutronTools.LOG.error("Failed to Process NBT: {}", nbtString, e);
             return;
         }
 

@@ -34,13 +34,13 @@ public class NeutronCreativeTabs {
                     tabKey = tabKey.replaceAll("[^a-z0-9/._-]", "");
 
                     if (tabKey == null) {
-                        NeutronTools.LOGGER.error("Tab name key is null");
+                        NeutronTools.LOG.error("Tab name key is null");
                         return;
                     }
-                    NeutronTools.LOGGER.info("Registering new tab {}", tabKey);
+                    NeutronTools.LOG.info("Registering new tab {}", tabKey);
                     event.register(Registries.CREATIVE_MODE_TAB, NeutronTools.resource(tabKey), () -> tab);
                 } catch (Exception e) {
-                    NeutronTools.LOGGER.error("Failed to register new tab \"{}\"", originalTabKey, e);
+                    NeutronTools.LOG.error("Failed to register new tab \"{}\"", originalTabKey, e);
                 }
             });
         }

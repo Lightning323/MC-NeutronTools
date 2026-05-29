@@ -50,7 +50,7 @@ public class GenerateCommand {
                 return Command.SINGLE_SUCCESS;
             }
         }catch (Throwable throwable) {
-            NeutronTools.LOGGER.error("Error when generating", throwable);
+            NeutronTools.LOG.error("Error when generating", throwable);
             Component errorMessage = Component.literal("Error when generating").withStyle(ChatFormatting.RED);
             context.getSource().sendSuccess(() -> errorMessage, true);
             return Command.SINGLE_SUCCESS;
@@ -99,13 +99,13 @@ public class GenerateCommand {
             GSON.toJson(root, writer);
             return true;
         } catch (Exception e) {
-            NeutronTools.LOGGER.warn("Failed to save list: {}", e.getMessage());
+            NeutronTools.LOG.warn("Failed to save list: {}", e.getMessage());
         }
         return false;
     }
 
     private static boolean listBlocksToFile(File saveFile) {
-        NeutronTools.LOGGER.info("Saving block list to {} ", saveFile.getAbsolutePath());
+        NeutronTools.LOG.info("Saving block list to {} ", saveFile.getAbsolutePath());
         ArrayList<String> blocks = new ArrayList<>();
         try (FileWriter writer = new FileWriter(saveFile)) {
             for (ResourceLocation id : BuiltInRegistries.BLOCK.keySet()) {
@@ -113,17 +113,17 @@ public class GenerateCommand {
             }
             Collections.sort(blocks);
             writer.write(String.join("\n", blocks));
-            NeutronTools.LOGGER.info("Saved block list to: {}", saveFile.getAbsolutePath());
+            NeutronTools.LOG.info("Saved block list to: {}", saveFile.getAbsolutePath());
             return true;
         } catch (IOException e) {
-            NeutronTools.LOGGER.error("Failed to save block list ", e);
+            NeutronTools.LOG.error("Failed to save block list ", e);
         }
         return false;
     }
 
 
     private static boolean listEntitiesToFile(File saveFile) {
-        NeutronTools.LOGGER.info("Saving entity list to {}", saveFile.getAbsolutePath());
+        NeutronTools.LOG.info("Saving entity list to {}", saveFile.getAbsolutePath());
         ArrayList<String> entities = new ArrayList<>();
         try (FileWriter writer = new FileWriter(saveFile)) {
             for (ResourceLocation id : BuiltInRegistries.ENTITY_TYPE.keySet()) {
@@ -131,17 +131,17 @@ public class GenerateCommand {
             }
             Collections.sort(entities);
             writer.write(String.join("\n", entities));
-            NeutronTools.LOGGER.info("Saved entity list to: {}", saveFile.getAbsolutePath());
+            NeutronTools.LOG.info("Saved entity list to: {}", saveFile.getAbsolutePath());
             return true;
         } catch (IOException e) {
-            NeutronTools.LOGGER.error("Failed to save entity list: {}", e.getMessage());
+            NeutronTools.LOG.error("Failed to save entity list: {}", e.getMessage());
         }
         return false;
     }
 
 
     private static boolean listItemsToFile(File saveFile) {
-        NeutronTools.LOGGER.info("Saving item list to {}", saveFile.getAbsolutePath());
+        NeutronTools.LOG.info("Saving item list to {}", saveFile.getAbsolutePath());
         try (FileWriter writer = new FileWriter(saveFile)) {
             ArrayList<ResourceLocation> items = new ArrayList<>();
             ArrayList<ResourceLocation> hiddenItems = new ArrayList<>();
@@ -164,10 +164,10 @@ public class GenerateCommand {
             for (ResourceLocation id : hiddenItems) {
                 writer.write(id.toString() + "\n");
             }
-            NeutronTools.LOGGER.info("Saved item list to: {}", saveFile.getAbsolutePath());
+            NeutronTools.LOG.info("Saved item list to: {}", saveFile.getAbsolutePath());
             return true;
         } catch (IOException e) {
-            NeutronTools.LOGGER.error("Failed to save item list: {}", e.getMessage());
+            NeutronTools.LOG.error("Failed to save item list: {}", e.getMessage());
         }
         return false;
     }

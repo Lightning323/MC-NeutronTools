@@ -20,7 +20,7 @@ import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.makeItemS
 
 public class NeutronDisabledItemConfig {
     public NeutronDisabledItemConfig() {
-        loadSimpleJsonLists(new File(CONFIG_PATH, "disabled_items.json"));
+        loadSimpleJsonLists(new File(BASE_CONFIG_DIRECTORY.toFile(), "disabled_items.json"));
         //-------------------------------------------------------
         //Add disabled items from JEI
         //-------------------------------------------------------
@@ -36,12 +36,12 @@ public class NeutronDisabledItemConfig {
                         }
                     });
                 } catch (IOException e) {
-                    NeutronTools.LOGGER.warn("Failed to process JEI blacklisted items {}", e);
+                    NeutronTools.LOG.warn("Failed to process JEI blacklisted items {}", e);
                 }
             }
         }
         if (CONFIG.verboseMode) {
-            LOGGER.info("Disabled items: {}", disabledItems);
+            LOG.info("Disabled items: {}", disabledItems);
         }
         loadItems();
     }
@@ -74,7 +74,7 @@ public class NeutronDisabledItemConfig {
         try (Reader reader = Files.newBufferedReader(file.toPath())) {
             jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
         } catch (Exception e) {
-            NeutronTools.LOGGER.warn("Failed to parse config file: {}", file);
+            NeutronTools.LOG.warn("Failed to parse config file: {}", file);
             return;
         }
 

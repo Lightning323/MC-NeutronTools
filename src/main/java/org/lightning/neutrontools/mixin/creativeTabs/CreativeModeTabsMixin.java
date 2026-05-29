@@ -41,7 +41,7 @@ public abstract class CreativeModeTabsMixin {
     private static void onAllTabsFinishedBuilding(CreativeModeTab.ItemDisplayParameters parameters, CallbackInfo ci) {
         // At this point, EVERY tab has run its buildContents method.
         // The displayItems and displayItemsSearchTab lists are now fully populated.
-        NeutronTools.LOGGER.info("All Creative Tab contents have been built...");
+        NeutronTools.LOG.info("All Creative Tab contents have been built...");
         NeutronCreativeTabs.INSTANCE.cache.writeCache();
 //        CreativeTabConfig.INSTANCE.setBuildSetup(true); //Set it to true in case we run build contents more than once
     }
