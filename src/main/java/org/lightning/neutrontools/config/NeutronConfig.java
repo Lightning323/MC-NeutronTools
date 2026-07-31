@@ -61,6 +61,7 @@ public class NeutronConfig {
     public boolean hideTutorialToasts = false;
     public boolean verboseMode = false;
     public boolean loadFromBaseDatapacksDirectory = true;
+    public boolean allowSimulatedCreativeTabEdits = false;
     //--------------------------------------------------------------------
 
     private void writeReadConfig(FileConfig config, boolean isReading) {
@@ -77,6 +78,7 @@ public class NeutronConfig {
         hideCreativeTabItemsFromJEIBlacklist = getAndSet(config, isReading, "client.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
         hideRecipeToasts = getAndSet(config, isReading, "client.hide_recipe_toasts", hideRecipeToasts);
         hideTutorialToasts = getAndSet(config, isReading, "client.hide_tutorial_toasts", hideTutorialToasts);
+        allowSimulatedCreativeTabEdits = getAndSet(config, isReading, "client.allow_simulated_creative_tab_edits", allowSimulatedCreativeTabEdits);
 
         if (!isReading) config.save();
     }

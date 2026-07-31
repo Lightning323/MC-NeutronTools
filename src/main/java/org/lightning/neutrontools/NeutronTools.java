@@ -41,8 +41,12 @@ public class NeutronTools {
     public static File BASE_GAME_DIRECTORY = FMLPaths.GAMEDIR.get().toFile();
     public static Path BASE_CONFIG_DIRECTORY = Paths.get(FMLPaths.CONFIGDIR.get().toString(), MODID);
 
-    public static Path OPTIONAL_PACK_DIRECTORY = Paths.get(BASE_CONFIG_DIRECTORY.toString(), "packs_optional");
-    public static Path PACK_DIRECTORY = Paths.get(BASE_CONFIG_DIRECTORY.toString(), "packs_required");
+    public static Path CONFIG_OPTIONAL_PACK_DIRECTORY = Paths.get(BASE_CONFIG_DIRECTORY.toString(), "packs_optional");
+    public static Path CONFIG_PACK_DIRECTORY = Paths.get(BASE_CONFIG_DIRECTORY.toString(), "packs_required");
+
+    public static Path RESOURCEPACK_GAME_DIRECTORY = Paths.get(FMLPaths.GAMEDIR.get().toString(),"resourcepacks", "required");
+    public static Path DATAPACK_GAME_DIRECTORY = Paths.get(FMLPaths.GAMEDIR.get().toString(),"datapacks", "required");
+
 
     public static final NeutronConfig CONFIG = new NeutronConfig();
     public static final NeutronCreativeTabConfig CONFIG_CREATIVE_TABS = new NeutronCreativeTabConfig();
@@ -64,22 +68,27 @@ public class NeutronTools {
     }
 
     private static void addPackSources(AddPackFindersEvent event) {
-        Path optionalResources = Paths.get(OPTIONAL_PACK_DIRECTORY.toString(), "resource_packs");
-        Path optionalData =  Paths.get(OPTIONAL_PACK_DIRECTORY.toString(), "data_packs");
-        Path requiredResources = Paths.get(PACK_DIRECTORY.toString(), "resource_packs");
-        Path requiredData =  Paths.get(PACK_DIRECTORY.toString(), "data_packs");
+        Path optionalResources = Paths.get(CONFIG_OPTIONAL_PACK_DIRECTORY.toString(), "resource_packs");
+        Path optionalData =  Paths.get(CONFIG_OPTIONAL_PACK_DIRECTORY.toString(), "data_packs");
+        Path requiredResources = Paths.get(CONFIG_PACK_DIRECTORY.toString(), "resource_packs");
+        Path requiredData =  Paths.get(CONFIG_PACK_DIRECTORY.toString(), "data_packs");
 
         if(!optionalResources.toFile().exists()) optionalResources.toFile().mkdirs();
         if(!optionalData.toFile().exists()) optionalData.toFile().mkdirs();
         if(!requiredResources.toFile().exists()) requiredResources.toFile().mkdirs();
         if(!requiredData.toFile().exists()) requiredData.toFile().mkdirs();
 
+        if(!DATAPACK_GAME_DIRECTORY.toFile().exists()) DATAPACK_GAME_DIRECTORY.toFile().mkdirs();
+        if(!RESOURCEPACK_GAME_DIRECTORY.toFile().exists()) RESOURCEPACK_GAME_DIRECTORY.toFile().mkdirs();
+
         if (event.getPackType() == PackType.SERVER_DATA) {
             event.addRepositorySource(GlobalPackHandler.createForcedRepositorySource(PackType.SERVER_DATA, requiredData));
+            event.addRepositorySource(GlobalPackHandler.createForcedRepositorySource(PackType.SERVER_DATA, DATAPACK_GAME_DIRECTORY));
             event.addRepositorySource(GlobalPackHandler.createRepositorySource(PackType.SERVER_DATA, optionalData));
         }
         if (event.getPackType() == PackType.CLIENT_RESOURCES) {
             event.addRepositorySource(GlobalPackHandler.createForcedRepositorySource(PackType.CLIENT_RESOURCES, requiredResources));
+            event.addRepositorySource(GlobalPackHandler.createForcedRepositorySource(PackType.CLIENT_RESOURCES, RESOURCEPACK_GAME_DIRECTORY));
             event.addRepositorySource(GlobalPackHandler.createRepositorySource(PackType.CLIENT_RESOURCES, optionalResources));
         }
     }

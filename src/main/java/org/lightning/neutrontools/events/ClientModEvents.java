@@ -65,11 +65,15 @@ public class ClientModEvents {
         //FIXME: Fix bugs relating to opening of creative tab, and Optimize this so that the creative tab config doesnt have to be loaded more than once
 
 
-        if (NeutronTools.CONFIG_CREATIVE_TABS.buildSetup()) {
+        if (NeutronTools.CONFIG.allowSimulatedCreativeTabEdits &&
+            NeutronTools.CONFIG_CREATIVE_TABS.buildSetup()) {
             NeutronTools.CONFIG_CREATIVE_TABS.load();
             NeutronTools.CONFIG_DISABLED_ITEMS.loadItems();
             NeutronTools.CONFIG_CREATIVE_TABS.setBuildSetup(false);
-            if (FMLEnvironment.dist == Dist.CLIENT && ModList.get().isLoaded("simulated")) {
+            if (
+                    FMLEnvironment.dist == Dist.CLIENT &&
+                            ModList.get().isLoaded("simulated")
+            ) {
                 TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.getTabEdit("simulated:main_tab");
                 if (tabEditConfig != null) tabEditConfig.modifySimulatedContents(event);
             }
