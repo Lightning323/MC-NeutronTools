@@ -66,7 +66,7 @@ public class ClientModEvents {
 
 
         if (NeutronTools.CONFIG.allowSimulatedCreativeTabEdits &&
-            NeutronTools.CONFIG_CREATIVE_TABS.buildSetup()) {
+                NeutronTools.CONFIG_CREATIVE_TABS.buildSetup()) {
             NeutronTools.CONFIG_CREATIVE_TABS.load();
             NeutronTools.CONFIG_DISABLED_ITEMS.loadItems();
             NeutronTools.CONFIG_CREATIVE_TABS.setBuildSetup(false);

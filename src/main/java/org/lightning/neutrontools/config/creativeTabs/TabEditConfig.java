@@ -45,28 +45,30 @@ public class TabEditConfig {
         items_to_add.forEach((indx, stacks) -> {
 
             //Parse the section
-            ResourceLocation aeronauticsSection = SIMULATED_SECTION;
+            ResourceLocation simulatedSection = null;
             if (indx != null && !indx.isBlank()) {
                 try {
-                    if (indx.trim().equalsIgnoreCase("aeronautics")) {
-                        aeronauticsSection = AERONAUTICS_SECTION;
-                    } else if (indx.trim().equalsIgnoreCase("offroad")) {
-                        aeronauticsSection = OFFROAD_SECTION;
+                    indx = indx.trim();
+                    if (indx.equalsIgnoreCase("aeronautics")) {
+                        simulatedSection = AERONAUTICS_SECTION;
+                    } else if (indx.equalsIgnoreCase("offroad")) {
+                        simulatedSection = OFFROAD_SECTION;
+                    } else if (indx.equalsIgnoreCase("simulated")) {
+                        simulatedSection = SIMULATED_SECTION;
                     } else {
-                        aeronauticsSection = ResourceLocation.tryParse(indx);
+                        LOGGER.warn("Adding items to custom simulated tab: \"" + indx + "\", This may case a crash if the tab does not exist!");
+                        simulatedSection = ResourceLocation.tryParse(indx);
                     }
                 } catch (Throwable e) {
                     LOGGER.error("Failed to parse aeronautics section: " + indx, e);
-                    aeronauticsSection = SIMULATED_SECTION;
                 }
-                if (aeronauticsSection == null)
-                    aeronauticsSection = SIMULATED_SECTION;
             }
-            //Add the items to the tab
-            for (ItemStack stack : stacks) {
-                SimulatedRegistrate.TAB_ITEMS.add(stack::getItem);
-                ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(stack.getItem());
-                SimulatedRegistrate.ITEM_TO_SECTION.put(itemKey, aeronauticsSection);
+            if (simulatedSection != null) {
+                for (ItemStack stack : stacks) {//Add the items to the tab
+                    SimulatedRegistrate.TAB_ITEMS.add(stack::getItem);
+                    ResourceLocation itemKey = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                    SimulatedRegistrate.ITEM_TO_SECTION.put(itemKey, simulatedSection);
+                }
             }
         });
 
