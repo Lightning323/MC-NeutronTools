@@ -37,8 +37,8 @@ public class GenerateCommand {
             if (function.test(savePath)) {
                 Component successMessage = Component.literal("Saved to: ").withStyle(ChatFormatting.GREEN)
                         .append(Component.literal(savePath.getAbsolutePath()).withStyle(ChatFormatting.GREEN))
-                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, savePath.getAbsolutePath()))
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Copy to clipboard"))));
+                        .withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, savePath.getAbsolutePath()))
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Open file"))));
                 context.getSource().sendSuccess(() -> successMessage, true);
                 return Command.SINGLE_SUCCESS;
             } else {
