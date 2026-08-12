@@ -34,7 +34,6 @@ public class NeutronCreativeTabConfig {
 
     public NeutronCreativeTabConfig() {
         load();
-        buildSetup = true;
     }
 
     public final Set<String> disabledTabs = new HashSet<>();

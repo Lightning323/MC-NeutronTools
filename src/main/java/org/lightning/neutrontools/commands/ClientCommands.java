@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -98,6 +99,8 @@ public class ClientCommands {
                 CreativeModeTab.ItemDisplayParameters params =
                         new CreativeModeTab.ItemDisplayParameters(enabledFeatures, hasPermissions, mc.level.registryAccess());
 
+                NeutronTools.CONFIG_CREATIVE_TABS.load();
+
                 for (CreativeModeTab tab : BuiltInRegistries.CREATIVE_MODE_TAB) {
                     // Evaluates DisplayItemsGenerator and repopulates tab's internal item lists
                     tab.buildContents(params);
@@ -111,11 +114,11 @@ public class ClientCommands {
                 NeutronTools.LOG.error("Failed to rebuild tabs", t);
             }
 
-//            // 4. If the player currently has the Creative Inventory OPEN, reload the UI
-//            if (mc.screen instanceof CreativeModeInventoryScreen creativeScreen) {
-//                // Re-initializes the active screen to update slots and tabs visually
-//                creativeScreen.init(mc, creativeScreen.width, creativeScreen.height);
-//            }
+            // 4. If the player currently has the Creative Inventory OPEN, reload the UI
+            if (mc.screen instanceof CreativeModeInventoryScreen creativeScreen) {
+                // Re-initializes the active screen to update slots and tabs visually
+                creativeScreen.init(mc, creativeScreen.width, creativeScreen.height);
+            }
         });
     }
 }

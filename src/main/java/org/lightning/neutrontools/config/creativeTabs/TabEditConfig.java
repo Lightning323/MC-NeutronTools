@@ -37,7 +37,7 @@ public class TabEditConfig {
     }
 
 
-    public void modifySimulatedContents(BuildCreativeModeTabContentsEvent event) {
+    public void modifySimulatedContents() {
         ResourceLocation SIMULATED_SECTION = ResourceLocation.fromNamespaceAndPath("simulated", "simulated");
         ResourceLocation AERONAUTICS_SECTION = ResourceLocation.fromNamespaceAndPath("aeronautics", "aeronautics");
         ResourceLocation OFFROAD_SECTION = ResourceLocation.fromNamespaceAndPath("offroad", "offroad");

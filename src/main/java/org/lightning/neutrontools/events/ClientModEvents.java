@@ -21,6 +21,8 @@ import dev.simulated_team.simulated.registrate.SimulatedRegistrate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
 
+import static org.lightning.neutrontools.NeutronTools.CONFIG;
+
 @EventBusSubscriber(
         modid = NeutronTools.MODID,
         bus = EventBusSubscriber.Bus.MOD,
@@ -65,6 +67,9 @@ public class ClientModEvents {
         //FIXME: Fix bugs relating to opening of creative tab, and Optimize this so that the creative tab config doesnt have to be loaded more than once
 
 
+        if (CONFIG.verboseMode)
+            NeutronTools.LOG.info("Building contents for {}", event.getTab().getDisplayName().getString());
+
         if (NeutronTools.CONFIG_CREATIVE_TABS.buildSetup()) {
             NeutronTools.CONFIG_CREATIVE_TABS.load();
             NeutronTools.CONFIG_DISABLED_ITEMS.loadItems();
@@ -72,10 +77,10 @@ public class ClientModEvents {
 
             if (NeutronTools.CONFIG.allowSimulatedCreativeTabEdits &&
                     FMLEnvironment.dist == Dist.CLIENT &&
-                            ModList.get().isLoaded("simulated")
+                    ModList.get().isLoaded("simulated")
             ) {
                 TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.getTabEdit("simulated:main_tab");
-                if (tabEditConfig != null) tabEditConfig.modifySimulatedContents(event);
+                if (tabEditConfig != null) tabEditConfig.modifySimulatedContents();
             }
         }
         TabEditConfig tabEditConfig = NeutronTools.CONFIG_CREATIVE_TABS.getTabEdit(event.getTab());
