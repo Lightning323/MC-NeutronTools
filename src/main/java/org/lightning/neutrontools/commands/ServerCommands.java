@@ -34,7 +34,7 @@ import java.util.List;
         modid = NeutronTools.MODID,
         bus = EventBusSubscriber.Bus.MOD
 )
-public class ModCommands {
+public class ServerCommands {
 
 
     public static int executeParsedCommandOP(CommandSourceStack originalSource, String command, boolean redirectOutput) {

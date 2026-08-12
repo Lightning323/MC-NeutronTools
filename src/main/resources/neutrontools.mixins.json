@@ -10,7 +10,8 @@
     "item.RecipeManagerMixin",
     "item.ItemEntityMixin",
     "item.VillagerTradeMixin",
-    "FolderRepositorySourceAccessor"
+    "FolderRepositorySourceAccessor",
+    "ItemStackMixin"
   ],
   "client": [
     "disableExpSettings.CreateWorldScreenMixin",

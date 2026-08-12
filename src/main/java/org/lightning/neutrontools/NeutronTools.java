@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -19,7 +20,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.lightning.neutrontools.config.NeutronDisabledItemConfig;
+import org.lightning.neutrontools.config.DisabledItemConfig;
+import org.lightning.neutrontools.config.UnbreakableItemConfig;
 import org.lightning.neutrontools.config.creativeTabs.NeutronCreativeTabConfig;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
 import org.lightning.neutrontools.events.ClientModEvents;
@@ -44,14 +46,16 @@ public class NeutronTools {
     public static Path CONFIG_OPTIONAL_PACK_DIRECTORY = Paths.get(BASE_CONFIG_DIRECTORY.toString(), "packs_optional");
     public static Path CONFIG_PACK_DIRECTORY = Paths.get(BASE_CONFIG_DIRECTORY.toString(), "packs_required");
 
-    public static Path RESOURCEPACK_GAME_DIRECTORY = Paths.get(FMLPaths.GAMEDIR.get().toString(),"resourcepacks", "required");
-    public static Path DATAPACK_GAME_DIRECTORY = Paths.get(FMLPaths.GAMEDIR.get().toString(),"datapacks", "required");
+    public static Path RESOURCEPACK_GAME_DIRECTORY = Paths.get(FMLPaths.GAMEDIR.get().toString(), "resourcepacks", "required");
+    public static Path DATAPACK_GAME_DIRECTORY = Paths.get(FMLPaths.GAMEDIR.get().toString(), "datapacks", "required");
 
 
     public static final NeutronConfig CONFIG = new NeutronConfig();
+    public static final UnbreakableItemConfig CONFIG_UNBREAKABLE_ITEMS = new UnbreakableItemConfig();
     public static final NeutronCreativeTabConfig CONFIG_CREATIVE_TABS = new NeutronCreativeTabConfig();
-    public static final NeutronDisabledItemConfig CONFIG_DISABLED_ITEMS = new NeutronDisabledItemConfig();
+    public static final DisabledItemConfig CONFIG_DISABLED_ITEMS = new DisabledItemConfig();
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+
 
     public NeutronTools(IEventBus eventBus, ModContainer container) {
         // Register the commonSetup method for modloading
@@ -67,19 +71,22 @@ public class NeutronTools {
         eventBus.addListener(NeutronTools::addPackSources);
     }
 
+
+
+
     private static void addPackSources(AddPackFindersEvent event) {
         Path optionalResources = Paths.get(CONFIG_OPTIONAL_PACK_DIRECTORY.toString(), "resource_packs");
-        Path optionalData =  Paths.get(CONFIG_OPTIONAL_PACK_DIRECTORY.toString(), "data_packs");
+        Path optionalData = Paths.get(CONFIG_OPTIONAL_PACK_DIRECTORY.toString(), "data_packs");
         Path requiredResources = Paths.get(CONFIG_PACK_DIRECTORY.toString(), "resource_packs");
-        Path requiredData =  Paths.get(CONFIG_PACK_DIRECTORY.toString(), "data_packs");
+        Path requiredData = Paths.get(CONFIG_PACK_DIRECTORY.toString(), "data_packs");
 
-        if(!optionalResources.toFile().exists()) optionalResources.toFile().mkdirs();
-        if(!optionalData.toFile().exists()) optionalData.toFile().mkdirs();
-        if(!requiredResources.toFile().exists()) requiredResources.toFile().mkdirs();
-        if(!requiredData.toFile().exists()) requiredData.toFile().mkdirs();
+        if (!optionalResources.toFile().exists()) optionalResources.toFile().mkdirs();
+        if (!optionalData.toFile().exists()) optionalData.toFile().mkdirs();
+        if (!requiredResources.toFile().exists()) requiredResources.toFile().mkdirs();
+        if (!requiredData.toFile().exists()) requiredData.toFile().mkdirs();
 
-        if(!DATAPACK_GAME_DIRECTORY.toFile().exists()) DATAPACK_GAME_DIRECTORY.toFile().mkdirs();
-        if(!RESOURCEPACK_GAME_DIRECTORY.toFile().exists()) RESOURCEPACK_GAME_DIRECTORY.toFile().mkdirs();
+        if (!DATAPACK_GAME_DIRECTORY.toFile().exists()) DATAPACK_GAME_DIRECTORY.toFile().mkdirs();
+        if (!RESOURCEPACK_GAME_DIRECTORY.toFile().exists()) RESOURCEPACK_GAME_DIRECTORY.toFile().mkdirs();
 
         if (event.getPackType() == PackType.SERVER_DATA) {
             event.addRepositorySource(GlobalPackHandler.createForcedRepositorySource(PackType.SERVER_DATA, requiredData));
@@ -98,6 +105,8 @@ public class NeutronTools {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        CONFIG_UNBREAKABLE_ITEMS.loadItems();
+        CONFIG_DISABLED_ITEMS.loadItems();
     }
 
 
