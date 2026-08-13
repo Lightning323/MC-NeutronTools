@@ -1,12 +1,7 @@
 package org.lightning.neutrontools.config;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraft.world.flag.FeatureFlagSet;
-import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -27,8 +22,8 @@ public class ConfigReloadHandler {
             @Override
             public void onResourceManagerReload(ResourceManager resourceManager) {
                 // Runs on the main thread whenever /reload is executed
-                CONFIG_UNBREAKABLE_ITEMS.reloadFromDisk();
-                CONFIG_DISABLED_ITEMS.reloadFromDisk();
+                CONFIG_UNBREAKABLE_ITEMS.loadFromDisk();
+                CONFIG_DISABLED_ITEMS.loadFromDisk();
             }
         });
     }

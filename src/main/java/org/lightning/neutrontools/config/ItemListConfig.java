@@ -25,8 +25,7 @@ public class ItemListConfig {
             filenameDotJson = filenameDotJson.replace(".json", "");
         }
         file = new File(BASE_CONFIG_DIRECTORY.toFile(), filenameDotJson.strip() + ".json");
-        loadSimpleJsonLists(file);
-        loadItems();
+        loadFromDisk();
     }
 
     public final Set<Item> itemList = new HashSet<>();
@@ -66,14 +65,14 @@ public class ItemListConfig {
         return itemIdList.contains(itemID);
     }
 
-    public void reloadFromDisk() {
+    public void loadFromDisk() {
         itemList.clear();
         itemIdList.clear();
         loadSimpleJsonLists(file);
         loadItems();
     }
 
-    private void loadSimpleJsonLists(File file) {
+    protected void loadSimpleJsonLists(File file) {
         if (!Files.exists(file.toPath())) {
             try {
                 Files.writeString(file.toPath(), "{\n\"items\":[]\n}");

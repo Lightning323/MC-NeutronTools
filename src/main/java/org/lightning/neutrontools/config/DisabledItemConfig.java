@@ -11,9 +11,14 @@ import java.nio.file.Path;
 import static org.lightning.neutrontools.NeutronTools.*;
 import static org.lightning.neutrontools.creativetabs.CreativeTabUtils.makeItemStack;
 
-public class DisabledItemConfig extends  ItemListConfig {
+public class DisabledItemConfig extends ItemListConfig {
     public DisabledItemConfig() {
         super("disabled_items.json");
+    }
+
+    public void loadFromDisk() {
+        itemList.clear();
+        itemIdList.clear();
         //-------------------------------------------------------
         //Add disabled items from JEI
         //-------------------------------------------------------
@@ -36,6 +41,8 @@ public class DisabledItemConfig extends  ItemListConfig {
         if (CONFIG.verboseMode) {
             LOG.info("Disabled items: {}", this.itemList);
         }
+
+        loadSimpleJsonLists(file);
         loadItems();
     }
 }
