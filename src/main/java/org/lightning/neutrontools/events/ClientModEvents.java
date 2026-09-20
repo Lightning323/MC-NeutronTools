@@ -11,12 +11,14 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ToastAddEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import org.lightning.neutrontools.NeutronTools;
 import org.lightning.neutrontools.config.creativeTabs.TabEditConfig;
+import org.lightning.neutrontools.utils.KeybindUtils;
 import dev.simulated_team.simulated.registrate.SimulatedRegistrate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.lightning.neutrontools.creativetabs.CreativeTabUtils;
@@ -40,13 +42,11 @@ public class ClientModEvents {
         }
     }
 
-    //    @SubscribeEvent
-//    public static void onClientSetup(FMLClientSetupEvent event) {
-//    }
-
-//    @SubscribeEvent
-//    public static void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
-//    }
+    @SubscribeEvent
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        //Make sure any disabled keybinds are unbound as soon as the game starts
+        KeybindUtils.unbindHiddenKeyBinds();
+    }
 
     private static boolean tagsReady = false;
 

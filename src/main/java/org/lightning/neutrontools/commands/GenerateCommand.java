@@ -6,6 +6,8 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,6 +25,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 
 import static org.lightning.neutrontools.config.CreativeTabsCache.GSON;
@@ -30,7 +34,7 @@ import static org.lightning.neutrontools.config.CreativeTabsCache.GSON;
 public class GenerateCommand {
     private static File basePath = new File("generated");
 
-    private static int generate(String path, CommandContext<CommandSourceStack> context, Predicate<File> function) {
+    public static int generate(String path, CommandContext<CommandSourceStack> context, Predicate<File> function) {
         try {
             File savePath = new File(basePath, path);
             basePath.mkdirs();
@@ -74,6 +78,8 @@ public class GenerateCommand {
                         }))
                         .then(Commands.literal("ordered_tabs_list").executes(context ->
                                 generate("ordered_tabs.json", context, GenerateCommand::writeOrderedTabs)))
+                        .then(Commands.literal("keybind_list").executes(context ->
+                                generate("keybinds.json", context, GenerateCommand::writeKeybindsToFile)))
 
                 )
 
@@ -102,6 +108,28 @@ public class GenerateCommand {
             NeutronTools.LOG.warn("Failed to save list: {}", e.getMessage());
         }
         return false;
+    }
+
+    public static boolean writeKeybindsToFile(File saveFile) {
+        TreeMap<String, TreeSet<String>> byCategory = new TreeMap<>();
+        for (KeyMapping keyMapping : Minecraft.getInstance().options.keyMappings) {
+            byCategory.computeIfAbsent(keyMapping.getCategory(), c -> new TreeSet<>()).add(keyMapping.getName());
+        }
+
+        JsonObject root = new JsonObject();
+        byCategory.forEach((category, keybinds) -> {
+            JsonArray array = new JsonArray();
+            keybinds.forEach(array::add);
+            root.add(category, array);
+        });
+
+        try (FileWriter writer = new FileWriter(saveFile)) {
+            GSON.toJson(root, writer);
+            return true;
+        } catch (IOException e) {
+            NeutronTools.LOG.error("Failed to save keybind list", e);
+            return false;
+        }
     }
 
     private static boolean listBlocksToFile(File saveFile) {

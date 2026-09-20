@@ -21,6 +21,7 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.lightning.neutrontools.config.DisabledItemConfig;
+import org.lightning.neutrontools.config.KeybindConfig;
 import org.lightning.neutrontools.config.UnbreakableItemConfig;
 import org.lightning.neutrontools.config.creativeTabs.NeutronCreativeTabConfig;
 import org.lightning.neutrontools.creativetabs.NeutronCreativeTabs;
@@ -52,6 +53,7 @@ public class NeutronTools {
 
     public static final NeutronConfig CONFIG = new NeutronConfig();
     public static final UnbreakableItemConfig CONFIG_UNBREAKABLE_ITEMS = new UnbreakableItemConfig();
+    public static final KeybindConfig CONFIG_KEYBINDS = new KeybindConfig();
     public static final NeutronCreativeTabConfig CONFIG_CREATIVE_TABS = new NeutronCreativeTabConfig();
     public static final DisabledItemConfig CONFIG_DISABLED_ITEMS = new DisabledItemConfig();
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);

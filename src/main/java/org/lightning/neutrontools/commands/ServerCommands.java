@@ -238,9 +238,6 @@ public class ServerCommands {
 
         // === Register root ONCE ===
         dispatcher.register(root);
-
-        // Keep your ListAllCommand separate
-        GenerateCommand.register(dispatcher);
     }
 
 

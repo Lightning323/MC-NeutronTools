@@ -80,6 +80,8 @@ public class ClientCommands {
 
         event.getDispatcher().register(root);
 
+        GenerateCommand.register(event.getDispatcher());
+
     }
 
 
