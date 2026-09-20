@@ -15,6 +15,8 @@ Provides unique utilities and commands not commonly found in other mods. This mo
 - Configurable Hunger speed!
 - Disable experimental settings popup!
 - Configurable hunger level!
+- Hide keybinds from the Controls menu!
+-   Hide entire keybind categories or individual keybinds by name. Hidden keybinds are also fully unassigned so they no longer respond.
 
 ## A few of the Commands:
 See all commands on the wiki

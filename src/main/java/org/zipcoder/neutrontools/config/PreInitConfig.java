@@ -7,6 +7,8 @@ import org.zipcoder.neutrontools.utils.MathUtils;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import static org.zipcoder.neutrontools.NeutronTools.LOGGER;
 
 public class PreInitConfig {
@@ -41,6 +43,9 @@ public class PreInitConfig {
     public float hungerMultiplier = 1.0f;//Casting from double to float
     public boolean hideCreativeTabItemsFromJEIBlacklist = true;
     public boolean disableExperementalSettings = true;
+    public List<String> hiddenKeybindCategories = new ArrayList<>();
+    public List<String> hiddenKeybinds = new ArrayList<>();
+    public boolean keybindConsoleLogs = false;
     //--------------------------------------------------------------------
 
     /**
@@ -55,6 +60,10 @@ public class PreInitConfig {
         config.set("common.disable_experemental_settings_popup", disableExperementalSettings);
         //client
         config.set("client.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
+        //keybind hiding
+        config.set("client.hidden_keybind_categories", hiddenKeybindCategories);
+        config.set("client.hidden_keybinds", hiddenKeybinds);
+        config.set("client.keybind_console_logs", keybindConsoleLogs);
         //--------------------------------------------------------------------
         config.save();
     }
@@ -74,6 +83,10 @@ public class PreInitConfig {
 
         hideCreativeTabItemsFromJEIBlacklist = config.getOrElse("common.hide_creative_tab_items_from_jei_blacklist", hideCreativeTabItemsFromJEIBlacklist);
         disableExperementalSettings = config.getOrElse("common.disable_experemental_settings_popup", disableExperementalSettings);
+        //keybind hiding
+        hiddenKeybindCategories = config.getOrElse("client.hidden_keybind_categories", hiddenKeybindCategories);
+        hiddenKeybinds = config.getOrElse("client.hidden_keybinds", hiddenKeybinds);
+        keybindConsoleLogs = config.getOrElse("client.keybind_console_logs", keybindConsoleLogs);
         //--------------------------------------------------------------------
     }
 }

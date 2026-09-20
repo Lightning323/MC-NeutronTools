@@ -16,6 +16,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.PacketDistributor;
 import org.slf4j.Logger;
 import org.zipcoder.neutrontools.config.PreInitConfig;
+import org.zipcoder.neutrontools.keybindhider.KeybindUtils;
 import org.zipcoder.neutrontools.network.ModNetwork;
 import org.zipcoder.neutrontools.network.SyncConfigPacket;
 
@@ -64,6 +65,7 @@ public class NeutronTools {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
+            event.enqueueWork(KeybindUtils::disableHiddenKeyBindings);
         }
     }
 }
