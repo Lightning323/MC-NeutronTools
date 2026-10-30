@@ -86,7 +86,19 @@ public class CreativeTabUtils {
 
     public static ItemStack makeItemStack(String itemId) {
         if (itemId == null) return ItemStack.EMPTY;
-        Optional<Item> itemOptional = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(itemId));
+        // Support both fully qualified IDs (modid:name) and bare names by defaulting to this mod's namespace.
+        String resolvedId = itemId;
+        if (!itemId.contains(":")) {
+            resolvedId = NeutronTools.MODID + ":" + itemId;
+        }
+        Optional<Item> itemOptional;
+        try {
+            itemOptional = BuiltInRegistries.ITEM.getOptional(ResourceLocation.parse(resolvedId));
+        } catch (Exception e) {
+            // If parsing fails, log and return empty stack.
+            NeutronTools.LOG.warn("Invalid item ID '{}' for creative tab utils", resolvedId, e);
+            return ItemStack.EMPTY;
+        }
         ItemStack stack = itemOptional.map(Item::getDefaultInstance).orElse(ItemStack.EMPTY);
         return stack;
     }
@@ -176,19 +188,20 @@ public class CreativeTabUtils {
      * @return the item, or null if not found
      */
     public static Item getItemByName(String name) {
-        // 1. ResourceLocation constructor is now private.
-        // Use .parse() or .tryParse()
-        ResourceLocation location = ResourceLocation.tryParse(name);
-
+        // Support bare names by defaulting to this mod's namespace.
+        if (name == null) return null;
+        String resolvedName = name;
+        if (!name.contains(":")) {
+            resolvedName = NeutronTools.MODID + ":" + name;
+        }
+        // Use tryParse for safety; it returns null if the string is malformed.
+        ResourceLocation location = ResourceLocation.tryParse(resolvedName);
         if (location != null) {
-            // 2. Use BuiltInRegistries.ITEM to get the value.
-            // It returns Items.AIR (which is the modern "null") if not found.
+            // Retrieve the item from the registry.
             Item item = BuiltInRegistries.ITEM.get(location);
-
-            // Optional: If you strictly want null instead of Air for your logic
+            // Return null instead of AIR for consistency.
             return item == Items.AIR ? null : item;
         }
-
         return null;
     }
 
