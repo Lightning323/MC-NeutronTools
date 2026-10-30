@@ -16,9 +16,10 @@ import java.io.FileWriter;
 import java.util.*;
 
 import static org.lightning.neutrontools.NeutronTools.BASE_CONFIG_DIRECTORY;
+import static org.lightning.neutrontools.NeutronTools.CONFIG_CACHE_DIRECTORY;
 
 public class CreativeTabsCache {
-    public static final File CREATIVE_TABS_CACHE_FILE = new File(BASE_CONFIG_DIRECTORY.toFile(), "cached_original_tabs.json");
+    public static final File CREATIVE_TABS_CACHE_FILE = new File(CONFIG_CACHE_DIRECTORY.toFile(), "cached_original_tabs.json");
     public final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     //The current state of our original tabs in the form of registry id -> items

@@ -40,6 +40,7 @@ public class NeutronTools {
 
     public static File BASE_GAME_DIRECTORY = FMLPaths.GAMEDIR.get().toFile();
     public static Path BASE_CONFIG_DIRECTORY = Paths.get(FMLPaths.CONFIGDIR.get().toString(), MODID);
+    public static Path CONFIG_CACHE_DIRECTORY = Paths.get(FMLPaths.CONFIGDIR.get().toString(), MODID, ".cache");
 
     public static Path OPTIONAL_PACK_DIRECTORY = Paths.get(BASE_CONFIG_DIRECTORY.toString(), "packs_optional");
     public static Path PACK_DIRECTORY = Paths.get(BASE_CONFIG_DIRECTORY.toString(), "packs_required");
@@ -53,6 +54,8 @@ public class NeutronTools {
         // Register the commonSetup method for modloading
         eventBus.addListener(this::commonSetup);
         eventBus.addListener(NeutronCreativeTabs::registerTabs);
+        // Register custom blocks and items defined via config JSON
+        eventBus.addListener(org.lightning.neutrontools.registry.CustomRegistry::registerCustomObjects);
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (Neutrontools) to respond directly to events.

@@ -8,10 +8,14 @@ import java.io.File;
 import java.nio.file.Files;
 
 import static org.lightning.neutrontools.NeutronTools.BASE_CONFIG_DIRECTORY;
+import static org.lightning.neutrontools.NeutronTools.CONFIG_CACHE_DIRECTORY;
 
 public class NeutronConfig {
 
     public static final File DISABLED_TABS_FILE = new File(BASE_CONFIG_DIRECTORY.toFile(), "disabled_tabs.json");
+    public static final File REGISTRY_DIRECTORY = new File(BASE_CONFIG_DIRECTORY.toFile(), "registry");
+    public static final File REGISTRY_BLOCKS_DIRECTORY = new File(REGISTRY_DIRECTORY, "blocks");
+    public static final File REGISTRY_ITEMS_DIRECTORY = new File(REGISTRY_DIRECTORY, "items");
     public static final File DISABLED_ITEMS_FILE = new File(BASE_CONFIG_DIRECTORY.toFile(), "disabled_items.json");
     public static final File ORDERED_TABS_FILE = new File(BASE_CONFIG_DIRECTORY.toFile(), "ordered_tabs.json");
     public static final File NEW_TABS_DIRECTORY = new File(BASE_CONFIG_DIRECTORY.toFile(), "new_tabs");
@@ -19,13 +23,21 @@ public class NeutronConfig {
 
     public static void plantStarterFiles() {
         NeutronTools.BASE_CONFIG_DIRECTORY.toFile().mkdirs();
+        CONFIG_CACHE_DIRECTORY.toFile().mkdirs();
         try {
-            if (!DISABLED_TABS_FILE.exists()) Files.writeString(DISABLED_TABS_FILE.toPath(), "{\n\"disabled_tabs\":[]\n}");
-            if (!DISABLED_ITEMS_FILE.exists()) Files.writeString(DISABLED_ITEMS_FILE.toPath(), "{\n\"disabled_items\":[]\n}");
+            if (!DISABLED_TABS_FILE.exists())
+                Files.writeString(DISABLED_TABS_FILE.toPath(), "{\n\"disabled_tabs\":[]\n}");
+            if (!DISABLED_ITEMS_FILE.exists())
+                Files.writeString(DISABLED_ITEMS_FILE.toPath(), "{\n\"disabled_items\":[]\n}");
             if (!ORDERED_TABS_FILE.exists()) Files.writeString(ORDERED_TABS_FILE.toPath(), "{\n\"ordered_tabs\":[]\n}");
+
 
             NEW_TABS_DIRECTORY.mkdirs();
             TAB_EDITS_DIRECTORY.mkdirs();
+            // Ensure registry folders exist
+            REGISTRY_DIRECTORY.mkdirs();
+            REGISTRY_BLOCKS_DIRECTORY.mkdirs();
+            REGISTRY_ITEMS_DIRECTORY.mkdirs();
         } catch (Exception e) {
             NeutronTools.LOG.error("Failed to plant starter files", e);
         }
