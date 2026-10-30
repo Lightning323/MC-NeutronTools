@@ -34,7 +34,7 @@ import java.util.List;
         modid = NeutronTools.MODID,
         bus = EventBusSubscriber.Bus.MOD
 )
-public class ModCommands {
+public class ServerCommands {
 
 
     public static int executeParsedCommandOP(CommandSourceStack originalSource, String command, boolean redirectOutput) {
@@ -238,9 +238,6 @@ public class ModCommands {
 
         // === Register root ONCE ===
         dispatcher.register(root);
-
-        // Keep your ListAllCommand separate
-        GenerateCommand.register(dispatcher);
     }
 
 

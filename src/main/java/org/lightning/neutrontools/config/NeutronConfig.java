@@ -21,14 +21,13 @@ public class NeutronConfig {
     public static final File NEW_TABS_DIRECTORY = new File(BASE_CONFIG_DIRECTORY.toFile(), "new_tabs");
     public static final File TAB_EDITS_DIRECTORY = new File(BASE_CONFIG_DIRECTORY.toFile(), "tab_edits");
 
+
     public static void plantStarterFiles() {
         NeutronTools.BASE_CONFIG_DIRECTORY.toFile().mkdirs();
         CONFIG_CACHE_DIRECTORY.toFile().mkdirs();
         try {
-            if (!DISABLED_TABS_FILE.exists())
-                Files.writeString(DISABLED_TABS_FILE.toPath(), "{\n\"disabled_tabs\":[]\n}");
-            if (!DISABLED_ITEMS_FILE.exists())
-                Files.writeString(DISABLED_ITEMS_FILE.toPath(), "{\n\"disabled_items\":[]\n}");
+            if (!DISABLED_TABS_FILE.exists()) Files.writeString(DISABLED_TABS_FILE.toPath(), "{\n\"disabled_tabs\":[]\n}");
+            if (!DISABLED_ITEMS_FILE.exists()) Files.writeString(DISABLED_ITEMS_FILE.toPath(), "{\n\"disabled_items\":[]\n}");
             if (!ORDERED_TABS_FILE.exists()) Files.writeString(ORDERED_TABS_FILE.toPath(), "{\n\"ordered_tabs\":[]\n}");
 
 

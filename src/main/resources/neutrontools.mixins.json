@@ -10,7 +10,8 @@
     "item.RecipeManagerMixin",
     "item.ItemEntityMixin",
     "item.VillagerTradeMixin",
-    "FolderRepositorySourceAccessor"
+    "FolderRepositorySourceAccessor",
+    "ItemStackMixin"
   ],
   "client": [
     "disableExpSettings.CreateWorldScreenMixin",
@@ -18,7 +19,9 @@
     "creativeTabs.CreativeModeTabMixin",
     "creativeTabs.CreativeModeTabRegistryMixin",
     "creativeTabs.CreativeModeTabsMixin",
-    "creativeTabs.MixinCreativeTabCrashFix"
+    "creativeTabs.MixinCreativeTabCrashFix",
+    "keybinds.KeyBindsListMixin",
+    "keybinds.ControllingKeybindMixin"
   ],
   "injectors": {
     "defaultRequire": 1
